@@ -77,10 +77,10 @@ export function Sidebar({
           onClick={() => setView("activity")}
         />
         <NavButton
-          active={view === "profile"}
+          active={view === "settings"}
           icon={User}
-          label="Profile"
-          onClick={() => setView("profile")}
+          label="Settings"
+          onClick={() => setView("settings")}
         />
       </nav>
 
@@ -146,7 +146,7 @@ export function Header({ view, onScan, onActivity, unread }) {
     contractors: "GC Directory",
     brokers: "Brokers & Partners",
     activity: "Activity Log",
-    profile: "Company Profile",
+    settings: "Settings",
   };
   const eyebrow = {
     dashboard: "Insurance wallet + compliance + savings",
@@ -155,7 +155,7 @@ export function Header({ view, onScan, onActivity, unread }) {
     contractors: "Saved certificate holders",
     brokers: "Licensed partner routing",
     activity: "What's happened",
-    profile: "Account & preferences",
+    settings: "Account, team, billing, and security",
   };
 
   return (

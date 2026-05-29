@@ -26,7 +26,7 @@ import SavingsView from "./components/SavingsView.jsx";
 import ContractorsView from "./components/ContractorsView.jsx";
 import BrokersView from "./components/BrokersView.jsx";
 import ActivityView from "./components/ActivityView.jsx";
-import ProfileView from "./components/ProfileView.jsx";
+import SettingsView from "./components/SettingsView.jsx";
 import SendModal from "./components/SendModal.jsx";
 import ScanModal from "./components/ScanModal.jsx";
 import SuccessModal from "./components/SuccessModal.jsx";
@@ -36,12 +36,6 @@ import AddPolicyModal from "./components/AddPolicyModal.jsx";
 import AddBrokerModal from "./components/AddBrokerModal.jsx";
 import QuoteRequestModal from "./components/QuoteRequestModal.jsx";
 import "./styles.css";
-
-const DEFAULT_PREFERENCES = {
-  alerts: true,
-  routing: true,
-  autoshop: false,
-};
 
 function prependActivity(activity, title, body) {
   return [
@@ -133,7 +127,7 @@ export default function SubShieldComplete() {
     () => getOpenQuoteRequests(quoteRequests),
     [quoteRequests]
   );
-  const preferences = { ...DEFAULT_PREFERENCES, ...(data.preferences || {}) };
+  const settings = data.settings || initialData.settings;
 
   const score = useMemo(() => getComplianceScore(policies), [policies]);
   const docs = useMemo(() => countDocuments(policies), [policies]);
@@ -649,28 +643,60 @@ export default function SubShieldComplete() {
     fireToast("Broker added", `${normalized.name} is ready for quote requests.`);
   }
 
-  function togglePreference(key) {
-    if (!(key in DEFAULT_PREFERENCES)) return;
-    const nextValue = !preferences[key];
-    const labels = {
-      alerts: "Renewal alerts",
-      routing: "Verified COI routing",
-      autoshop: "Auto-shop better rates",
+  function saveSettingsSection(sectionKey, value, meta = {}) {
+    const mergedSettings = {
+      ...settings,
+      [sectionKey]: value,
     };
+
+    const nextCompany =
+      sectionKey === "companyProfile"
+        ? {
+            ...company,
+            name: value.legalName || company.name,
+            tradeType: value.tradeType || company.tradeType,
+            state: value.state || company.state,
+            revenueRange: value.revenueRange || company.revenueRange,
+            employees: value.employees || company.employees,
+            contactEmail: mergedSettings.account?.loginEmail || company.contactEmail,
+          }
+        : sectionKey === "account"
+        ? {
+            ...company,
+            name: value.workspaceName || company.name,
+            contactEmail: value.loginEmail || company.contactEmail,
+          }
+        : company;
 
     commit({
       ...data,
-      preferences: {
-        ...preferences,
-        [key]: nextValue,
-      },
+      company: nextCompany,
+      settings: mergedSettings,
       activity: prependActivity(
         data.activity,
-        `${labels[key]} ${nextValue ? "enabled" : "disabled"}`,
-        "Profile settings updated."
+        meta.activityTitle || "Settings updated",
+        meta.activityBody || "Account settings were updated."
       ),
     });
-    fireToast("Setting saved", `${labels[key]} ${nextValue ? "enabled" : "disabled"}.`);
+
+    fireToast(
+      meta.toastTitle || "Settings saved",
+      meta.toastBody || "Your changes are now live."
+    );
+  }
+
+  function logoutUser() {
+    commit({
+      ...data,
+      activity: prependActivity(
+        data.activity,
+        "User logged out",
+        "Session closed from the settings page."
+      ),
+    });
+    setView("dashboard");
+    setModal(null);
+    fireToast("Logged out", "Current session closed successfully.");
   }
 
   function resetDemo() {
@@ -819,14 +845,15 @@ export default function SubShieldComplete() {
 
           {view === "activity" && <ActivityView activity={data.activity} />}
 
-          {view === "profile" && (
-            <ProfileView
+          {view === "settings" && (
+            <SettingsView
               company={company}
               data={data}
-              settings={preferences}
+              settings={settings}
               totalPremium={totalPremium}
-              onToggleSetting={togglePreference}
+              onSaveSection={saveSettingsSection}
               onReset={resetDemo}
+              onLogout={logoutUser}
             />
           )}
         </main>

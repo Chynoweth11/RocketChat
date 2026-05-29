@@ -1435,6 +1435,143 @@ textarea {
   transform: translateX(20px);
 }
 
+/* ---------- 13.1 Settings Workspace ---------- */
+
+.ss-settings-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ss-settings-nav-card {
+  position: sticky;
+  top: 20px;
+}
+
+.ss-settings-identity {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.ss-settings-summary {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ss-settings-summary .ss-info {
+  background: #ffffff;
+}
+
+.ss-settings-tabs {
+  display: grid;
+  gap: 8px;
+}
+
+.ss-settings-tab {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #ffffff;
+  min-height: 42px;
+  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #465568;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
+}
+
+.ss-settings-tab:hover {
+  border-color: var(--line-strong);
+  color: #1f2937;
+}
+
+.ss-settings-tab.active {
+  border-color: #c8d8fb;
+  background: linear-gradient(180deg, #f9fbff 0%, #f3f7ff 100%);
+  color: #103167;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12);
+}
+
+.ss-settings-main {
+  min-width: 0;
+}
+
+.ss-settings-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.ss-settings-list {
+  display: grid;
+  gap: 9px;
+}
+
+.ss-settings-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: auto;
+  background: #ffffff;
+}
+
+.ss-settings-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+.ss-settings-table th,
+.ss-settings-table td {
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 12.5px;
+}
+
+.ss-settings-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 760;
+  background: #f8fafd;
+}
+
+.ss-settings-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ss-settings-table-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.ss-role-panel {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--surface-soft);
+}
+
+.ss-role-panel b {
+  display: block;
+  font-size: 14px;
+  font-weight: 760;
+  margin-bottom: 4px;
+}
+
+.ss-button-sm {
+  min-height: 33px;
+  padding: 7px 11px;
+  font-size: 12px;
+}
+
 /* ---------- 14. Modal / toast ---------- */
 
 .ss-toast {
@@ -1645,6 +1782,19 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .ss-settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-settings-nav-card {
+    position: relative;
+    top: 0;
+  }
+
+  .ss-settings-tabs {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+
   .ss-hero {
     flex-direction: column;
     align-items: flex-start;
@@ -1685,6 +1835,10 @@ textarea {
   .ss-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .ss-settings-tabs {
+    grid-template-columns: 1fr;
   }
 
   .ss-row .ss-button {
