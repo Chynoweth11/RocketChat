@@ -6,6 +6,12 @@
  * after any user action (see utils.js readStoredData / writeStoredData).
  */
 
+function isoDaysAgo(days) {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString();
+}
+
 export const initialData = {
   policies: [
     {
@@ -101,24 +107,33 @@ export const initialData = {
     },
   ],
 
+  preferences: {
+    alerts: true,
+    routing: true,
+    autoshop: false,
+  },
+
   activity: [
     {
       id: "a1",
       title: "Workers' Comp is critical",
       body: "Expires in 4 days. Renew before routing new packages.",
       time: "Today",
+      createdAt: isoDaysAgo(0),
     },
     {
       id: "a2",
       title: "COI package routed",
       body: "Turner Construction · Downtown Marriott Remodel · 6 verified files",
       time: "2 days ago",
+      createdAt: isoDaysAgo(2),
     },
     {
       id: "a3",
       title: "GL entered renewal window",
       body: "General Liability has 45 days remaining.",
       time: "12 days ago",
+      createdAt: isoDaysAgo(12),
     },
   ],
 };

@@ -17,6 +17,34 @@ function isValidDataShape(value) {
   );
 }
 
+function normalizePreferences(value, fallback = {}) {
+  const defaults = {
+    alerts: typeof fallback.alerts === "boolean" ? fallback.alerts : true,
+    routing: typeof fallback.routing === "boolean" ? fallback.routing : true,
+    autoshop: typeof fallback.autoshop === "boolean" ? fallback.autoshop : false,
+  };
+
+  if (!value || typeof value !== "object") return defaults;
+
+  return {
+    alerts: typeof value.alerts === "boolean" ? value.alerts : defaults.alerts,
+    routing: typeof value.routing === "boolean" ? value.routing : defaults.routing,
+    autoshop: typeof value.autoshop === "boolean" ? value.autoshop : defaults.autoshop,
+  };
+}
+
+function normalizeActivityItem(item) {
+  if (!item || typeof item !== "object") return null;
+  if (!item.id || !item.title) return null;
+  return {
+    ...item,
+    title: String(item.title).trim(),
+    body: String(item.body || ""),
+    time: String(item.time || ""),
+    createdAt: item.createdAt ? String(item.createdAt) : undefined,
+  };
+}
+
 export function readStoredData(fallback) {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -25,6 +53,11 @@ export function readStoredData(fallback) {
     const parsed = JSON.parse(raw);
     if (!isValidDataShape(parsed)) return fallback;
 
+    const activity = parsed.activity
+      .map(normalizeActivityItem)
+      .filter(Boolean);
+    const fallbackPreferences = fallback.preferences || {};
+
     return {
       ...fallback,
       ...parsed,
@@ -32,7 +65,8 @@ export function readStoredData(fallback) {
       contractors: parsed.contractors.length
         ? parsed.contractors
         : fallback.contractors,
-      activity: parsed.activity.length ? parsed.activity : fallback.activity,
+      activity: activity.length ? activity : fallback.activity,
+      preferences: normalizePreferences(parsed.preferences, fallbackPreferences),
     };
   } catch {
     return fallback;
@@ -153,19 +187,47 @@ export function countDocuments(policies = []) {
 
 const DAY_BUCKETS = ["Today", "Yesterday"];
 
+function startOfLocalDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function getDayDifference(isoDateTime) {
+  const parsed = new Date(isoDateTime);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const today = startOfLocalDay(new Date());
+  const day = startOfLocalDay(parsed);
+  return Math.round((today - day) / 86400000);
+}
+
+function bucketFromLegacyTime(value) {
+  const time = (value || "").toLowerCase();
+  if (time === "just now" || time === "today") return "Today";
+  if (time === "yesterday" || time === "1 day ago") return "Yesterday";
+  return "Earlier";
+}
+
+export function formatActivityTime(item) {
+  if (item?.createdAt) {
+    const dayDiff = getDayDifference(item.createdAt);
+    if (dayDiff === 0) return "Today";
+    if (dayDiff === 1) return "Yesterday";
+    if (dayDiff > 1) return `${dayDiff} days ago`;
+  }
+  return item?.time || "Just now";
+}
+
 export function groupActivityByDate(activity = []) {
-  // Time strings are pre-baked ("Just now", "Today", "2 days ago", "12 days ago", etc.)
-  // We bucket them into Today / Yesterday / Earlier for visual grouping.
   const groups = { Today: [], Yesterday: [], Earlier: [] };
 
   activity.forEach((item) => {
-    const time = (item.time || "").toLowerCase();
-    if (time === "just now" || time === "today") {
+    const dayDiff = item?.createdAt ? getDayDifference(item.createdAt) : null;
+    if (dayDiff === 0) {
       groups.Today.push(item);
-    } else if (time === "yesterday" || time === "1 day ago") {
+    } else if (dayDiff === 1) {
       groups.Yesterday.push(item);
     } else {
-      groups.Earlier.push(item);
+      const fallbackBucket = bucketFromLegacyTime(item?.time);
+      groups[fallbackBucket].push(item);
     }
   });
 

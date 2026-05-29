@@ -2,15 +2,8 @@ import { Lock, RefreshCcw } from "lucide-react";
 import { useState } from "react";
 import { Section } from "./Layout.jsx";
 
-export default function ProfileView({ data, onReset }) {
+export default function ProfileView({ data, settings, onToggleSetting, onReset }) {
   const [confirming, setConfirming] = useState(false);
-  const [settings, setSettings] = useState({
-    alerts: true,
-    routing: true,
-    autoshop: false,
-  });
-  const toggle = (key) =>
-    setSettings((current) => ({ ...current, [key]: !current[key] }));
 
   const totalDocs = data.policies.reduce(
     (sum, policy) => sum + policy.documents.length,
@@ -42,17 +35,17 @@ export default function ProfileView({ data, onReset }) {
         <Setting
           label="Push renewal alerts"
           on={settings.alerts}
-          onToggle={() => toggle("alerts")}
+          onToggle={() => onToggleSetting("alerts")}
         />
         <Setting
           label="Verified COI routing"
           on={settings.routing}
-          onToggle={() => toggle("routing")}
+          onToggle={() => onToggleSetting("routing")}
         />
         <Setting
           label="Auto-shop better rates"
           on={settings.autoshop}
-          onToggle={() => toggle("autoshop")}
+          onToggle={() => onToggleSetting("autoshop")}
         />
       </section>
 

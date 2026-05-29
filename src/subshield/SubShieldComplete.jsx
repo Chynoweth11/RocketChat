@@ -28,10 +28,42 @@ import "./styles.css";
 
 function prependActivity(activity, title, body) {
   return [
-    { id: makeId("act"), title, body, time: "Just now" },
+    { id: makeId("act"), title, body, time: "Just now", createdAt: new Date().toISOString() },
     ...activity,
   ].slice(0, 30);
 }
+
+function normalizeProjectName(value) {
+  return (value || "").trim().replace(/\s+/g, " ");
+}
+
+function normalizeProjects(projects = []) {
+  const seen = new Set();
+  const cleaned = [];
+  projects.forEach((project) => {
+    const normalized = normalizeProjectName(project);
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    cleaned.push(normalized);
+  });
+  return cleaned;
+}
+
+function addProjectIfMissing(projects, project) {
+  const normalized = normalizeProjectName(project);
+  if (!normalized) return normalizeProjects(projects);
+  const current = normalizeProjects(projects);
+  const exists = current.some((item) => item.toLowerCase() === normalized.toLowerCase());
+  return exists ? current : [normalized, ...current];
+}
+
+const DEFAULT_PREFERENCES = {
+  alerts: true,
+  routing: true,
+  autoshop: false,
+};
 
 
 /* ---------- Component ---------- */
@@ -71,6 +103,7 @@ export default function SubShieldComplete() {
     data.policies.find((p) => p.id === policyId) || data.policies[0];
   const selectedContractor =
     data.contractors.find((c) => c.id === contractorId) || data.contractors[0];
+  const preferences = { ...DEFAULT_PREFERENCES, ...(data.preferences || {}) };
 
   // Keep selectors valid as data changes
   useEffect(() => {
@@ -247,7 +280,7 @@ export default function SubShieldComplete() {
 
   function sendPackage() {
     if (!selectedContractor) return;
-    const finalProject = newProject.trim() || project;
+    const finalProject = normalizeProjectName(newProject) || normalizeProjectName(project);
     if (!finalProject) {
       fireToast("Project name required", "Pick or type a project before sending.");
       return;
@@ -256,12 +289,14 @@ export default function SubShieldComplete() {
     const packageDocCount = countDocuments(packagePolicies(data.policies));
     const contractors = data.contractors.map((contractor) => {
       if (
-        contractor.id !== selectedContractor.id ||
-        contractor.projects.includes(finalProject)
+        contractor.id !== selectedContractor.id
       ) {
-        return contractor;
+        return { ...contractor, projects: normalizeProjects(contractor.projects) };
       }
-      return { ...contractor, projects: [finalProject, ...contractor.projects] };
+      return {
+        ...contractor,
+        projects: addProjectIfMissing(contractor.projects, finalProject),
+      };
     });
 
     const next = {
@@ -281,38 +316,73 @@ export default function SubShieldComplete() {
   }
 
   function addContractor(contractor) {
+    const email = contractor.email.trim().toLowerCase();
+    const emailExists = data.contractors.some(
+      (existing) => existing.email.trim().toLowerCase() === email
+    );
+    if (emailExists) {
+      fireToast(
+        "Duplicate compliance email",
+        "A GC with that email already exists. Edit the existing entry instead."
+      );
+      return;
+    }
+
+    const normalized = {
+      ...contractor,
+      projects: normalizeProjects(contractor.projects),
+    };
+
     const next = {
       ...data,
-      contractors: [contractor, ...data.contractors],
+      contractors: [normalized, ...data.contractors],
       activity: prependActivity(
         data.activity,
-        `${contractor.name} added to directory`,
-        `${contractor.contact} · ${contractor.email}`
+        `${normalized.name} added to directory`,
+        `${normalized.contact} · ${normalized.email}`
       ),
     };
     commit(next);
-    setContractorId(contractor.id);
-    setProject(contractor.projects[0] || "");
+    setContractorId(normalized.id);
+    setProject(normalized.projects[0] || "");
     setModal(null);
-    fireToast("GC saved", `${contractor.name} added to your directory.`);
+    fireToast("GC saved", `${normalized.name} added to your directory.`);
   }
 
   function updateContractor(updated) {
+    const email = updated.email.trim().toLowerCase();
+    const emailConflict = data.contractors.some(
+      (existing) =>
+        existing.id !== updated.id && existing.email.trim().toLowerCase() === email
+    );
+    if (emailConflict) {
+      fireToast(
+        "Duplicate compliance email",
+        "That email is already used by another GC."
+      );
+      return;
+    }
+
+    const normalized = {
+      ...updated,
+      projects: normalizeProjects(updated.projects),
+    };
+
     const next = {
       ...data,
       contractors: data.contractors.map((c) =>
-        c.id === updated.id ? { ...c, ...updated } : c
+        c.id === normalized.id ? { ...c, ...normalized } : c
       ),
       activity: prependActivity(
         data.activity,
-        `${updated.name} updated`,
+        `${normalized.name} updated`,
         `Certificate holder and details saved.`
       ),
     };
     commit(next);
     setEditingContractor(null);
     setModal(null);
-    fireToast("GC updated", `${updated.name} details saved.`);
+    fireToast("GC updated", `${normalized.name} details saved.`);
   }
 
   function deleteContractor(id) {
@@ -343,13 +413,50 @@ export default function SubShieldComplete() {
     fireToast("Demo reset", "Local data restored to the seed state.");
   }
 
+  function togglePreference(key) {
+    if (!(key in DEFAULT_PREFERENCES)) return;
+    const nextValue = !preferences[key];
+    const labels = {
+      alerts: "Renewal alerts",
+      routing: "Verified COI routing",
+      autoshop: "Auto-shop better rates",
+    };
+
+    const next = {
+      ...data,
+      preferences: {
+        ...preferences,
+        [key]: nextValue,
+      },
+      activity: prependActivity(
+        data.activity,
+        `${labels[key]} ${nextValue ? "enabled" : "disabled"}`,
+        "Profile settings updated."
+      ),
+    };
+    commit(next);
+    fireToast("Setting saved", `${labels[key]} ${nextValue ? "enabled" : "disabled"}.`);
+  }
+
 
   /* ---------- Modal openers ---------- */
 
   function openSend(contractor) {
+    if (!data.contractors.length) {
+      setView("contractors");
+      fireToast(
+        "No GCs saved",
+        "Add a general contractor before sending a COI package."
+      );
+      return;
+    }
+
     if (contractor) {
       setContractorId(contractor.id);
       setProject(contractor.projects[0] || "");
+    } else if (!selectedContractor && data.contractors[0]) {
+      setContractorId(data.contractors[0].id);
+      setProject(data.contractors[0].projects[0] || "");
     }
     setNewProject("");
     setModal("send");
@@ -414,7 +521,12 @@ export default function SubShieldComplete() {
           {view === "activity" && <ActivityView activity={data.activity} />}
 
           {view === "profile" && (
-            <ProfileView data={data} onReset={resetDemo} />
+            <ProfileView
+              data={data}
+              settings={preferences}
+              onToggleSetting={togglePreference}
+              onReset={resetDemo}
+            />
           )}
         </main>
       </div>
