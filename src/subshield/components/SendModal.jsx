@@ -23,21 +23,21 @@ export default function SendModal({
   const handleSend = async () => {
     if (sending) return;
     setSending(true);
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((resolve) => setTimeout(resolve, 700));
     onSend();
   };
 
   const firstName = contractor.contact.split(" ")[0] || "team";
   const coverEmail =
     `To: ${contractor.email}\n` +
-    `Subject: COI Package — ${finalProject}\n\n` +
+    `Subject: COI Package - ${finalProject}\n\n` +
     `Hello ${firstName}, please see the attached verified insurance package for ${finalProject}. ` +
-    `All documents are originals issued by our carriers and licensed broker.`;
+    "All documents are originals issued by our carriers and licensed broker partners.";
 
   return (
     <Modal
       title="Review COI package"
-      subtitle={`${docs} verified files · routed to ${contractor.email}`}
+      subtitle={`${docs} verified files - routed to ${contractor.email}`}
       onClose={onClose}
     >
       <div className="ss-field-grid">
@@ -107,19 +107,19 @@ export default function SendModal({
           <strong>To:</strong> {contractor.email}
         </p>
         <p>
-          <strong>Subject:</strong> COI Package — {finalProject}
+          <strong>Subject:</strong> COI Package - {finalProject}
         </p>
         <p style={{ marginTop: 8 }}>
           Hello {firstName}, please see the attached verified insurance package
           for {finalProject}. All documents are originals issued by our
-          carriers and licensed broker.
+          carriers and licensed broker partners.
         </p>
       </div>
 
       <div>
         {policies.map((policy) =>
           policy.documents.map((doc) => (
-            <DocumentRow key={`${policy.id}-${doc}`} name={`${policy.name} · ${doc}`} />
+            <DocumentRow key={`${policy.id}-${doc}`} name={`${policy.name} - ${doc}`} />
           ))
         )}
       </div>
@@ -134,7 +134,7 @@ export default function SendModal({
         >
           {sending ? (
             <>
-              <span className="ss-spinner" /> Routing…
+              <span className="ss-spinner" /> Routing...
             </>
           ) : (
             <>
@@ -153,7 +153,7 @@ function DocumentRow({ name }) {
       <span className="ss-pdf" aria-hidden="true">PDF</span>
       <div className="ss-doc-body">
         <b>{name}</b>
-        <small>Original carrier-issued document · verified</small>
+        <small>Original carrier-issued document - verified</small>
       </div>
       <em className="ss-verified">
         <Check size={13} /> Verified

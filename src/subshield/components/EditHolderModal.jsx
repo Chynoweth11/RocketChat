@@ -8,9 +8,12 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
     name: contractor.name,
     contact: contractor.contact,
     email: contractor.email,
+    phone: contractor.phone || "",
     delivery: contractor.delivery,
     holder: contractor.holder,
     requirements: contractor.requirements,
+    notes: contractor.notes || "",
+    portalInstructions: contractor.portalInstructions || "",
   });
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [errors, setErrors] = useState({});
@@ -38,10 +41,13 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
       initials: deriveInitials(form.name),
       contact: form.contact.trim(),
       email: form.email.trim(),
+      phone: form.phone.trim(),
       delivery: form.delivery.trim() || "Compliance inbox",
       holder: form.holder.trim(),
       requirements:
         form.requirements.trim() || "Standard verified COI package accepted.",
+      notes: form.notes.trim(),
+      portalInstructions: form.portalInstructions.trim(),
     });
   };
 
@@ -72,6 +78,11 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
           error={errors.email}
         />
         <FormField
+          label="Phone"
+          value={form.phone}
+          onChange={change("phone")}
+        />
+        <FormField
           label="Delivery method"
           value={form.delivery}
           onChange={change("delivery")}
@@ -90,6 +101,19 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
         label="Requirements"
         value={form.requirements}
         onChange={change("requirements")}
+        multiline
+      />
+
+      <FormField
+        label="Portal instructions"
+        value={form.portalInstructions}
+        onChange={change("portalInstructions")}
+      />
+
+      <FormField
+        label="Notes"
+        value={form.notes}
+        onChange={change("notes")}
         multiline
       />
 

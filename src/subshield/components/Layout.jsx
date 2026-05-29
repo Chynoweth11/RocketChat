@@ -1,4 +1,15 @@
-import { Bell, Building2, Camera, History, Shield, ShieldCheck, User } from "lucide-react";
+import {
+  BadgeDollarSign,
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  Camera,
+  History,
+  LayoutDashboard,
+  Shield,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { getStatus } from "../utils.js";
 
 export function Brand() {
@@ -21,6 +32,8 @@ export function Sidebar({
   docCount,
   upcoming,
   criticalCount,
+  savingsCount,
+  openQuoteCount,
   onSend,
 }) {
   return (
@@ -28,16 +41,34 @@ export function Sidebar({
       <Brand />
       <nav aria-label="Primary">
         <NavButton
+          active={view === "dashboard"}
+          icon={LayoutDashboard}
+          label="Command"
+          onClick={() => setView("dashboard")}
+        />
+        <NavButton
           active={view === "vault"}
           icon={ShieldCheck}
-          label="Vault"
+          label="Policies"
           onClick={() => setView("vault")}
+        />
+        <NavButton
+          active={view === "savings"}
+          icon={BadgeDollarSign}
+          label="Savings"
+          onClick={() => setView("savings")}
         />
         <NavButton
           active={view === "contractors"}
           icon={Building2}
           label="GCs"
           onClick={() => setView("contractors")}
+        />
+        <NavButton
+          active={view === "brokers"}
+          icon={BriefcaseBusiness}
+          label="Brokers"
+          onClick={() => setView("brokers")}
         />
         <NavButton
           active={view === "activity"}
@@ -79,9 +110,11 @@ export function Sidebar({
         </span>
         <strong>{docCount} files</strong>
         <p>
-          {criticalCount > 0
-            ? `${criticalCount} polic${criticalCount === 1 ? "y" : "ies"} need attention before routing.`
-            : "Original carrier-issued documents are ready to route."}
+          {criticalCount > 0 ? `${criticalCount} polic${criticalCount === 1 ? "y" : "ies"} need attention before routing.` : "Original carrier-issued documents are ready to route."}
+          <br />
+          {savingsCount > 0 ? `${savingsCount} savings opportunit${savingsCount === 1 ? "y" : "ies"} available.` : "No active savings alerts."}
+          <br />
+          {openQuoteCount > 0 ? `${openQuoteCount} open quote request${openQuoteCount === 1 ? "" : "s"}.` : "No open quote requests."}
         </p>
         <button className="ss-button" onClick={onSend}>
           Send COI
@@ -107,14 +140,20 @@ export function NavButton({ active, icon: Icon, label, onClick }) {
 
 export function Header({ view, onScan, onActivity, unread }) {
   const titles = {
+    dashboard: "Insurance Command Center",
     vault: "Document Vault",
+    savings: "Savings Opportunities",
     contractors: "GC Directory",
+    brokers: "Brokers & Partners",
     activity: "Activity Log",
     profile: "Company Profile",
   };
   const eyebrow = {
+    dashboard: "Insurance wallet + compliance + savings",
     vault: "Subcontractor compliance",
+    savings: "Insurance savings assistant",
     contractors: "Saved certificate holders",
+    brokers: "Licensed partner routing",
     activity: "What's happened",
     profile: "Account & preferences",
   };

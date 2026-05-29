@@ -1,6 +1,15 @@
 import { useState } from "react";
-import { FileText, HardHat, Lock, ShieldCheck, Truck, Umbrella, Upload } from "lucide-react";
+import {
+  FileText,
+  HardHat,
+  Lock,
+  ShieldCheck,
+  Truck,
+  Umbrella,
+  Upload,
+} from "lucide-react";
 import Modal from "./Modal.jsx";
+import { dateFromToday } from "../utils.js";
 
 const TYPES = [
   {
@@ -11,8 +20,8 @@ const TYPES = [
     carrier: "Hiscox Insurance Co.",
     policyNumber: "UM-7740921",
     daysRemaining: 318,
-    premium: 980,
-    limit: "$2M excess liability",
+    premiumAmount: 980,
+    coverageLimits: "$2M excess liability",
     documents: ["Umbrella certificate"],
   },
   {
@@ -23,8 +32,8 @@ const TYPES = [
     carrier: "Acme Mutual",
     policyNumber: "GL-44827193",
     daysRemaining: 365,
-    premium: 1840,
-    limit: "$2M aggregate / $1M occurrence",
+    premiumAmount: 1840,
+    coverageLimits: "$2M aggregate / $1M occurrence",
     documents: ["GL certificate", "Additional Insured"],
   },
   {
@@ -35,8 +44,8 @@ const TYPES = [
     carrier: "Progressive Commercial",
     policyNumber: "CA-55120984",
     daysRemaining: 280,
-    premium: 2460,
-    limit: "$1M combined single limit",
+    premiumAmount: 2460,
+    coverageLimits: "$1M combined single limit",
     documents: ["Auto certificate"],
   },
   {
@@ -47,8 +56,8 @@ const TYPES = [
     carrier: "StateFund West",
     policyNumber: "WC-90183321",
     daysRemaining: 365,
-    premium: 3210,
-    limit: "Statutory / $1M employer liability",
+    premiumAmount: 3210,
+    coverageLimits: "Statutory / $1M employer liability",
     documents: ["WC certificate"],
   },
   {
@@ -59,8 +68,8 @@ const TYPES = [
     carrier: "TX Dept. of Licensing",
     policyNumber: "TL-TILE-0099821",
     daysRemaining: 365,
-    premium: 295,
-    limit: "Tile contractor license",
+    premiumAmount: 295,
+    coverageLimits: "Tile contractor license",
     documents: ["Trade license"],
   },
 ];
@@ -70,21 +79,22 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
   const selected = TYPES.find((t) => t.id === typeId) || TYPES[0];
   const alreadyVaulted = existingTypes.includes(selected.id);
 
+  const renewalDate = dateFromToday(selected.daysRemaining);
+
   return (
     <Modal
       title="Vault a document"
-      subtitle="The original carrier PDF stays untouched. SubShield only reads metadata."
+      subtitle="The original carrier PDF stays untouched. SubShield reads and stores document metadata."
       onClose={onClose}
     >
       <div className="ss-upload">
         <div className="ss-upload-pdf" aria-hidden="true">PDF</div>
         <h3>Upload carrier-issued certificate</h3>
         <p>
-          Prototype mode: choose a document type below to simulate metadata
-          extraction. In production, drag-and-drop a real PDF.
+          Simulation mode: choose a document type below to preview metadata extraction.
         </p>
         <button type="button" className="ss-button soft" disabled>
-          <Upload size={16} /> Choose file (preview disabled)
+          <Upload size={16} /> Choose file (preview mode)
         </button>
       </div>
 
@@ -115,19 +125,35 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
         <b>Policy number</b>
         <span>{selected.policyNumber}</span>
         <b>Limit</b>
-        <span>{selected.limit}</span>
-        <b>Coverage period</b>
-        <span>365 days from today</span>
+        <span>{selected.coverageLimits}</span>
+        <b>Renewal date</b>
+        <span>{renewalDate}</span>
       </div>
 
       {alreadyVaulted && (
         <div className="ss-note">
           A {selected.label.toLowerCase()} policy is already vaulted.
-          Vaulting will update the existing record with the newer PDF.
+          Vaulting will update the existing policy with this newer document.
         </div>
       )}
 
-      <button type="button" className="ss-button" onClick={() => onVault(selected)}>
+      <button
+        type="button"
+        className="ss-button"
+        onClick={() =>
+          onVault({
+            ...selected,
+            policyType: selected.id,
+            type: selected.id,
+            renewalDate,
+            expirationDate: renewalDate,
+            effectiveDate: dateFromToday(selected.daysRemaining - 365),
+            premiumFrequency: "annual",
+            status: "active",
+            savingsStatus: selected.id === "license" ? "not_applicable" : "monitoring",
+          })
+        }
+      >
         <Lock size={16} />
         {alreadyVaulted ? "Update vaulted policy" : "Vault verified policy"}
       </button>

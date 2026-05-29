@@ -15,6 +15,7 @@ export default function VaultView({
   onShop,
   onSend,
   onScan,
+  onAddPolicy,
   renewingId,
   shoppingId,
 }) {
@@ -35,6 +36,9 @@ export default function VaultView({
             <div className="ss-row">
               <button className="ss-button" onClick={onSend}>
                 <Send size={16} /> Send package
+              </button>
+              <button className="ss-button soft" onClick={onAddPolicy}>
+                <Zap size={16} /> Add policy
               </button>
               <button className="ss-button soft" onClick={onScan}>
                 <Upload size={16} /> Add document
@@ -87,7 +91,7 @@ function PolicyRow({ policy, selected, onClick }) {
       <span className="ss-policy-copy">
         <b>{policy.name}</b>
         <small>
-          {policy.carrier} · {policy.policyNumber}
+          {policy.carrier} - {policy.policyNumber}
         </small>
       </span>
       <em className={`ss-status ${status.className}`}>{status.label}</em>
@@ -111,24 +115,24 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
           <span className="ss-eyebrow">Policy detail</span>
           <h2>{policy.name}</h2>
           <p className="ss-muted">
-            {policy.carrier} · {policy.policyNumber}
+            {policy.carrier} - {policy.policyNumber}
           </p>
         </div>
       </div>
 
       <div className="ss-bar-top">
         <span>{policy.daysRemaining} days left</span>
-        <span>{formatMoney(policy.premium)}/yr</span>
+        <span>{formatMoney(policy.premiumAmount ?? policy.premium)}/{policy.premiumFrequency || "annual"}</span>
       </div>
       <div className="ss-bar">
         <span className={status.className} style={{ width }} />
       </div>
 
       <div className="ss-info-grid">
-        <Info label="Limit" value={policy.limit} />
-        <Info label="Expires" value={formatLongDate(policy.expires)} />
+        <Info label="Limit" value={policy.coverageLimits || policy.limit} />
+        <Info label="Renews" value={formatLongDate(policy.renewalDate || policy.expires)} />
         <Info label="Documents" value={`${policy.documents.length} verified`} />
-        <Info label="Carrier" value={policy.carrier} />
+        <Info label="Broker" value={policy.brokerId ? "Assigned" : "Not assigned"} />
       </div>
 
       <div className={`ss-note ${isCritical ? "danger" : ""}`}>
@@ -152,7 +156,7 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
         >
           {isRenewing ? (
             <>
-              <Spinner /> Renewing…
+              <Spinner /> Renewing...
             </>
           ) : (
             <>
@@ -167,7 +171,7 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
         >
           {isShopping ? (
             <>
-              <Spinner /> Shopping rates…
+              <Spinner /> Shopping rates...
             </>
           ) : (
             <>Lower bill</>
@@ -187,7 +191,7 @@ function DocumentRow({ name }) {
       <span className="ss-pdf" aria-hidden="true">PDF</span>
       <div className="ss-doc-body">
         <b>{name}</b>
-        <small>Original carrier-issued document · verified</small>
+        <small>Original carrier-issued document - verified</small>
       </div>
       <em className="ss-verified">
         <Check size={13} /> Verified
