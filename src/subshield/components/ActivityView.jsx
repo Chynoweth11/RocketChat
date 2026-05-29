@@ -1,6 +1,6 @@
 import { CheckCircle2, History } from "lucide-react";
 import { Section } from "./Layout.jsx";
-import { groupActivityByDate } from "../utils.js";
+import { formatActivityTime, groupActivityByDate } from "../utils.js";
 
 export default function ActivityView({ activity }) {
   const groups = groupActivityByDate(activity);
@@ -33,7 +33,7 @@ export default function ActivityView({ activity }) {
               <div className="ss-activity-body">
                 <b>{item.title}</b>
                 <small>{item.body}</small>
-                <small className="ss-time">{item.time}</small>
+                <small className="ss-time">{formatActivityTime(item)}</small>
               </div>
             </div>
           ))}

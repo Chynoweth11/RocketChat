@@ -1,5 +1,5 @@
-/* =====================================================================
-   SubShield — Design System
+﻿/* =====================================================================
+   SubShield - Design System
    A single, organized stylesheet. Replaces the prior
    styles.css + debug.css + premium.css trio.
    ===================================================================== */
@@ -430,6 +430,35 @@ textarea {
   margin: 0;
 }
 
+.ss-command-tip {
+  max-width: 290px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.ss-command-tip b {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+
+.ss-command-tip p {
+  margin: 8px 0 6px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ss-command-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
 
 /* ---------- 8. Compliance score ring ---------- */
 
@@ -667,6 +696,22 @@ textarea {
   flex-shrink: 0;
 }
 
+.ss-broker-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.ss-broker-card .ss-gc-avatar {
+  flex-shrink: 0;
+}
+
 .ss-mini-btn {
   width: 36px;
   height: 36px;
@@ -809,6 +854,54 @@ textarea {
 .ss-note.success {
   background: var(--green-soft);
   color: var(--green);
+}
+
+.ss-insight {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: #ffffff;
+  margin-bottom: 10px;
+}
+
+.ss-insight b {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.3;
+}
+
+.ss-insight small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.ss-inline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--border-soft);
+  padding: 10px 0;
+  font-size: 13px;
+}
+
+.ss-inline-row:first-of-type {
+  border-top: 0;
+}
+
+.ss-inline-row span {
+  font-weight: 700;
+}
+
+.ss-inline-row small {
+  color: var(--muted);
 }
 
 
@@ -1261,6 +1354,46 @@ textarea {
   color: var(--text);
 }
 
+.ss-savings-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fff, #fcfaf6);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.ss-savings-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ss-savings-head h2 {
+  margin: 4px 0;
+  font-size: 21px;
+  letter-spacing: -0.03em;
+}
+
+.ss-savings-amount {
+  text-align: right;
+  min-width: 130px;
+}
+
+.ss-savings-amount small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 3px;
+}
+
+.ss-savings-amount strong {
+  font-size: 24px;
+  letter-spacing: -0.05em;
+}
+
 .ss-footer {
   display: flex;
   justify-content: space-between;
@@ -1402,7 +1535,7 @@ textarea {
   }
 
   .ss-sidebar nav {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
     display: grid;
     gap: 6px;
   }
@@ -1448,7 +1581,8 @@ textarea {
 
   .ss-review,
   .ss-info-grid,
-  .ss-field-grid {
+  .ss-field-grid,
+  .ss-command-metrics {
     grid-template-columns: 1fr;
   }
 
@@ -1505,6 +1639,14 @@ textarea {
   .ss-modal {
     border-radius: 22px;
     padding: 20px;
+  }
+
+  .ss-savings-head {
+    flex-direction: column;
+  }
+
+  .ss-savings-amount {
+    text-align: left;
   }
 }
 
@@ -1753,3 +1895,4 @@ textarea {
   color: #ffffff;
   border-color: #17191f;
 }
+

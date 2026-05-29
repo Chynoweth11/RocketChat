@@ -7,9 +7,12 @@ const EMPTY = {
   name: "",
   contact: "",
   email: "",
+  phone: "",
   delivery: "Compliance inbox",
   holder: "",
   requirements: "",
+  notes: "",
+  portalInstructions: "",
   firstProject: "",
 };
 
@@ -40,11 +43,15 @@ export default function AddGCModal({ onClose, onSave }) {
       initials: deriveInitials(form.name),
       contact: form.contact.trim(),
       email: form.email.trim(),
+      phone: form.phone.trim(),
       delivery: form.delivery.trim() || "Compliance inbox",
       holder: form.holder.trim(),
       requirements:
         form.requirements.trim() || "Standard verified COI package accepted.",
+      notes: form.notes.trim(),
+      portalInstructions: form.portalInstructions.trim(),
       projects: form.firstProject.trim() ? [form.firstProject.trim()] : [],
+      pastSends: [],
     };
     onSave(contractor);
   };
@@ -79,6 +86,12 @@ export default function AddGCModal({ onClose, onSave }) {
           error={errors.email}
         />
         <FormField
+          label="Phone"
+          value={form.phone}
+          onChange={change("phone")}
+          placeholder="(512) 555-0199"
+        />
+        <FormField
           label="Delivery method"
           value={form.delivery}
           onChange={change("delivery")}
@@ -100,6 +113,21 @@ export default function AddGCModal({ onClose, onSave }) {
         value={form.requirements}
         onChange={change("requirements")}
         placeholder="Primary non-contributory wording, $2M umbrella, etc."
+        multiline
+      />
+
+      <FormField
+        label="Portal instructions"
+        value={form.portalInstructions}
+        onChange={change("portalInstructions")}
+        placeholder="Upload to compliance portal then email PM."
+      />
+
+      <FormField
+        label="Notes"
+        value={form.notes}
+        onChange={change("notes")}
+        placeholder="Any internal notes for future sends."
         multiline
       />
 

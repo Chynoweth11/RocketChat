@@ -29,7 +29,7 @@ export default function ContractorsView({
       <section className="ss-card ss-span">
         <Section
           title="Saved general contractors"
-          sub="Certificate holders, contacts, and project requirements"
+          sub="Certificate holders, contacts, requirements, and send history"
           extra={
             <button
               type="button"
@@ -49,7 +49,7 @@ export default function ContractorsView({
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by GC, contact, email, or project…"
+              placeholder="Search by GC, contact, email, or project..."
               aria-label="Search contractors"
             />
           </div>
@@ -60,9 +60,8 @@ export default function ContractorsView({
             <Building2 size={32} />
             <h2>No GCs saved yet</h2>
             <p>
-              Add a general contractor to save their certificate holder
-              details, delivery method, and project history for fast COI
-              re-sends.
+              Add a general contractor to save certificate holder details,
+              delivery rules, and project history for fast COI sends.
             </p>
             <button className="ss-button" onClick={onAdd}>
               <Plus size={15} /> Add your first GC
@@ -92,14 +91,18 @@ export default function ContractorsView({
         <Section title="Why this saves time" sub="One source of truth" />
         <p className="ss-muted">
           Every send pulls from the same vault and certificate-holder data.
-          You won't retype the GC's legal name, copy old emails, or hunt for
-          past project names ever again.
+          You do not need to retype legal names, copy old emails, or hunt
+          down portal notes before each project send.
         </p>
         <div className="ss-info-grid" style={{ marginTop: 18 }}>
           <Stat label="Saved GCs" value={contractors.length} />
           <Stat
             label="Total projects"
             value={contractors.reduce((sum, gc) => sum + gc.projects.length, 0)}
+          />
+          <Stat
+            label="Past sends"
+            value={contractors.reduce((sum, gc) => sum + (gc.pastSends?.length || 0), 0)}
           />
         </div>
       </section>
@@ -117,8 +120,12 @@ function ContractorRow({ contractor, onSend, onEdit }) {
         <b>{contractor.name}</b>
         <small>
           {contractor.projects.length} project
-          {contractor.projects.length === 1 ? "" : "s"} · {contractor.email}
+          {contractor.projects.length === 1 ? "" : "s"} - {contractor.email}
         </small>
+        {contractor.phone ? <small>{contractor.phone}</small> : null}
+        {contractor.portalInstructions ? (
+          <small>Portal: {contractor.portalInstructions}</small>
+        ) : null}
         <div style={{ marginTop: 6 }}>
           <CopyButton text={contractor.holder} label="Copy holder" small />
         </div>
