@@ -3,6 +3,7 @@ import {
   BadgeDollarSign,
   CheckCircle2,
   FileCheck2,
+  FileSpreadsheet,
   FileText,
   History,
   RefreshCcw,
@@ -15,6 +16,25 @@ import {
 } from "lucide-react";
 import { Section } from "./Layout.jsx";
 import { formatActivityTime, groupActivityByDate } from "../utils.js";
+
+function exportActivityCsv(activity) {
+  const header = ["Title","Details","Time"];
+  const rows = activity.map((item) => [
+    item.title,
+    item.body,
+    formatActivityTime(item),
+  ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`));
+  const csv = [header.join(","), ...rows.map((row) => row.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "activity-log.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 const TYPE_FILTERS = [
   { id: "all", label: "All" },
@@ -98,7 +118,23 @@ export default function ActivityView({ activity }) {
       <Section
         title="Activity Log"
         sub="A complete timeline of renewals, uploads, sends, and savings actions."
-        extra={`${filtered.length} event${filtered.length === 1 ? "" : "s"}`}
+        extra={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--faint)" }}>
+              {filtered.length} event{filtered.length === 1 ? "" : "s"}
+            </span>
+            {activity.length > 0 && (
+              <button
+                type="button"
+                className="ss-copy-btn"
+                onClick={() => exportActivityCsv(activity)}
+                title="Export activity log as CSV"
+              >
+                <FileSpreadsheet size={13} /> Export
+              </button>
+            )}
+          </div>
+        }
       />
 
       {activity.length > 0 && (

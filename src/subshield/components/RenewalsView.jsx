@@ -1,7 +1,30 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowRight, CalendarClock, Search } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, FileSpreadsheet, Search } from "lucide-react";
 import { formatLongDate, formatMoney, getStatus } from "../utils.js";
 import { Section } from "./Layout.jsx";
+
+function exportRenewalsCsv(policies) {
+  const header = ["Policy","Carrier","Policy Number","Renewal Date","Days Remaining","Status","Annual Premium"];
+  const rows = policies.map((policy) => [
+    policy.name,
+    policy.carrier,
+    policy.policyNumber,
+    formatLongDate(policy.renewalDate || policy.expires),
+    policy.daysRemaining ?? "",
+    getStatus(policy.daysRemaining).label,
+    policy.premiumAmount ?? policy.premium ?? 0,
+  ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`));
+  const csv = [header.join(","), ...rows.map((row) => row.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "renewal-schedule.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 const RENEWAL_FILTERS = [
   { id: "all", label: "All renewals" },
@@ -83,6 +106,18 @@ export default function RenewalsView({
         <Section
           title="Upcoming renewals"
           sub={`${filteredPolicies.length} policy${filteredPolicies.length === 1 ? "" : "ies"}`}
+          extra={
+            orderedPolicies.length > 0 ? (
+              <button
+                type="button"
+                className="ss-copy-btn"
+                onClick={() => exportRenewalsCsv(orderedPolicies)}
+                title="Export renewal schedule as CSV"
+              >
+                <FileSpreadsheet size={13} /> Export
+              </button>
+            ) : null
+          }
         />
 
         <div className="ss-search">
