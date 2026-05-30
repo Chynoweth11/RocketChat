@@ -540,10 +540,20 @@ function bucketFromLegacyTime(value) {
 
 export function formatActivityTime(item) {
   if (item?.createdAt) {
-    const dayDiff = getDayDifference(item.createdAt);
-    if (dayDiff === 0) return "Today";
-    if (dayDiff === 1) return "Yesterday";
-    if (dayDiff > 1) return `${dayDiff} days ago`;
+    const parsed = new Date(item.createdAt);
+    if (!Number.isNaN(parsed.getTime())) {
+      const dayDiff = getDayDifference(item.createdAt);
+      if (dayDiff === 0) {
+        const h = parsed.getHours();
+        const m = String(parsed.getMinutes()).padStart(2, "0");
+        const ampm = h >= 12 ? "PM" : "AM";
+        const hour = h % 12 || 12;
+        return `Today at ${hour}:${m} ${ampm}`;
+      }
+      if (dayDiff === 1) return "Yesterday";
+      if (dayDiff > 1 && dayDiff < 7) return `${dayDiff} days ago`;
+      return formatShortDate(item.createdAt);
+    }
   }
   return item?.time || "Just now";
 }

@@ -285,6 +285,21 @@ export default function SubShieldComplete() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    const titles = {
+      dashboard: "Dashboard",
+      policies: "My Insurance",
+      savings: "Lower My Insurance",
+      renewals: "Renewals",
+      certificates: "Certificates of Insurance",
+      documents: "Documents",
+      activity: "Activity",
+      settings: "Settings",
+    };
+    const label = titles[view] || "SubShield";
+    document.title = `${label} — SubShield`;
+  }, [view]);
+
   function commit(next) {
     setData(next);
     writeStoredData(next);
