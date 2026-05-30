@@ -265,11 +265,12 @@ textarea {
 
 .ss-side-card strong {
   display: block;
-  margin: 6px 0 8px;
-  font-size: 32px;
+  margin: 5px 0 7px;
+  font-size: 22px;
   line-height: 1;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.03em;
   color: #0f203d;
+  font-weight: 800;
 }
 
 .ss-side-card p {
@@ -405,10 +406,10 @@ textarea {
 }
 
 .ss-top h1 {
-  margin: 8px 0 0;
-  font-size: clamp(30px, 3.2vw, 44px);
-  line-height: 1;
-  letter-spacing: -0.05em;
+  margin: 6px 0 0;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
 
 .ss-top-actions {
@@ -468,9 +469,10 @@ textarea {
 
 .ss-section h2 {
   margin: 0;
-  font-size: 25px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 
 .ss-section p {
@@ -499,25 +501,26 @@ textarea {
 
 .ss-button {
   border: 1px solid transparent;
-  min-height: 42px;
-  padding: 10px 16px;
-  border-radius: 13px;
-  background: linear-gradient(160deg, #141d31 0%, #0b1322 100%);
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: var(--brand);
   color: #fff;
   font-size: 13px;
-  font-weight: 760;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.17);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  box-shadow: 0 1px 3px rgba(37, 87, 210, 0.25), 0 4px 12px rgba(37, 87, 210, 0.18);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ss-button:hover:not(:disabled) {
+  background: #2051c8;
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 2px 6px rgba(37, 87, 210, 0.3), 0 8px 20px rgba(37, 87, 210, 0.2);
 }
 
 .ss-button:disabled {
@@ -528,13 +531,25 @@ textarea {
 
 .ss-button.soft {
   background: #fff;
-  color: #17223a;
-  border-color: var(--line);
-  box-shadow: var(--shadow-xs);
+  color: #334155;
+  border-color: #dde3ec;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.ss-button.soft:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #c5cdd9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
 .ss-button.danger {
-  background: linear-gradient(160deg, #d44b45 0%, #bc332d 100%);
+  background: #dc2626;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);
+}
+
+.ss-button.danger:hover:not(:disabled) {
+  background: #b91c1c;
 }
 
 .ss-button-sm {
@@ -728,9 +743,10 @@ textarea {
 }
 
 .ss-info b {
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .ss-info-hint {
@@ -775,17 +791,18 @@ textarea {
 }
 
 .ss-dash-spend-panel h2 {
-  margin: 9px 0 7px;
-  font-size: clamp(31px, 3.4vw, 42px);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  margin: 8px 0 5px;
+  font-size: clamp(14px, 1.3vw, 17px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--muted);
 }
 
 .ss-dash-spend-value {
-  font-size: clamp(44px, 6vw, 62px);
-  line-height: 0.92;
-  font-weight: 850;
-  letter-spacing: -0.07em;
+  font-size: clamp(32px, 4vw, 46px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   color: #0d1629;
 }
 
@@ -794,31 +811,41 @@ textarea {
   border: 1px solid var(--line-soft);
   border-radius: 14px;
   background: var(--surface-soft);
-  padding: 11px;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  align-items: end;
-  min-height: 116px;
+  padding: 12px 10px 8px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 110px;
 }
 
 .ss-spend-point {
-  display: grid;
-  justify-items: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   gap: 5px;
+  height: 100%;
 }
 
 .ss-spend-point span {
-  width: 20px;
-  border-radius: 7px;
-  background: linear-gradient(180deg, #4f72e7 0%, #7e95ec 100%);
-  box-shadow: 0 6px 14px rgba(79, 114, 231, 0.22);
+  width: 100%;
+  max-width: 28px;
+  border-radius: 6px 6px 3px 3px;
+  background: var(--brand);
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.ss-spend-point:last-child span {
+  opacity: 1;
 }
 
 .ss-spend-point small {
   font-size: 10px;
   color: #64748b;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .ss-dash-account-row {
@@ -879,26 +906,33 @@ textarea {
 .ss-dash-trend-bars {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
+  height: 56px;
 }
 
 .ss-dash-trend-item {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   gap: 4px;
-  min-width: 24px;
+  min-width: 22px;
+  height: 100%;
 }
 
 .ss-dash-trend-item span {
-  width: 17px;
-  border-radius: 6px 6px 4px 4px;
-  background: linear-gradient(180deg, #4c70e8 0%, #8198ed 100%);
+  width: 16px;
+  border-radius: 4px 4px 2px 2px;
+  background: var(--brand);
+  opacity: 0.6;
+  flex-shrink: 0;
 }
 
 .ss-dash-trend-item small {
   font-size: 10px;
   font-weight: 700;
   color: #60708a;
+  flex-shrink: 0;
 }
 
 .ss-dash-metrics {
@@ -932,9 +966,10 @@ textarea {
 }
 
 .ss-dash-metric b {
-  font-size: 27px;
+  font-size: 22px;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .ss-dash-activity-row {
@@ -992,6 +1027,7 @@ textarea {
 
 .ss-dash-save-primary .ss-button {
   width: 100%;
+  margin-top: 4px;
 }
 
 .ss-dash-save-list {
@@ -1070,10 +1106,10 @@ textarea {
 }
 
 .ss-hero h2 {
-  margin: 8px 0;
-  font-size: clamp(31px, 4.5vw, 46px);
-  line-height: 0.95;
-  letter-spacing: -0.05em;
+  margin: 6px 0 8px;
+  font-size: clamp(20px, 2.2vw, 26px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .ss-hero p {
@@ -1302,10 +1338,11 @@ textarea {
 }
 
 .ss-renewals-head h2 {
-  margin: 8px 0 6px;
-  font-size: clamp(28px, 3.8vw, 40px);
-  line-height: 0.98;
-  letter-spacing: -0.05em;
+  margin: 6px 0 6px;
+  font-size: clamp(20px, 2.2vw, 26px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .ss-renewals-head p {
@@ -1814,6 +1851,73 @@ textarea {
   gap: 8px;
 }
 
+/* --- Dashboard action row --- */
+.ss-action-row-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ss-action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.ss-action-item:last-child {
+  border-bottom: none;
+}
+
+.ss-action-item:hover {
+  background: var(--surface-soft);
+}
+
+.ss-action-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ss-action-dot.warning { background: var(--warning); }
+.ss-action-dot.danger  { background: var(--danger); }
+.ss-action-dot.success { background: var(--success); }
+
+.ss-action-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-action-text b {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ss-action-text small {
+  display: block;
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ss-action-cta {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
 /* --- Policy services & claims --- */
 .ss-service-list {
   display: grid;
@@ -2233,25 +2337,38 @@ textarea {
 }
 
 .ss-settings-identity {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0 10px;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 4px;
 }
 
 .ss-avatar {
-  width: 74px;
-  height: 74px;
-  border-radius: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  margin: 0 auto 10px;
-  font-size: 30px;
+  flex-shrink: 0;
+  font-size: 18px;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
+}
+
+.ss-settings-identity-copy {
+  min-width: 0;
 }
 
 .ss-settings-identity h2 {
   margin: 0;
-  font-size: 24px;
-  letter-spacing: -0.03em;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ss-settings-summary {
@@ -2345,15 +2462,16 @@ textarea {
 }
 
 .ss-settings-context {
-  background: linear-gradient(180deg, #f6f9ff 0%, #edf3ff 100%);
-  border-color: #d4dff2;
+  background: var(--surface-soft);
+  border-color: var(--line);
 }
 
 .ss-settings-context h2 {
-  margin: 7px 0 6px;
-  font-size: clamp(26px, 3.2vw, 32px);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  margin: 5px 0 5px;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .ss-settings-context p {
@@ -2490,9 +2608,10 @@ textarea {
 
 .ss-modal h2 {
   margin: 0 36px 6px 0;
-  font-size: 28px;
-  line-height: 1.05;
-  letter-spacing: -0.05em;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .ss-close {
@@ -2755,7 +2874,7 @@ textarea {
   }
 
   .ss-top h1 {
-    font-size: 26px;
+    font-size: 20px;
   }
 
   .ss-section h2,
@@ -2763,11 +2882,11 @@ textarea {
   .ss-renewals-head h2,
   .ss-settings-context h2,
   .ss-modal h2 {
-    font-size: 24px;
+    font-size: 18px;
   }
 
   .ss-dash-spend-value {
-    font-size: 40px;
+    font-size: 28px;
   }
 
   .ss-row {

@@ -232,10 +232,12 @@ export default function SettingsView({
           >
             {`${settings.userProfile.firstName?.[0] || ""}${settings.userProfile.lastName?.[0] || ""}`.toUpperCase() || "SS"}
           </div>
-          <h2>{company?.name || "SubShield Company"}</h2>
-          <p className="ss-muted">
-            {settings.userProfile.jobTitle || "Account Owner"} | {company?.state || "N/A"}
-          </p>
+          <div className="ss-settings-identity-copy">
+            <h2>{company?.name || "SubShield Company"}</h2>
+            <p className="ss-muted" style={{ margin: "2px 0 0", fontSize: 12 }}>
+              {settings.userProfile.jobTitle || "Account Owner"}{company?.state ? ` | ${company.state}` : ""}
+            </p>
+          </div>
         </div>
 
         <div className="ss-settings-summary ss-settings-summary-inline">

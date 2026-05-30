@@ -102,7 +102,7 @@ export default function DashboardView({
             <div className="ss-spend-chart" aria-label="Insurance spend trend">
               {monthlySeries.map((point) => (
                 <div key={point.label} className="ss-spend-point">
-                  <span style={{ height: `${Math.max(14, Math.round((point.value / monthlyPeak) * 100))}%` }} />
+                  <span style={{ height: `${Math.max(12, Math.round((point.value / monthlyPeak) * 70))}px` }} />
                   <small>{point.label}</small>
                 </div>
               ))}
@@ -162,7 +162,7 @@ export default function DashboardView({
           <div className="ss-dash-trend-bars">
             {spendBars.map((item) => (
               <div className="ss-dash-trend-item" key={item.id}>
-                <span style={{ height: `${item.percent}%` }} />
+                <span style={{ height: `${Math.max(8, Math.round(item.percent * 0.55))}px` }} />
                 <small>{item.label}</small>
               </div>
             ))}
@@ -328,25 +328,28 @@ export default function DashboardView({
         </div>
       </section>
 
-      {missingDocCount > 0 && (
-        <section className="ss-card ss-span">
-          <div className="ss-note">
-            <FileCheck2 size={16} />
-            <span>
-              {missingDocCount} {missingDocCount === 1 ? "policy is" : "policies are"} missing supporting documents. Upload now so certificates stay ready.
-            </span>
-          </div>
-        </section>
-      )}
-
-      {coverageGaps.length > 0 && (
-        <section className="ss-card ss-span">
-          <div className="ss-note danger">
-            <CalendarClock size={16} />
-            <span>
-              {coverageGaps.length} coverage {coverageGaps.length === 1 ? "gap needs" : "gaps need"} review.
-            </span>
-          </div>
+      {(missingDocCount > 0 || coverageGaps.length > 0) && (
+        <section className="ss-card ss-span ss-action-row-card">
+          {missingDocCount > 0 && (
+            <button type="button" className="ss-action-item" onClick={onUpload}>
+              <span className="ss-action-dot warning" aria-hidden="true" />
+              <span className="ss-action-text">
+                <b>{missingDocCount} {missingDocCount === 1 ? "policy" : "policies"} missing documents</b>
+                <small>Upload declarations pages to keep certificates ready</small>
+              </span>
+              <span className="ss-action-cta">Upload now</span>
+            </button>
+          )}
+          {coverageGaps.length > 0 && (
+            <button type="button" className="ss-action-item" onClick={() => onQueueAction("renewals")}>
+              <span className="ss-action-dot danger" aria-hidden="true" />
+              <span className="ss-action-text">
+                <b>{coverageGaps.length} coverage {coverageGaps.length === 1 ? "gap" : "gaps"} need review</b>
+                <small>Check renewal dates and coverage continuity</small>
+              </span>
+              <span className="ss-action-cta">Review</span>
+            </button>
+          )}
         </section>
       )}
     </div>
