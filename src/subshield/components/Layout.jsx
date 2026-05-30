@@ -53,63 +53,66 @@ export function Sidebar({
   return (
     <aside className="ss-sidebar">
       <Brand />
-      <nav aria-label="Primary">
-        {NAV_ITEMS.map((item) => (
-          <NavButton
-            key={item.id}
-            active={view === item.id}
-            icon={item.icon}
-            label={item.label}
-            badge={item.id === "savings" && savingsCount > 0 ? savingsCount : null}
-            onClick={() => setView(item.id)}
-          />
-        ))}
-      </nav>
 
-      {upcoming && upcoming.length > 0 && (
-        <div className="ss-upcoming">
-          <div className="ss-upcoming-title">
-            <b>Upcoming renewals</b>
-            <small>Next {upcoming.length}</small>
-          </div>
-          {upcoming.map((policy) => {
-            const status = getStatus(policy.daysRemaining);
-            return (
-              <div key={policy.id} className="ss-upcoming-row">
-                <span className="ss-upcoming-name">{policy.name}</span>
-                <span className={`ss-upcoming-days ${status.className}`}>
-                  {policy.daysRemaining}d
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div className="ss-sidebar-scroll">
+        <nav aria-label="Primary">
+          {NAV_ITEMS.map((item) => (
+            <NavButton
+              key={item.id}
+              active={view === item.id}
+              icon={item.icon}
+              label={item.label}
+              badge={item.id === "savings" && savingsCount > 0 ? savingsCount : null}
+              onClick={() => setView(item.id)}
+            />
+          ))}
+        </nav>
 
-      <div className="ss-side-card">
-        <span className="ss-eyebrow">{potentialSavings > 0 ? "Savings found" : "Coverage healthy"}</span>
-        <strong>
-          {potentialSavings > 0 ? `${formatMoney(potentialSavings)}/yr` : "You're set"}
-        </strong>
-        <p>
-          {potentialSavings > 0
-            ? "Lower-rate options are available on your active coverage. Review them before renewal."
-            : "No new savings right now. We'll keep monitoring renewals and partner rates."}
-        </p>
-        <div className="ss-savings-stack">
-          <div>
-            <small>Needs action</small>
-            <strong>{savingsCount}</strong>
+        {upcoming && upcoming.length > 0 && (
+          <div className="ss-upcoming">
+            <div className="ss-upcoming-title">
+              <b>Upcoming renewals</b>
+              <small>Next {upcoming.length}</small>
+            </div>
+            {upcoming.slice(0, 4).map((policy) => {
+              const status = getStatus(policy.daysRemaining);
+              return (
+                <div key={policy.id} className="ss-upcoming-row">
+                  <span className="ss-upcoming-name">{policy.name}</span>
+                  <span className={`ss-upcoming-days ${status.className}`}>
+                    {policy.daysRemaining}d
+                  </span>
+                </div>
+              );
+            })}
           </div>
-          <div>
-            <small>Renewing soon</small>
-            <strong>{soon}</strong>
+        )}
+
+        <div className="ss-side-card">
+          <span className="ss-eyebrow">{potentialSavings > 0 ? "Savings found" : "Coverage healthy"}</span>
+          <strong>
+            {potentialSavings > 0 ? `${formatMoney(potentialSavings)}/yr` : "You're set"}
+          </strong>
+          <p>
+            {potentialSavings > 0
+              ? "Lower-rate options are available. Review before renewal."
+              : "No new savings right now. We keep monitoring rates."}
+          </p>
+          <div className="ss-savings-stack">
+            <div>
+              <small>Needs action</small>
+              <strong>{savingsCount}</strong>
+            </div>
+            <div>
+              <small>Renewing soon</small>
+              <strong>{soon}</strong>
+            </div>
           </div>
+          <button className="ss-button" onClick={onReviewSavings}>
+            {potentialSavings > 0 ? "Review savings" : "View savings"}
+            <ArrowRight size={15} />
+          </button>
         </div>
-        <button className="ss-button" onClick={onReviewSavings}>
-          {potentialSavings > 0 ? "Review savings" : "View savings center"}
-          <ArrowRight size={15} />
-        </button>
       </div>
 
       {account && (
