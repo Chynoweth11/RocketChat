@@ -34,6 +34,13 @@ function buildSpendBars(policies = []) {
   return top.map((item) => ({ ...item, percent: Math.max(18, Math.round((item.value / peak) * 100)) }));
 }
 
+function greetingFor(date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 function buildMonthlySpend(totalPremium) {
   const monthly = Math.round(totalPremium / 12);
   const variance = [0.78, 0.84, 0.91, 0.96, 1.04, 1.08];
@@ -92,7 +99,7 @@ export default function DashboardView({
       <section className="ss-card ss-span">
         <div className="ss-dash-top-grid">
           <div className="ss-dash-spend-panel">
-            <span className="ss-eyebrow">{firstName ? `Good evening, ${firstName}` : "Welcome back"}</span>
+            <span className="ss-eyebrow">{firstName ? `${greetingFor()}, ${firstName}` : "Welcome back"}</span>
             <h2>Current insurance spend</h2>
             <div className="ss-dash-spend-value">{formatMoney(totalPremium)}</div>
             <p className="ss-muted">
