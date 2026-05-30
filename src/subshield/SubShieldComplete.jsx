@@ -290,8 +290,8 @@ export default function SubShieldComplete() {
     writeStoredData(next);
   }
 
-  function fireToast(title, body) {
-    setToast({ title, body });
+  function fireToast(title, body, type = "default") {
+    setToast({ title, body, type });
   }
 
   /* ---------- Policies ---------- */
@@ -332,7 +332,7 @@ export default function SubShieldComplete() {
         ),
       });
       setRenewingId(null);
-      fireToast("Policy renewed", `${policy.name} is active for 365 days.`);
+      fireToast("Policy renewed", `${policy.name} is active for 365 days.`, "success");
     }, 850);
   }
 
@@ -340,7 +340,7 @@ export default function SubShieldComplete() {
     const normalized = normalizePolicy(policyInput, company.id);
     const exists = policies.some((policy) => policy.policyNumber === normalized.policyNumber);
     if (exists) {
-      fireToast("Policy already exists", "This policy number is already tracked.");
+      fireToast("Policy already exists", "This policy number is already tracked.", "warning");
       return;
     }
 
@@ -378,7 +378,7 @@ export default function SubShieldComplete() {
     setPolicyId(normalized.id);
     setAddPolicyType(null);
     setModal(null);
-    fireToast("Policy saved", `${normalized.name} added. We'll watch it for savings.`);
+    fireToast("Policy saved", `${normalized.name} added. We'll watch it for savings.`, "success");
   }
 
   function vaultDocument(detected) {
@@ -464,7 +464,7 @@ export default function SubShieldComplete() {
         ),
       });
       setPolicyId(policy.id);
-      fireToast("Insurance uploaded", `${policy.name} added | checking for savings.`);
+      fireToast("Insurance uploaded", `${policy.name} added | checking for savings.`, "success");
     }
     setModal(null);
   }
@@ -821,7 +821,7 @@ export default function SubShieldComplete() {
     if (!selectedContractor) return;
     const finalProject = normalizeProjectName(newProject) || normalizeProjectName(project);
     if (!finalProject) {
-      fireToast("Project name required", "Pick or type a project before sending.");
+      fireToast("Project name required", "Pick or type a project before sending.", "warning");
       return;
     }
 
@@ -880,7 +880,7 @@ export default function SubShieldComplete() {
       (existing) => existing.email.trim().toLowerCase() === email
     );
     if (emailExists) {
-      fireToast("Duplicate email", "A holder with that email already exists. Edit it instead.");
+      fireToast("Duplicate email", "A holder with that email already exists. Edit it instead.", "warning");
       return;
     }
 
@@ -914,7 +914,7 @@ export default function SubShieldComplete() {
       (existing) => existing.id !== updated.id && existing.email.trim().toLowerCase() === email
     );
     if (emailConflict) {
-      fireToast("Duplicate email", "That email is already used by another holder.");
+      fireToast("Duplicate email", "That email is already used by another holder.", "warning");
       return;
     }
 
@@ -967,7 +967,7 @@ export default function SubShieldComplete() {
       (item) => item.email.trim().toLowerCase() === email
     );
     if (exists) {
-      fireToast("Duplicate advisor", "An advisor with that email already exists.");
+      fireToast("Duplicate advisor", "An advisor with that email already exists.", "warning");
       return;
     }
 
@@ -1367,7 +1367,7 @@ export default function SubShieldComplete() {
       )}
 
       {toast && (
-        <div className="ss-toast" role="status" aria-live="polite">
+        <div className={`ss-toast${toast.type && toast.type !== "default" ? ` ${toast.type}` : ""}`} role="status" aria-live="polite">
           <div>
             <b>{toast.title}</b>
             {toast.body && <small>{toast.body}</small>}

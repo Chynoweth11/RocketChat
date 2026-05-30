@@ -717,27 +717,38 @@ textarea {
 
 .ss-empty {
   min-height: 220px;
-  border: 1px dashed var(--line);
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
+  border: 1.5px dashed #d8e2ef;
+  border-radius: 16px;
+  background: #fafbfd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  gap: 6px;
-  padding: 24px;
+  gap: 10px;
+  padding: 32px 24px;
   color: var(--muted);
+}
+
+.ss-empty svg {
+  color: #c5cedc;
+  flex-shrink: 0;
 }
 
 .ss-empty h2 {
   margin: 0;
-  font-size: 20px;
-  letter-spacing: -0.03em;
-  color: #162338;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: #1e2d42;
+  font-weight: 700;
 }
 
 .ss-empty p {
   margin: 0;
-  max-width: 450px;
-  line-height: 1.5;
+  font-size: 13px;
+  max-width: 380px;
+  line-height: 1.6;
+  color: var(--muted);
 }
 
 .ss-info-grid {
@@ -2337,10 +2348,17 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
-  padding: 10px;
+  padding: 10px 12px;
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ss-activity:hover {
+  border-color: #d8e2ef;
+  box-shadow: var(--shadow-xs);
 }
 
 .ss-activity-body {
@@ -3233,5 +3251,129 @@ textarea {
   }
   .ss-cmd-overlay {
     padding: 8vh 10px 10px;
+  }
+}
+
+/* ---------- Focus rings (keyboard accessibility) ---------- */
+:focus-visible {
+  outline: 2.5px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2.5px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ---------- Toast animation & type variants ---------- */
+@keyframes ss-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.ss-toast {
+  animation: ss-toast-in 0.2s ease-out;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ss-toast-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ss-toast.success {
+  background: rgba(15, 90, 60, 0.97);
+  border-color: rgba(22, 120, 80, 0.9);
+}
+
+.ss-toast.warning {
+  background: rgba(100, 65, 5, 0.97);
+  border-color: rgba(160, 110, 20, 0.9);
+}
+
+.ss-toast.error {
+  background: rgba(110, 25, 20, 0.97);
+  border-color: rgba(180, 40, 30, 0.9);
+}
+
+/* ---------- Activity improvements ---------- */
+.ss-activity-group {
+  margin-bottom: 4px;
+}
+
+.ss-activity-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f4f6fa;
+  display: grid;
+  place-items: center;
+}
+
+.ss-chip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ss-chip.active .ss-chip-count {
+  background: rgba(47, 99, 233, 0.15);
+}
+
+/* ---------- Smooth view transitions ---------- */
+.ss-main > * {
+  animation: ss-view-in 0.18s ease-out;
+}
+
+@keyframes ss-view-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Scrollbar polish (webkit) ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4dce8;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b8c4d4;
+}
+
+/* ---------- Print styles ---------- */
+@media print {
+  .ss-sidebar,
+  .ss-top-actions,
+  .ss-toast,
+  .ss-cmd-overlay {
+    display: none !important;
+  }
+  .ss-layout {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  .ss-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
   }
 }
