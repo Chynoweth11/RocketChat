@@ -3,9 +3,13 @@ import {
   AlertTriangle,
   BadgeDollarSign,
   Check,
+  Download,
+  FileCheck2,
+  LifeBuoy,
   Plus,
   Search,
   Send,
+  Shield,
   Upload,
   Zap,
 } from "lucide-react";
@@ -235,7 +239,12 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
         <Info label="Annual premium" value={`${formatMoney(policy.premiumAmount ?? policy.premium)}`} />
         <Info label="Deductible" value={formatDeductible(policy.deductible)} />
         <Info label="Coverage limit" value={policy.coverageLimits || policy.limit} />
-        <Info label="Renews" value={formatLongDate(policy.renewalDate || policy.expires)} />
+        <Info
+          label="Term"
+          value={`${formatLongDate(policy.effectiveDate)} - ${formatLongDate(
+            policy.expirationDate || policy.expires
+          )}`}
+        />
         <Info label="Documents" value={`${policy.documents.length} on file`} />
         <Info label="Advisor" value={policy.brokerId ? "Assigned" : "Not assigned"} />
       </div>
@@ -243,6 +252,53 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
       <div className={`ss-note ${isCritical ? "danger" : ""}`}>
         <AlertTriangle size={16} />
         <span>{policy.statusNote}</span>
+      </div>
+
+      <Section title="Policy services" sub="Manage this policy and its paperwork" />
+      <div className="ss-service-list">
+        <ServiceLink
+          icon={Shield}
+          title="Manage / renew policy"
+          detail="Renew coverage or compare a better rate before the deadline."
+          onClick={onRenew}
+        />
+        <ServiceLink
+          icon={FileCheck2}
+          title="Request certificate"
+          detail="Send a certificate of insurance to a holder or GC."
+          onClick={onSend}
+        />
+        {(policy.type || policy.policyType) !== "license" && (
+          <ServiceLink
+            icon={BadgeDollarSign}
+            title="Find savings"
+            detail="Route this policy to partners for lower-rate quotes."
+            onClick={onFindSavings}
+          />
+        )}
+        <ServiceLink
+          icon={Download}
+          title="Download client summary"
+          detail="Export a one-page coverage summary for this policy."
+          onClick={() => downloadPolicySummary(policy)}
+        />
+      </div>
+
+      <Section title="Claims" sub="What you need if you have to file" />
+      <div className="ss-claims-card">
+        <p className="ss-muted">
+          File a claim through your carrier or advisor. Having these ready speeds up the process:
+        </p>
+        <ul className="ss-claims-list">
+          <li>Policy number ({policy.policyNumber})</li>
+          <li>Date, time, place, and description of the incident</li>
+          <li>Names and roles of anyone involved</li>
+        </ul>
+        <div className="ss-row">
+          <button className="ss-button soft" onClick={onSend}>
+            <LifeBuoy size={16} /> Contact advisor
+          </button>
+        </div>
       </div>
 
       <Section
@@ -282,6 +338,49 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
       </div>
     </div>
   );
+}
+
+function ServiceLink({ icon: Icon, title, detail, onClick }) {
+  return (
+    <button type="button" className="ss-service-link" onClick={onClick}>
+      <span className="ss-service-icon" aria-hidden="true">
+        <Icon size={18} />
+      </span>
+      <span className="ss-service-copy">
+        <b>{title}</b>
+        <small>{detail}</small>
+      </span>
+    </button>
+  );
+}
+
+function downloadPolicySummary(policy) {
+  const lines = [
+    "SubShield — Policy Client Summary",
+    "==================================",
+    `Policy: ${policy.name}`,
+    `Carrier: ${policy.carrier}`,
+    `Policy number: ${policy.policyNumber}`,
+    `Term: ${formatLongDate(policy.effectiveDate)} - ${formatLongDate(
+      policy.expirationDate || policy.expires
+    )}`,
+    `Annual premium: ${formatMoney(policy.premiumAmount ?? policy.premium)}`,
+    `Deductible: ${formatDeductible(policy.deductible)}`,
+    `Coverage limit: ${policy.coverageLimits || policy.limit}`,
+    `Renews: ${formatLongDate(policy.renewalDate || policy.expires)}`,
+    `Documents on file: ${policy.documents.join(", ") || "None"}`,
+    "",
+    `Generated ${new Date().toLocaleString()}`,
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${policy.policyNumber || policy.name}-summary.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function DocumentRow({ name }) {

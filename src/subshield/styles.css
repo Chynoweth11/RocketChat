@@ -1767,6 +1767,83 @@ textarea {
   gap: 8px;
 }
 
+/* --- Policy services & claims --- */
+.ss-service-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.ss-service-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 13px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.ss-service-link:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.ss-service-icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.ss-service-link:hover .ss-service-icon {
+  background: #fff;
+}
+
+.ss-service-copy b {
+  display: block;
+  font-size: 14px;
+  color: var(--brand);
+}
+
+.ss-service-copy small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ss-claims-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  padding: 14px;
+}
+
+.ss-claims-card p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ss-claims-list {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  color: var(--text);
+  font-size: 13px;
+}
+
 @media (max-width: 560px) {
   .ss-step-label {
     display: none;
