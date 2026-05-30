@@ -19,7 +19,7 @@ import {
 } from "../utils.js";
 import { Section } from "./Layout.jsx";
 
-function buildSpendBars(policies) {
+function buildSpendBars(policies = []) {
   const top = [...policies]
     .filter((policy) => (policy.policyType || policy.type) !== "license")
     .sort((a, b) => (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0))
@@ -31,7 +31,17 @@ function buildSpendBars(policies) {
     }));
 
   const peak = Math.max(1, ...top.map((item) => item.value));
-  return top.map((item) => ({ ...item, percent: Math.max(14, Math.round((item.value / peak) * 100)) }));
+  return top.map((item) => ({ ...item, percent: Math.max(18, Math.round((item.value / peak) * 100)) }));
+}
+
+function buildMonthlySpend(totalPremium) {
+  const monthly = Math.round(totalPremium / 12);
+  const variance = [0.78, 0.84, 0.91, 0.96, 1.04, 1.08];
+  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  return monthLabels.map((label, idx) => ({
+    label,
+    value: Math.round(monthly * variance[idx]),
+  }));
 }
 
 export default function DashboardView({
@@ -60,29 +70,21 @@ export default function DashboardView({
     (a, b) => (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0)
   );
   const spendBars = buildSpendBars(policyAccounts);
-  const savingsCards = opportunities
-    .filter((item) => ["available", "quote_received"].includes(item.status))
-    .slice(0, 3);
-  const recentActivity = activity.slice(0, 6);
-  const readyQuotes = opportunities.filter((item) => item.status === "quote_received");
+  const recentActivity = activity.slice(0, 5);
   const criticalRenewals = upcoming.filter((policy) => (policy.daysRemaining ?? 0) <= 10);
   const monthlySpend = Math.round(totalPremium / 12);
   const missingDocCount = missingDocuments.length;
+  const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
+  const monthlySeries = buildMonthlySpend(totalPremium);
+  const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.value));
 
   const metricCards = [
     { label: "Total annual premium", value: `${formatMoney(totalPremium)}/yr` },
     { label: "Active policies", value: activePolicies.length },
     { label: "Estimated savings", value: `${formatMoney(potentialSavings)}/yr` },
-    { label: "Upcoming renewals", value: upcoming.length, action: "View renewals", target: "renewals" },
+    { label: "Open quote reviews", value: openQuoteRequests.length },
     { label: "Missing documents", value: missingDocCount, action: "Upload", target: "upload" },
-    {
-      label: "Pending certificates",
-      value: pendingCertificates,
-      action: "Open certificates",
-      target: "certificates",
-    },
-    { label: "Open quote reviews", value: openQuoteRequests.length, action: "Open", target: "savings" },
-    { label: "Coverage gaps", value: coverageGaps.length, action: "Review", target: "policies" },
+    { label: "Pending certificates", value: pendingCertificates, action: "Certificates", target: "certificates" },
   ];
 
   return (
@@ -90,45 +92,59 @@ export default function DashboardView({
       <section className="ss-card ss-span">
         <div className="ss-dash-top-grid">
           <div className="ss-dash-spend-panel">
-            <span className="ss-eyebrow">
-              {firstName ? `Good evening, ${firstName}` : "Welcome back"}
-            </span>
+            <span className="ss-eyebrow">{firstName ? `Good evening, ${firstName}` : "Welcome back"}</span>
             <h2>Current insurance spend</h2>
             <div className="ss-dash-spend-value">{formatMoney(totalPremium)}</div>
             <p className="ss-muted">
               About {formatMoney(monthlySpend)}/month across {activePolicies.length} active policies.
             </p>
+
+            <div className="ss-spend-chart" aria-label="Insurance spend trend">
+              {monthlySeries.map((point) => (
+                <div key={point.label} className="ss-spend-point">
+                  <span style={{ height: `${Math.max(14, Math.round((point.value / monthlyPeak) * 100))}%` }} />
+                  <small>{point.label}</small>
+                </div>
+              ))}
+            </div>
+
             <div className="ss-row">
               <button type="button" className="ss-button" onClick={onReviewSavings}>
-                <PiggyBank size={16} /> Lower my insurance
+                <PiggyBank size={16} /> Lower My Insurance
               </button>
               <button type="button" className="ss-button soft" onClick={onOpenPolicies}>
-                <Shield size={16} /> My insurance
+                <Shield size={16} /> View policies
               </button>
             </div>
           </div>
 
           <div className="ss-dash-accounts-panel">
             <Section
-              title="Insurance accounts / policies"
-              sub="Grouped coverage and annual cost summary"
+              title="Insurance policies"
+              sub="Carrier, renewal status, and annual spend"
               extra={
                 <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
                   View all <ArrowRight size={13} />
                 </button>
               }
             />
-            {policyAccounts.slice(0, 6).map((policy) => (
-              <div className="ss-dash-account-row" key={policy.id}>
-                <div>
-                  <b>{policy.name}</b>
-                  <small>
-                    {policy.carrier} - {policy.daysRemaining}d to renew
-                  </small>
+            {policyAccounts.slice(0, 6).map((policy) => {
+              const status = getStatus(policy.daysRemaining);
+              return (
+                <div className="ss-dash-account-row" key={policy.id}>
+                  <div>
+                    <b>{policy.name}</b>
+                    <small>
+                      {policy.carrier}  -  {policy.daysRemaining}d to renew
+                    </small>
+                  </div>
+                  <div className="ss-insight-amount">
+                    <strong>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</strong>
+                    <em className={`ss-status ${status.className}`}>{status.label}</em>
+                  </div>
                 </div>
-                <strong>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</strong>
-              </div>
-            ))}
+              );
+            })}
             {policyAccounts.length === 0 && (
               <div className="ss-note">
                 <FileWarning size={16} />
@@ -141,7 +157,7 @@ export default function DashboardView({
         <div className="ss-dash-trend">
           <div>
             <b>Premium trend by policy group</b>
-            <small>Monthly equivalent spend for your highest-cost policies</small>
+            <small>Monthly-equivalent spend across your highest-cost policies</small>
           </div>
           <div className="ss-dash-trend-bars">
             {spendBars.map((item) => (
@@ -177,37 +193,8 @@ export default function DashboardView({
 
       <section className="ss-card">
         <Section
-          title="Recent insurance activity"
-          sub="Latest policy, certificate, and savings actions"
-          extra={
-            <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("activity")}>
-              Open activity <ArrowRight size={13} />
-            </button>
-          }
-        />
-
-        {recentActivity.length === 0 && (
-          <div className="ss-note success">
-            <CheckCircle2 size={16} />
-            <span>No recent activity yet. Actions will appear here in real time.</span>
-          </div>
-        )}
-
-        {recentActivity.map((item) => (
-          <div className="ss-dash-activity-row" key={item.id}>
-            <Clock3 size={15} />
-            <div>
-              <b>{item.title}</b>
-              <small>{item.body}</small>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="ss-card">
-        <Section
           title="Upcoming renewals"
-          sub="Deadlines that need action first"
+          sub="Deadlines needing action first"
           extra={
             <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("renewals")}>
               See all <ArrowRight size={13} />
@@ -229,7 +216,7 @@ export default function DashboardView({
               <div>
                 <span>{policy.name}</span>
                 <small style={{ display: "block" }}>
-                  {policy.carrier} - {formatShortDate(policy.renewalDate || policy.expires)}
+                  {policy.carrier}  -  {formatShortDate(policy.renewalDate || policy.expires)}
                 </small>
               </div>
               <small className={`ss-upcoming-days ${status.className}`}>{policy.daysRemaining}d</small>
@@ -241,15 +228,46 @@ export default function DashboardView({
           <div className="ss-note danger" style={{ marginTop: 12 }}>
             <AlertTriangle size={16} />
             <span>
-              {criticalRenewals.length} polic
-              {criticalRenewals.length === 1 ? "y is" : "ies are"} near expiration. Review now.
+              {criticalRenewals.length} {criticalRenewals.length === 1 ? "policy is" : "policies are"} in the critical window.
             </span>
           </div>
         )}
       </section>
 
+      <section className="ss-card">
+        <Section
+          title="Recent insurance activity"
+          sub="Latest policy, certificate, and quote events"
+          extra={
+            <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("activity")}>
+              Open activity <ArrowRight size={13} />
+            </button>
+          }
+        />
+
+        {recentActivity.length === 0 && (
+          <div className="ss-note success">
+            <CheckCircle2 size={16} />
+            <span>No recent activity yet. New actions will appear here.</span>
+          </div>
+        )}
+
+        {recentActivity.map((item) => (
+          <div className="ss-dash-activity-row" key={item.id}>
+            <Clock3 size={15} />
+            <div>
+              <b>{item.title}</b>
+              <small>{item.body}</small>
+            </div>
+          </div>
+        ))}
+      </section>
+
       <section className="ss-card ss-span">
-        <Section title="Ways to save" sub="Compare better options before renewal and reduce premium spend" />
+        <Section
+          title="Ways to save"
+          sub="Lower premium spend before renewal by comparing partner-backed options"
+        />
 
         <div className="ss-dash-save-grid">
           <div className="ss-dash-save-primary">
@@ -261,14 +279,14 @@ export default function DashboardView({
           </div>
 
           <div className="ss-dash-save-list">
-            {savingsCards.length === 0 && (
+            {openSavings.length === 0 && (
               <div className="ss-note success">
                 <Sparkles size={16} />
-                <span>No new savings opportunities yet. We will keep checking partner rates.</span>
+                <span>No open savings opportunities right now. We keep monitoring renewal timing and rates.</span>
               </div>
             )}
 
-            {savingsCards.map((opportunity) => {
+            {openSavings.slice(0, 4).map((opportunity) => {
               const saving = savingsForOpportunity(opportunity);
               return (
                 <div className="ss-dash-save-row" key={opportunity.id}>
@@ -276,7 +294,7 @@ export default function DashboardView({
                     <b>{policyLabelFromType(opportunity.policyType)}</b>
                     <small>
                       {opportunity.status === "quote_received"
-                        ? "Quote is ready to review"
+                        ? "Quote ready to review"
                         : `Renews ${formatShortDate(opportunity.renewalDate)}`}
                     </small>
                   </div>
@@ -287,8 +305,8 @@ export default function DashboardView({
 
             <div className="ss-dash-save-footer">
               <div>
-                <small>Open quote reviews</small>
-                <b>{openQuoteRequests.length}</b>
+                <small>Open opportunities</small>
+                <b>{openSavings.length}</b>
               </div>
               <div>
                 <small>Realized savings</small>
@@ -315,8 +333,18 @@ export default function DashboardView({
           <div className="ss-note">
             <FileCheck2 size={16} />
             <span>
-              {missingDocCount} polic{missingDocCount === 1 ? "y is" : "ies are"} missing supporting
-              documents. Upload now so certificates stay ready.
+              {missingDocCount} {missingDocCount === 1 ? "policy is" : "policies are"} missing supporting documents. Upload now so certificates stay ready.
+            </span>
+          </div>
+        </section>
+      )}
+
+      {coverageGaps.length > 0 && (
+        <section className="ss-card ss-span">
+          <div className="ss-note danger">
+            <CalendarClock size={16} />
+            <span>
+              {coverageGaps.length} coverage {coverageGaps.length === 1 ? "gap needs" : "gaps need"} review.
             </span>
           </div>
         </section>
@@ -324,3 +352,4 @@ export default function DashboardView({
     </div>
   );
 }
+

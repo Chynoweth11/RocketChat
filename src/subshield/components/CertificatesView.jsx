@@ -127,7 +127,7 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
                 <div>
                   <b>{send.project}</b>
                   <small>
-                    {holder?.name || send.email} · {send.docCount} files
+                    {holder?.name || send.email}  -  {send.docCount} files
                   </small>
                 </div>
                 <span className="ss-pill" style={{ padding: "6px 10px", fontSize: 11 }}>
@@ -142,7 +142,7 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
           <CheckCircle2 size={16} />
           <span>
             Each send reuses saved holder wording and delivery rules, so certificates go
-            out in a few clicks — no digging through old emails.
+            out in a few clicks  -  no digging through old emails.
           </span>
         </div>
       </section>
@@ -160,7 +160,7 @@ function HolderRow({ contractor, onSend, onEdit }) {
         <b>{contractor.name}</b>
         <small>
           {contractor.projects.length} project
-          {contractor.projects.length === 1 ? "" : "s"} · {contractor.email}
+          {contractor.projects.length === 1 ? "" : "s"}  -  {contractor.email}
         </small>
         {contractor.phone ? <small>{contractor.phone}</small> : null}
         {contractor.portalInstructions ? (
@@ -193,3 +193,4 @@ function HolderRow({ contractor, onSend, onEdit }) {
     </div>
   );
 }
+

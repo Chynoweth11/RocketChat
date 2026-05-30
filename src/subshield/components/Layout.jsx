@@ -47,6 +47,8 @@ export function Sidebar({
   savingsCount,
   onReviewSavings,
 }) {
+  const soon = upcoming?.filter((policy) => (policy.daysRemaining ?? 999) <= 30).length || 0;
+
   return (
     <aside className="ss-sidebar">
       <Brand />
@@ -84,21 +86,39 @@ export function Sidebar({
       )}
 
       <div className="ss-side-card">
-        <span className="ss-eyebrow">
-          {potentialSavings > 0 ? "Savings found" : "All optimized"}
-        </span>
+        <span className="ss-eyebrow">{potentialSavings > 0 ? "Savings found" : "Coverage healthy"}</span>
         <strong>
           {potentialSavings > 0 ? `${formatMoney(potentialSavings)}/yr` : "You're set"}
         </strong>
         <p>
           {potentialSavings > 0
             ? "We found lower-cost options on your current coverage. Review and switch in a few clicks."
-            : "No new savings right now. We'll keep watching your renewals and the market."}
+            : "No new savings right now. We'll keep watching renewals and partner rates."}
         </p>
+        <div className="ss-savings-stack">
+          <div>
+            <small>Needs action</small>
+            <strong>{savingsCount}</strong>
+          </div>
+          <div>
+            <small>Renewing soon</small>
+            <strong>{soon}</strong>
+          </div>
+        </div>
         <button className="ss-button" onClick={onReviewSavings}>
           {potentialSavings > 0 ? "Review savings" : "View savings center"}
           <ArrowRight size={15} />
         </button>
+      </div>
+
+      <div className="ss-sidebar-footer">
+        <button type="button" className="ss-sidebar-link">
+          Suggest a feature
+        </button>
+        <button type="button" className="ss-sidebar-link">
+          Chat with support
+        </button>
+        <small>SubShield Insurance Workspace</small>
       </div>
     </aside>
   );
@@ -120,6 +140,12 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
 }
 
 export function Header({ view, onUpload, onActivity, unread }) {
+  const todayLabel = new Date().toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
   const titles = {
     dashboard: "Dashboard",
     policies: "My Insurance",
@@ -148,6 +174,7 @@ export function Header({ view, onUpload, onActivity, unread }) {
         <h1>{titles[view]}</h1>
       </div>
       <div className="ss-top-actions">
+        <small className="ss-top-date">Updated {todayLabel}</small>
         <button
           type="button"
           className="ss-button soft ss-upload-btn"

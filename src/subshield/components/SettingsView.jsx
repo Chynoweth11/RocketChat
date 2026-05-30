@@ -215,7 +215,7 @@ export default function SettingsView({
 
   return (
     <div className="ss-settings-layout">
-      <aside className="ss-card ss-settings-nav-card">
+      <section className="ss-card ss-settings-nav-card">
         <div className="ss-settings-identity">
           <div
             className="ss-avatar"
@@ -229,7 +229,7 @@ export default function SettingsView({
           </p>
         </div>
 
-        <div className="ss-settings-summary">
+        <div className="ss-settings-summary ss-settings-summary-inline">
           <Stat label="Policies" value={summary.policies} />
           <Stat label="Documents" value={summary.docs} />
           <Stat label="Recipients" value={summary.contractors} />
@@ -248,11 +248,11 @@ export default function SettingsView({
           />
         </label>
 
-        <nav className="ss-settings-nav-groups" aria-label="Settings tabs">
+        <nav className="ss-settings-nav-groups ss-settings-nav-inline" aria-label="Settings tabs">
           {filteredGroups.map((group) => (
             <div key={group.label} className="ss-settings-group">
               <p className="ss-settings-group-label">{group.label}</p>
-              <div className="ss-settings-tabs">
+              <div className="ss-settings-tabs ss-settings-tabs-inline">
                 {group.tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -276,7 +276,7 @@ export default function SettingsView({
             </p>
           )}
         </nav>
-      </aside>
+      </section>
 
       <div className="ss-settings-main">
         <section className="ss-card ss-settings-context">

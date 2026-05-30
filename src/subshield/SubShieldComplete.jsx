@@ -295,7 +295,7 @@ export default function SubShieldComplete() {
         activity: prependActivity(
           data.activity,
           `${policy.name} renewed`,
-          `${policy.carrier} — active through ${renewalDate}.`
+          `${policy.carrier}  -  active through ${renewalDate}.`
         ),
       });
       setRenewingId(null);
@@ -431,7 +431,7 @@ export default function SubShieldComplete() {
         ),
       });
       setPolicyId(policy.id);
-      fireToast("Insurance uploaded", `${policy.name} added — checking for savings.`);
+      fireToast("Insurance uploaded", `${policy.name} added  -  checking for savings.`);
     }
     setModal(null);
   }
@@ -471,7 +471,7 @@ export default function SubShieldComplete() {
       };
 
       const quoteDoc = normalizeDocument({
-        name: `${policy?.name || policyLabelFromType(opportunity.policyType)} Quote — ${alternateQuote.carrier}`,
+        name: `${policy?.name || policyLabelFromType(opportunity.policyType)} Quote  -  ${alternateQuote.carrier}`,
         docType: "quote",
         policyId: opportunity.policyId,
         policyType: opportunity.policyType,
@@ -488,7 +488,7 @@ export default function SubShieldComplete() {
           status: "quote_received",
           submittedAt: new Date().toISOString(),
           respondedAt: new Date().toISOString(),
-          notes: `Auto-shopped — ${formatMoney(savings)}/yr below current premium.`,
+          notes: `Auto-shopped  -  ${formatMoney(savings)}/yr below current premium.`,
         },
         company.id
       );
@@ -505,11 +505,11 @@ export default function SubShieldComplete() {
         activity: prependActivity(
           data.activity,
           `Better ${policyLabelFromType(opportunity.policyType)} rate found`,
-          `${alternateQuote.carrier} quoted ${formatMoney(newPremium)}/yr — saving ${formatMoney(savings)}/yr.`
+          `${alternateQuote.carrier} quoted ${formatMoney(newPremium)}/yr  -  saving ${formatMoney(savings)}/yr.`
         ),
       });
       setFindingId(null);
-      fireToast("Better rate found", `Save ${formatMoney(savings)}/yr — review the comparison.`);
+      fireToast("Better rate found", `Save ${formatMoney(savings)}/yr  -  review the comparison.`);
     }, 1100);
   }
 
@@ -529,7 +529,7 @@ export default function SubShieldComplete() {
             deductible: quote.deductible ?? item.deductible,
             coverageLimits: quote.coverageLimits || item.coverageLimits,
             limit: quote.coverageLimits || item.limit,
-            statusNote: `Switched to ${quote.carrier} — saving ${formatMoney(savings)}/yr.`,
+            statusNote: `Switched to ${quote.carrier}  -  saving ${formatMoney(savings)}/yr.`,
             lastQuotedAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }
@@ -805,7 +805,7 @@ export default function SubShieldComplete() {
     };
 
     const certificateDoc = normalizeDocument({
-      name: `COI — ${finalProject} (${selectedContractor.name})`,
+      name: `COI  -  ${finalProject} (${selectedContractor.name})`,
       docType: "certificate",
       carrier: company.name,
       status: "verified",
@@ -831,7 +831,7 @@ export default function SubShieldComplete() {
       activity: prependActivity(
         data.activity,
         `Certificate sent to ${selectedContractor.name}`,
-        `${finalProject} — ${packageDocCount} verified files to ${selectedContractor.email}.`
+        `${finalProject}  -  ${packageDocCount} verified files to ${selectedContractor.email}.`
       ),
     });
 
@@ -866,7 +866,7 @@ export default function SubShieldComplete() {
       activity: prependActivity(
         data.activity,
         `${normalized.name} added`,
-        `${normalized.contact} — ${normalized.email}`
+        `${normalized.contact}  -  ${normalized.email}`
       ),
     });
     setContractorId(normalized.id);
@@ -1304,3 +1304,4 @@ export default function SubShieldComplete() {
     </div>
   );
 }
+
