@@ -39,7 +39,7 @@ function buildActionQueue({
         id: `quote-ready-${opportunity.id}`,
         severity: "success",
         title: `Better ${policyLabelFromType(opportunity.policyType)} rate ready`,
-        detail: `Save ${formatMoney(savingsForOpportunity(opportunity))}/yr by switching — review and approve.`,
+        detail: `Save ${formatMoney(savingsForOpportunity(opportunity))}/yr by switching - review and approve.`,
         actionLabel: "Review & switch",
         target: "savings",
       });
@@ -152,13 +152,14 @@ export default function DashboardView({
       <section className="ss-card ss-span">
         <div className="ss-hero">
           <div>
+            <span className="ss-hero-kicker">Trusted coverage and savings workspace</span>
             <span className="ss-eyebrow">
               {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
             </span>
             <h2>{headline}</h2>
             <p>
               SubShield reviews your business insurance, watches every renewal, and
-              finds lower-cost options from licensed partners — so you stay covered
+              finds lower-cost options from licensed partners - so you stay covered
               and stop overpaying.
             </p>
             <div className="ss-row">
@@ -301,7 +302,7 @@ export default function DashboardView({
               <div>
                 <span>{policy.name}</span>
                 <small style={{ display: "block" }}>
-                  {policy.carrier} · {formatShortDate(policy.renewalDate || policy.expires)}
+                  {policy.carrier} - {formatShortDate(policy.renewalDate || policy.expires)}
                 </small>
               </div>
               <small className={`ss-upcoming-days ${status.className}`}>
@@ -359,7 +360,7 @@ export default function DashboardView({
               <div>
                 <b>{sendItem.project}</b>
                 <small>
-                  {sendItem.email} · {sendItem.docCount} verified files
+                  {sendItem.email} - {sendItem.docCount} verified files
                 </small>
               </div>
               <span className="ss-pill" style={{ padding: "6px 10px", fontSize: 11 }}>

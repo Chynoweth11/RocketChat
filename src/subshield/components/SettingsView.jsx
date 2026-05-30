@@ -10,6 +10,7 @@ import {
   Lock,
   LogOut,
   Mail,
+  Search,
   ShieldCheck,
   Users,
   UserCircle2,
@@ -17,23 +18,119 @@ import {
 import { formatLongDate, formatMoney, makeId } from "../utils.js";
 import { Section } from "./Layout.jsx";
 
-const SETTINGS_TABS = [
-  { id: "profile", label: "User Profile", icon: UserCircle2 },
-  { id: "account", label: "Account Settings", icon: Lock },
-  { id: "company", label: "Company Profile", icon: Building2 },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "email", label: "Email Preferences", icon: Mail },
-  { id: "security", label: "Security & Password", icon: ShieldCheck },
-  { id: "team", label: "Team Members", icon: Users },
-  { id: "roles", label: "Roles & Permissions", icon: KeyRound },
-  { id: "billing", label: "Billing", icon: CreditCard },
-  { id: "documents", label: "Document Preferences", icon: FileText },
-  { id: "templates", label: "Email Templates", icon: Mail },
-  { id: "privacy", label: "Privacy", icon: ShieldCheck },
-  { id: "data", label: "Data & Storage", icon: Database },
-  { id: "support", label: "Support / Help", icon: HelpCircle },
-  { id: "logout", label: "Logout", icon: LogOut },
+const SETTINGS_GROUPS = [
+  {
+    label: "Profile and workspace",
+    tabs: [
+      {
+        id: "profile",
+        label: "User Profile",
+        icon: UserCircle2,
+        description: "Identity, role, and profile details used across the app.",
+      },
+      {
+        id: "account",
+        label: "Account Settings",
+        icon: Lock,
+        description: "Workspace defaults, formatting, and account preferences.",
+      },
+      {
+        id: "company",
+        label: "Company Profile",
+        icon: Building2,
+        description: "Business details used in insurance documents and requests.",
+      },
+    ],
+  },
+  {
+    label: "Communication",
+    tabs: [
+      {
+        id: "notifications",
+        label: "Notifications",
+        icon: Bell,
+        description: "Renewal, compliance, and activity alert controls.",
+      },
+      {
+        id: "email",
+        label: "Email Preferences",
+        icon: Mail,
+        description: "Delivery behavior, signatures, and digest settings.",
+      },
+      {
+        id: "templates",
+        label: "Email Templates",
+        icon: Mail,
+        description: "Default COI and coverage review message templates.",
+      },
+      {
+        id: "support",
+        label: "Support / Help",
+        icon: HelpCircle,
+        description: "Preferred support channels and help resources.",
+      },
+    ],
+  },
+  {
+    label: "Security and access",
+    tabs: [
+      {
+        id: "security",
+        label: "Security & Password",
+        icon: ShieldCheck,
+        description: "MFA, session, and password protection settings.",
+      },
+      {
+        id: "team",
+        label: "Team Members",
+        icon: Users,
+        description: "Invite and manage internal users.",
+      },
+      {
+        id: "roles",
+        label: "Roles & Permissions",
+        icon: KeyRound,
+        description: "Role access for policies, sends, and billing controls.",
+      },
+      {
+        id: "privacy",
+        label: "Privacy",
+        icon: ShieldCheck,
+        description: "Data sharing and analytics consent options.",
+      },
+      {
+        id: "data",
+        label: "Data & Storage",
+        icon: Database,
+        description: "Storage quotas, retention, and backup preferences.",
+      },
+    ],
+  },
+  {
+    label: "Billing and operations",
+    tabs: [
+      {
+        id: "billing",
+        label: "Billing",
+        icon: CreditCard,
+        description: "Plan, payment method, and invoice history.",
+      },
+      {
+        id: "documents",
+        label: "Document Preferences",
+        icon: FileText,
+        description: "Verification requirements and default filing behavior.",
+      },
+      {
+        id: "logout",
+        label: "Logout",
+        icon: LogOut,
+        description: "Sign out or reset sandbox data safely.",
+      },
+    ],
+  },
 ];
+const SETTINGS_TABS = SETTINGS_GROUPS.flatMap((group) => group.tabs);
 
 const PERMISSION_LABELS = {
   vault: "Manage policy vault",
@@ -100,7 +197,21 @@ export default function SettingsView({
   onLogout,
 }) {
   const [activeTab, setActiveTab] = useState("profile");
+  const [tabQuery, setTabQuery] = useState("");
   const summary = useMemo(() => summaryData(data, totalPremium), [data, totalPremium]);
+  const activeTabMeta = SETTINGS_TABS.find((tab) => tab.id === activeTab) || SETTINGS_TABS[0];
+  const filteredGroups = useMemo(() => {
+    const query = tabQuery.trim().toLowerCase();
+    if (!query) return SETTINGS_GROUPS;
+    return SETTINGS_GROUPS.map((group) => ({
+      ...group,
+      tabs: group.tabs.filter(
+        (tab) =>
+          tab.label.toLowerCase().includes(query) ||
+          tab.description.toLowerCase().includes(query)
+      ),
+    })).filter((group) => group.tabs.length > 0);
+  }, [tabQuery]);
 
   return (
     <div className="ss-settings-layout">
@@ -126,25 +237,54 @@ export default function SettingsView({
           <Stat label="Tracked Premium" value={`${formatMoney(summary.totalPremium)}/yr`} />
         </div>
 
-        <nav className="ss-settings-tabs" aria-label="Settings tabs">
-          {SETTINGS_TABS.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                type="button"
-                key={tab.id}
-                className={`ss-settings-tab ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <Icon size={16} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+        <label className="ss-settings-search">
+          <Search size={15} />
+          <input
+            type="search"
+            value={tabQuery}
+            onChange={(event) => setTabQuery(event.target.value)}
+            placeholder="Jump to a setting..."
+            aria-label="Search settings sections"
+          />
+        </label>
+
+        <nav className="ss-settings-nav-groups" aria-label="Settings tabs">
+          {filteredGroups.map((group) => (
+            <div key={group.label} className="ss-settings-group">
+              <p className="ss-settings-group-label">{group.label}</p>
+              <div className="ss-settings-tabs">
+                {group.tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      type="button"
+                      key={tab.id}
+                      className={`ss-settings-tab ${activeTab === tab.id ? "active" : ""}`}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      <Icon size={16} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {filteredGroups.length === 0 && (
+            <p className="ss-muted" style={{ margin: 0 }}>
+              No settings match your search.
+            </p>
+          )}
         </nav>
       </aside>
 
       <div className="ss-settings-main">
+        <section className="ss-card ss-settings-context">
+          <span className="ss-eyebrow">Current section</span>
+          <h2>{activeTabMeta.label}</h2>
+          <p>{activeTabMeta.description}</p>
+        </section>
+
         {activeTab === "profile" && (
           <ProfileSettings
             initial={settings.userProfile}

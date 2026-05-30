@@ -413,29 +413,28 @@ textarea {
   justify-content: space-between;
   gap: 20px;
   min-height: 208px;
-  overflow: hidden;
+  align-items: flex-start;
 }
 
-.ss-hero::after {
-  content: "Trusted insurance workspace";
-  position: absolute;
-  right: 0;
-  top: 0;
+.ss-hero-kicker {
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
-  padding: 7px 11px;
+  padding: 7px 12px;
   border: 1px solid #d8e3fb;
   background: #f0f5ff;
   color: #31569a;
   font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-weight: 700;
+  font-weight: 740;
+  margin-bottom: 9px;
 }
 
 .ss-hero h2 {
   margin: 8px 0;
-  font-size: clamp(38px, 5.8vw, 62px);
-  line-height: 0.96;
+  font-size: clamp(34px, 5.1vw, 54px);
+  line-height: 0.98;
   letter-spacing: -0.06em;
   font-weight: 840;
 }
@@ -1490,6 +1489,10 @@ textarea {
 .ss-settings-nav-card {
   position: sticky;
   top: 20px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .ss-settings-identity {
@@ -1505,6 +1508,53 @@ textarea {
 
 .ss-settings-summary .ss-info {
   background: #ffffff;
+}
+
+.ss-settings-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #ffffff;
+  color: #73819a;
+  padding: 9px 11px;
+  margin: 0 0 12px;
+}
+
+.ss-settings-search input {
+  border: 0;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 560;
+  color: var(--text);
+  background: transparent;
+}
+
+.ss-settings-search input::placeholder {
+  color: #8f9bb0;
+}
+
+.ss-settings-nav-groups {
+  display: grid;
+  gap: 12px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.ss-settings-group {
+  display: grid;
+  gap: 7px;
+}
+
+.ss-settings-group-label {
+  margin: 0;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 760;
+  color: #74839a;
 }
 
 .ss-settings-tabs {
@@ -1543,6 +1593,27 @@ textarea {
 
 .ss-settings-main {
   min-width: 0;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.ss-settings-context {
+  background: linear-gradient(180deg, #f8fbff 0%, #f3f7ff 100%);
+}
+
+.ss-settings-context h2 {
+  margin: 8px 0 6px;
+  font-size: 27px;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.ss-settings-context p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .ss-settings-stack {
@@ -2256,6 +2327,13 @@ textarea {
   .ss-settings-nav-card {
     position: relative;
     top: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ss-settings-nav-groups {
+    overflow: visible;
+    padding-right: 0;
   }
 
   .ss-settings-tabs {
@@ -2267,9 +2345,8 @@ textarea {
     align-items: flex-start;
   }
 
-  .ss-hero::after {
-    position: static;
-    margin-top: 8px;
+  .ss-hero-kicker {
+    margin-bottom: 6px;
   }
 
   .ss-command-tip {
