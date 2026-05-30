@@ -715,7 +715,7 @@ export default function SubShieldComplete() {
   function openSend(contractor) {
     if (!data.contractors.length) {
       setView("contractors");
-      fireToast("No GCs saved", "Add a general contractor before sending a COI package.");
+      fireToast("No recipients saved", "Add a recipient before sending a COI package.");
       return;
     }
 

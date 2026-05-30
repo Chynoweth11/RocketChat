@@ -43,7 +43,7 @@ export function Sidebar({
         <NavButton
           active={view === "dashboard"}
           icon={LayoutDashboard}
-          label="Command"
+          label="Dashboard"
           onClick={() => setView("dashboard")}
         />
         <NavButton
@@ -61,13 +61,13 @@ export function Sidebar({
         <NavButton
           active={view === "contractors"}
           icon={Building2}
-          label="GCs"
+          label="Directory"
           onClick={() => setView("contractors")}
         />
         <NavButton
           active={view === "brokers"}
           icon={BriefcaseBusiness}
-          label="Coverage Network"
+          label="Network"
           onClick={() => setView("brokers")}
         />
         <NavButton
@@ -141,21 +141,21 @@ export function NavButton({ active, icon: Icon, label, onClick }) {
 export function Header({ view, onScan, onActivity, unread }) {
   const titles = {
     dashboard: "Insurance Command Center",
-    vault: "Document Vault",
+    vault: "Policies & Documents",
     savings: "Savings Opportunities",
-    contractors: "GC Directory",
+    contractors: "Recipients Directory",
     brokers: "Coverage & Savings Network",
     activity: "Activity Log",
     settings: "Settings",
   };
   const eyebrow = {
-    dashboard: "Insurance wallet + compliance + savings",
-    vault: "Subcontractor compliance",
-    savings: "Insurance savings assistant",
-    contractors: "Saved certificate holders",
-    brokers: "Insurance review, quote, and savings partners",
-    activity: "What's happened",
-    settings: "Account, team, billing, and security",
+    dashboard: "Your day-to-day insurance workspace",
+    vault: "Track coverage health and document readiness",
+    savings: "Find and action premium savings opportunities",
+    contractors: "Save certificate holders, projects, and send rules",
+    brokers: "Connect with licensed review and quote partners",
+    activity: "A complete operational timeline",
+    settings: "Account, team, billing, and product controls",
   };
 
   return (

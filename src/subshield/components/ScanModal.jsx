@@ -83,15 +83,15 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
 
   return (
     <Modal
-      title="Vault a document"
-      subtitle="The original carrier PDF stays untouched. SubShield reads and stores document metadata."
+      title="Vault a Document"
+      subtitle="Keep the original carrier PDF untouched while SubShield reads and stores policy metadata."
       onClose={onClose}
     >
       <div className="ss-upload">
         <div className="ss-upload-pdf" aria-hidden="true">PDF</div>
-        <h3>Upload carrier-issued certificate</h3>
+        <h3>Step 1: Upload carrier-issued certificate</h3>
         <p>
-          Simulation mode: choose a document type below to preview metadata extraction.
+          Simulation mode: choose a document type below to preview how metadata extraction works.
         </p>
         <button type="button" className="ss-button soft" disabled>
           <Upload size={16} /> Choose file (preview mode)
@@ -99,7 +99,7 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
       </div>
 
       <div className="ss-field-label" style={{ marginBottom: 8 }}>
-        Detected document type
+        Step 2: Confirm detected document type
       </div>
       <div className="ss-chip-group" role="radiogroup" aria-label="Document type">
         {TYPES.map((type) => {
@@ -155,7 +155,7 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
         }
       >
         <Lock size={16} />
-        {alreadyVaulted ? "Update vaulted policy" : "Vault verified policy"}
+        {alreadyVaulted ? "Update existing policy record" : "Vault verified policy"}
       </button>
     </Modal>
   );

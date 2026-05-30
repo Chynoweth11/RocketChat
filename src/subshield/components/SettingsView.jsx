@@ -121,7 +121,7 @@ export default function SettingsView({
         <div className="ss-settings-summary">
           <Stat label="Policies" value={summary.policies} />
           <Stat label="Documents" value={summary.docs} />
-          <Stat label="GCs" value={summary.contractors} />
+          <Stat label="Recipients" value={summary.contractors} />
           <Stat label="Users" value={summary.teamMembers} />
           <Stat label="Tracked Premium" value={`${formatMoney(summary.totalPremium)}/yr`} />
         </div>

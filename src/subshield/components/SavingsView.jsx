@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   BadgeDollarSign,
   BellRing,
@@ -5,14 +6,25 @@ import {
   CircleOff,
   HandCoins,
   History,
+  Search,
   Send,
 } from "lucide-react";
 import {
   formatLongDate,
   formatMoney,
+  policyLabelFromType,
   quoteStatusLabel,
 } from "../utils.js";
 import { Section } from "./Layout.jsx";
+
+const FILTERS = [
+  { id: "all", label: "All opportunities" },
+  { id: "available", label: "Ready to act" },
+  { id: "sent_to_partner", label: "Sent to partner" },
+  { id: "requested", label: "Requested" },
+  { id: "remind_later", label: "Snoozed" },
+  { id: "dismissed", label: "Dismissed" },
+];
 
 export default function SavingsView({
   opportunities,
@@ -25,17 +37,95 @@ export default function SavingsView({
   onDismiss,
   onRemindLater,
 }) {
-  const policyById = new Map((policies || []).map((policy) => [policy.id, policy]));
-  const partnerById = new Map((partners || []).map((partner) => [partner.id, partner]));
-  const brokerById = new Map((brokers || []).map((broker) => [broker.id, broker]));
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const policyById = useMemo(
+    () => new Map((policies || []).map((policy) => [policy.id, policy])),
+    [policies]
+  );
+  const partnerById = useMemo(
+    () => new Map((partners || []).map((partner) => [partner.id, partner])),
+    [partners]
+  );
+  const brokerById = useMemo(
+    () => new Map((brokers || []).map((broker) => [broker.id, broker])),
+    [brokers]
+  );
+
+  const filteredOpportunities = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return opportunities.filter((opportunity) => {
+      const policy = policyById.get(opportunity.policyId);
+      const policyLabel = policy?.name || policyLabelFromType(opportunity.policyType);
+      const matchesQuery =
+        !q ||
+        policyLabel.toLowerCase().includes(q) ||
+        opportunity.currentCarrier.toLowerCase().includes(q);
+      const matchesFilter =
+        statusFilter === "all" || opportunity.status === statusFilter;
+      return matchesQuery && matchesFilter;
+    });
+  }, [opportunities, policyById, query, statusFilter]);
+
+  const availableCount = opportunities.filter((item) => item.status === "available").length;
+  const inProgressCount = opportunities.filter((item) =>
+    ["requested", "sent_to_partner", "quote_received"].includes(item.status)
+  ).length;
+  const estimatedSavings = opportunities
+    .filter((item) => item.status === "available")
+    .reduce((sum, item) => sum + (item.estimatedSavings || 0), 0);
 
   return (
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <Section
-          title="Insurance savings assistant"
-          sub="Track overpayment risk, renewal timing, and quote actions."
+          title="Insurance Savings Assistant"
+          sub="Find overpriced or at-risk policies and route help to licensed partners."
         />
+
+        <div className="ss-command-metrics">
+          <div className="ss-info">
+            <span>Ready opportunities</span>
+            <b>{availableCount}</b>
+          </div>
+          <div className="ss-info">
+            <span>In progress</span>
+            <b>{inProgressCount}</b>
+          </div>
+          <div className="ss-info">
+            <span>Potential annual savings</span>
+            <b>{formatMoney(estimatedSavings)}</b>
+          </div>
+        </div>
+
+        {opportunities.length > 0 && (
+          <>
+            <div className="ss-search">
+              <Search size={16} className="ss-search-icon" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search by policy or carrier..."
+                aria-label="Search opportunities"
+              />
+            </div>
+
+            <div className="ss-chip-group">
+              {FILTERS.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  className={`ss-chip ${statusFilter === item.id ? "active" : ""}`}
+                  onClick={() => setStatusFilter(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         {opportunities.length === 0 && (
           <div className="ss-empty">
@@ -45,7 +135,15 @@ export default function SavingsView({
           </div>
         )}
 
-        {opportunities.map((opportunity) => {
+        {opportunities.length > 0 && filteredOpportunities.length === 0 && (
+          <div className="ss-empty" style={{ minHeight: 170 }}>
+            <Search size={28} />
+            <h2>No matching opportunities</h2>
+            <p>Try a different filter or search term.</p>
+          </div>
+        )}
+
+        {filteredOpportunities.map((opportunity) => {
           const policy = policyById.get(opportunity.policyId);
           return (
             <OpportunityCard
@@ -62,7 +160,10 @@ export default function SavingsView({
       </section>
 
       <section className="ss-card">
-        <Section title="Quote request history" sub="Coverage and insurance review partner submissions" />
+        <Section
+          title="Quote Request History"
+          sub="Coverage and insurance review partner submissions"
+        />
         {quoteRequests.length === 0 && (
           <div className="ss-empty" style={{ minHeight: 180 }}>
             <History size={28} />
@@ -131,7 +232,8 @@ function OpportunityCard({
           <span className="ss-eyebrow">Savings opportunity</span>
           <h2>{policy?.name || opportunity.policyType}</h2>
           <p className="ss-muted">
-            Current carrier: {opportunity.currentCarrier} - Renewal: {formatLongDate(opportunity.renewalDate)}
+            Current carrier: {opportunity.currentCarrier} - Renewal:{" "}
+            {formatLongDate(opportunity.renewalDate)}
           </p>
         </div>
         <div className="ss-savings-amount">

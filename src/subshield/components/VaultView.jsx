@@ -1,8 +1,16 @@
-import { AlertTriangle, Check, Send, Upload, Zap } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, Check, Search, Send, Upload, Zap } from "lucide-react";
 import { policyIcon } from "../icons.js";
 import { formatLongDate, formatMoney, getStatus } from "../utils.js";
 import { Section, Info, Spinner } from "./Layout.jsx";
 import ScoreRing from "./ScoreRing.jsx";
+
+const FILTERS = [
+  { id: "all", label: "All policies" },
+  { id: "danger", label: "Critical" },
+  { id: "warning", label: "Expiring soon" },
+  { id: "success", label: "Active" },
+];
 
 export default function VaultView({
   score,
@@ -19,19 +27,40 @@ export default function VaultView({
   renewingId,
   shoppingId,
 }) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const filteredPolicies = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return policies.filter((policy) => {
+      const status = getStatus(policy.daysRemaining).className;
+      const matchesFilter = filter === "all" || status === filter;
+      const matchesQuery =
+        !q ||
+        policy.name.toLowerCase().includes(q) ||
+        policy.carrier.toLowerCase().includes(q) ||
+        policy.policyNumber.toLowerCase().includes(q);
+      return matchesFilter && matchesQuery;
+    });
+  }, [policies, query, filter]);
+
+  const selectedInFiltered = selectedPolicy
+    ? filteredPolicies.some((policy) => policy.id === selectedPolicy.id)
+    : false;
+  const policyForDetail = selectedInFiltered ? selectedPolicy : filteredPolicies[0] || selectedPolicy;
+
   return (
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <div className="ss-hero">
           <div>
             <span className="ss-eyebrow">
-              {critical.length ? "Action needed" : "Job-site ready"}
+              {critical.length ? "Action needed" : "Coverage ready"}
             </span>
             <h2>{score}% compliant</h2>
             <p>
-              {critical.length
-                ? `${critical.length} polic${critical.length === 1 ? "y is" : "ies are"} critical. Renew before routing new COI packages.`
-                : "All required policies are current and ready for routing."}
+              Keep policy data, renewal timelines, and original documents in one clean
+              workspace so sends and renewals are faster.
             </p>
             <div className="ss-row">
               <button className="ss-button" onClick={onSend}>
@@ -47,29 +76,87 @@ export default function VaultView({
           </div>
           <ScoreRing value={score} />
         </div>
+
+        <div className="ss-command-metrics">
+          <Info label="Policies tracked" value={policies.length} />
+          <Info label="Critical" value={critical.length} />
+          <Info label="Verified files" value={docs} />
+          <Info
+            label="Expiring in 30 days"
+            value={policies.filter((policy) => (policy.daysRemaining ?? 0) <= 30).length}
+          />
+        </div>
       </section>
 
       <section className="ss-card">
-        <Section title="Insurance vault" sub={`${docs} verified files`} />
-        {policies.map((policy) => (
+        <Section
+          title="Policy List"
+          sub={`${filteredPolicies.length} policy${filteredPolicies.length === 1 ? "" : "ies"} shown`}
+        />
+
+        {policies.length > 0 && (
+          <>
+            <div className="ss-search">
+              <Search size={16} className="ss-search-icon" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search by policy, carrier, or policy number..."
+                aria-label="Search policies"
+              />
+            </div>
+
+            <div className="ss-chip-group">
+              {FILTERS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`ss-chip ${filter === item.id ? "active" : ""}`}
+                  onClick={() => setFilter(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {filteredPolicies.length === 0 && (
+          <div className="ss-empty" style={{ minHeight: 170 }}>
+            <Search size={28} />
+            <h2>No matching policies</h2>
+            <p>Try a different search or filter to find the policy you need.</p>
+          </div>
+        )}
+
+        {filteredPolicies.map((policy) => (
           <PolicyRow
             key={policy.id}
             policy={policy}
-            selected={policy.id === selectedPolicy.id}
+            selected={policy.id === policyForDetail.id}
             onClick={() => onSelectPolicy(policy.id)}
           />
         ))}
       </section>
 
       <section className="ss-card">
-        <PolicyDetail
-          policy={selectedPolicy}
-          onRenew={() => onRenew(selectedPolicy.id)}
-          onShop={() => onShop(selectedPolicy.id)}
-          onSend={onSend}
-          isRenewing={renewingId === selectedPolicy.id}
-          isShopping={shoppingId === selectedPolicy.id}
-        />
+        {policyForDetail ? (
+          <PolicyDetail
+            policy={policyForDetail}
+            onRenew={() => onRenew(policyForDetail.id)}
+            onShop={() => onShop(policyForDetail.id)}
+            onSend={onSend}
+            isRenewing={renewingId === policyForDetail.id}
+            isShopping={shoppingId === policyForDetail.id}
+          />
+        ) : (
+          <div className="ss-empty" style={{ minHeight: 220 }}>
+            <AlertTriangle size={28} />
+            <h2>No policy selected</h2>
+            <p>Add or select a policy to view full coverage details.</p>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -122,7 +209,10 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
 
       <div className="ss-bar-top">
         <span>{policy.daysRemaining} days left</span>
-        <span>{formatMoney(policy.premiumAmount ?? policy.premium)}/{policy.premiumFrequency || "annual"}</span>
+        <span>
+          {formatMoney(policy.premiumAmount ?? policy.premium)}/
+          {policy.premiumFrequency || "annual"}
+        </span>
       </div>
       <div className="ss-bar">
         <span className={status.className} style={{ width }} />
@@ -140,10 +230,7 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
         <span>{policy.statusNote}</span>
       </div>
 
-      <Section
-        title="Verified documents"
-        sub={`${policy.documents.length} files`}
-      />
+      <Section title="Verified Documents" sub={`${policy.documents.length} file${policy.documents.length === 1 ? "" : "s"}`} />
       {policy.documents.map((doc) => (
         <DocumentRow key={doc} name={doc} />
       ))}

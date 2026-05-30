@@ -28,8 +28,8 @@ export default function ContractorsView({
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <Section
-          title="Saved general contractors"
-          sub="Certificate holders, contacts, requirements, and send history"
+          title="Recipients Directory"
+          sub="Manage certificate holders, project contacts, and delivery rules in one place."
           extra={
             <button
               type="button"
@@ -37,10 +37,24 @@ export default function ContractorsView({
               onClick={onAdd}
               style={{ minHeight: 40, padding: "10px 14px" }}
             >
-              <Plus size={15} /> Add GC
+              <Plus size={15} /> Add recipient
             </button>
           }
         />
+
+        {contractors.length > 0 && (
+          <div className="ss-command-metrics">
+            <Stat label="Saved companies" value={contractors.length} />
+            <Stat
+              label="Projects tracked"
+              value={contractors.reduce((sum, gc) => sum + gc.projects.length, 0)}
+            />
+            <Stat
+              label="Past sends"
+              value={contractors.reduce((sum, gc) => sum + (gc.pastSends?.length || 0), 0)}
+            />
+          </div>
+        )}
 
         {contractors.length > 0 && (
           <div className="ss-search">
@@ -58,13 +72,13 @@ export default function ContractorsView({
         {contractors.length === 0 && (
           <div className="ss-empty">
             <Building2 size={32} />
-            <h2>No GCs saved yet</h2>
+            <h2>No recipients saved yet</h2>
             <p>
-              Add a general contractor to save certificate holder details,
-              delivery rules, and project history for fast COI sends.
+              Add your first recipient to save certificate holder details,
+              delivery instructions, and project history for fast COI sends.
             </p>
             <button className="ss-button" onClick={onAdd}>
-              <Plus size={15} /> Add your first GC
+              <Plus size={15} /> Add first recipient
             </button>
           </div>
         )}
@@ -73,7 +87,7 @@ export default function ContractorsView({
           <div className="ss-empty">
             <Search size={28} />
             <h2>No matches</h2>
-            <p>No GCs match "{query}". Try a different name, email, or project.</p>
+            <p>No recipients match "{query}". Try a different name, email, or project.</p>
           </div>
         )}
 
@@ -88,22 +102,14 @@ export default function ContractorsView({
       </section>
 
       <section className="ss-card">
-        <Section title="Why this saves time" sub="One source of truth" />
+        <Section title="How This Helps" sub="A cleaner COI workflow" />
         <p className="ss-muted">
-          Every send pulls from the same vault and certificate-holder data.
-          You do not need to retype legal names, copy old emails, or hunt
-          down portal notes before each project send.
+          Each send uses stored legal holder wording, contact details, and portal
+          instructions. That removes repetitive typing and reduces compliance mistakes.
         </p>
-        <div className="ss-info-grid" style={{ marginTop: 18 }}>
-          <Stat label="Saved GCs" value={contractors.length} />
-          <Stat
-            label="Total projects"
-            value={contractors.reduce((sum, gc) => sum + gc.projects.length, 0)}
-          />
-          <Stat
-            label="Past sends"
-            value={contractors.reduce((sum, gc) => sum + (gc.pastSends?.length || 0), 0)}
-          />
+        <div className="ss-note success" style={{ marginTop: 14 }}>
+          Keep this page updated so your team can route COIs in a few clicks without
+          searching old emails.
         </div>
       </section>
     </div>
@@ -147,7 +153,7 @@ function ContractorRow({ contractor, onSend, onEdit }) {
           style={{ minHeight: 36, padding: "8px 14px" }}
           aria-label={`Send COI to ${contractor.name}`}
         >
-          <Send size={14} /> Send
+          <Send size={14} /> Send COI
         </button>
       </div>
     </div>

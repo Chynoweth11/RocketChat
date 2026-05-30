@@ -2,19 +2,59 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeDollarSign,
-  Building2,
   CalendarClock,
   CheckCircle2,
+  Clock3,
   FileCheck2,
   Send,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import {
   formatMoney,
   formatShortDate,
   getStatus,
+  policyLabelFromType,
 } from "../utils.js";
 import { Section, Info } from "./Layout.jsx";
+
+function buildActionQueue({ reminders, opportunities, openQuoteRequests }) {
+  const renewalActions = reminders.slice(0, 3).map((reminder) => ({
+    id: `renew-${reminder.id}`,
+    type: "renewal",
+    title: `${reminder.policyName} renewal`,
+    detail: reminder.message,
+    severity: reminder.daysRemaining <= 10 ? "danger" : "warning",
+    actionLabel: "Review policy",
+    target: "vault",
+  }));
+
+  const savingsActions = opportunities
+    .filter((item) => item.status === "available")
+    .slice(0, 2)
+    .map((opportunity) => ({
+      id: `save-${opportunity.id}`,
+      type: "savings",
+      title: `${policyLabelFromType(opportunity.policyType)} savings opportunity`,
+      detail: `Potential ${formatMoney(opportunity.estimatedSavings)}/yr in savings before ${formatShortDate(opportunity.renewalDate)}.`,
+      severity: "success",
+      actionLabel: "Compare rates",
+      target: "quote",
+      opportunity,
+    }));
+
+  const quoteFollowUps = openQuoteRequests.slice(0, 2).map((request) => ({
+    id: `quote-${request.id}`,
+    type: "quote",
+    title: "Quote follow-up pending",
+    detail: `Quote request for ${policyLabelFromType(request.policyType || "liability")} is awaiting response.`,
+    severity: "warning",
+    actionLabel: "Track requests",
+    target: "savings",
+  }));
+
+  return [...renewalActions, ...savingsActions, ...quoteFollowUps].slice(0, 6);
+}
 
 export default function CommandCenterView({
   score,
@@ -35,22 +75,30 @@ export default function CommandCenterView({
 }) {
   const criticalCount = policies.filter((policy) => (policy.daysRemaining ?? 0) <= 10).length;
   const latestSends = [...coiSends].slice(0, 3);
-  const topOpportunities = opportunities.filter((item) => item.status === "available").slice(0, 3);
+  const availableOpportunities = opportunities.filter((item) => item.status === "available");
+  const actionQueue = buildActionQueue({
+    reminders,
+    opportunities,
+    openQuoteRequests,
+  });
 
   return (
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <div className="ss-hero">
           <div>
-            <span className="ss-eyebrow">Insurance command center</span>
+            <span className="ss-eyebrow">Today in SubShield</span>
             <h2>{score}% compliant</h2>
             <p>
-              Track renewals, route COIs, and request better rates before policies
-              expire or premiums climb.
+              Everything you need for compliance, COI delivery, and insurance savings
+              is organized below. Start with the priority queue, then move to sends.
             </p>
             <div className="ss-row">
               <button className="ss-button" onClick={onOpenSend}>
                 <Send size={16} /> Send COI package
+              </button>
+              <button className="ss-button soft" onClick={onOpenVault}>
+                <Shield size={16} /> Review policies
               </button>
               <button className="ss-button soft" onClick={onOpenSavings}>
                 <BadgeDollarSign size={16} /> Review savings
@@ -59,7 +107,7 @@ export default function CommandCenterView({
           </div>
 
           <div className="ss-command-tip">
-            <b>Recommended next action</b>
+            <b>Recommended next step</b>
             <p>{recommendedAction.detail}</p>
             <button type="button" className="ss-copy-btn" onClick={onOpenVault}>
               {recommendedAction.label} <ArrowRight size={13} />
@@ -71,78 +119,98 @@ export default function CommandCenterView({
           <Info label="Tracked premium" value={`${formatMoney(totalPremium)}/yr`} />
           <Info label="Policies" value={policies.length} />
           <Info label="Verified files" value={docs} />
-          <Info label="Saved GCs" value={contractors.length} />
+          <Info label="Saved recipients" value={contractors.length} />
           <Info label="Critical policies" value={criticalCount} />
           <Info label="Open quote requests" value={openQuoteRequests.length} />
         </div>
       </section>
 
-      <section className="ss-card">
-        <Section title="Renewal radar" sub="Never miss a policy renewal" />
-        {reminders.length === 0 && (
+      <section className="ss-card ss-span">
+        <Section
+          title="Priority Queue"
+          sub="Clear next actions so you never wonder what to do next."
+          extra={
+            <span className="ss-section-extra">
+              {actionQueue.length} active task{actionQueue.length === 1 ? "" : "s"}
+            </span>
+          }
+        />
+
+        {actionQueue.length === 0 && (
           <div className="ss-note success">
             <CheckCircle2 size={16} />
-            <span>No reminder alerts right now. Coverage timelines look healthy.</span>
+            <span>No urgent actions right now. Your account is in a healthy state.</span>
           </div>
         )}
 
-        {reminders.slice(0, 5).map((reminder) => {
-          const status = getStatus(reminder.daysRemaining);
-          return (
-            <div className="ss-insight" key={reminder.id}>
-              <div>
-                <b>{reminder.policyName}</b>
-                <small>{reminder.message}</small>
-              </div>
-              <em className={`ss-status ${status.className}`}>
-                {reminder.daysRemaining}d
-              </em>
+        {actionQueue.map((item) => (
+          <div className="ss-task-row" key={item.id}>
+            <span className={`ss-task-dot ${item.severity}`} aria-hidden="true" />
+            <div className="ss-task-copy">
+              <b>{item.title}</b>
+              <small>{item.detail}</small>
             </div>
-          );
-        })}
-
-        <Section title="Upcoming renewals" />
-        {upcoming.map((policy) => (
-          <div className="ss-inline-row" key={policy.id}>
-            <span>{policy.name}</span>
-            <small>{formatShortDate(policy.renewalDate || policy.expires)}</small>
+            <button
+              type="button"
+              className="ss-button soft ss-button-sm"
+              onClick={() => {
+                if (item.target === "vault") onOpenVault();
+                else if (item.target === "savings") onOpenSavings();
+                else if (item.target === "quote" && item.opportunity) {
+                  onOpenQuote(item.opportunity, "partner");
+                }
+              }}
+            >
+              {item.actionLabel}
+            </button>
           </div>
         ))}
       </section>
 
       <section className="ss-card">
-        <Section
-          title="Savings opportunities"
-          sub="Rocket Money style insurance savings, built for subcontractors"
-          extra={
-            <button type="button" className="ss-copy-btn" onClick={onOpenSavings}>
-              View all <ArrowRight size={13} />
-            </button>
-          }
-        />
-
-        {topOpportunities.length === 0 && (
+        <Section title="Renewal Timeline" sub="What is coming up next" />
+        {upcoming.length === 0 && (
           <div className="ss-note success">
-            <Shield size={16} />
-            <span>No active opportunities right now. Policies are in monitoring mode.</span>
+            <CheckCircle2 size={16} />
+            <span>No upcoming renewals in your current window.</span>
           </div>
         )}
+        {upcoming.map((policy) => {
+          const status = getStatus(policy.daysRemaining);
+          return (
+            <div className="ss-inline-row" key={policy.id}>
+              <span>{policy.name}</span>
+              <small className={`ss-upcoming-days ${status.className}`}>
+                {policy.daysRemaining}d
+              </small>
+            </div>
+          );
+        })}
+      </section>
 
-        {topOpportunities.map((opportunity) => (
+      <section className="ss-card">
+        <Section title="Savings Snapshot" sub="High-impact opportunities first" />
+        {availableOpportunities.length === 0 && (
+          <div className="ss-note success">
+            <Sparkles size={16} />
+            <span>No active savings opportunities right now.</span>
+          </div>
+        )}
+        {availableOpportunities.slice(0, 3).map((opportunity) => (
           <div className="ss-insight" key={opportunity.id}>
             <div>
-              <b>{opportunity.currentCarrier}</b>
+              <b>{policyLabelFromType(opportunity.policyType)}</b>
               <small>
-                {formatMoney(opportunity.currentPremium)}/yr - renewal {formatShortDate(opportunity.renewalDate)}
+                Current premium {formatMoney(opportunity.currentPremium)}/yr
                 <br />
-                Estimated savings {formatMoney(opportunity.estimatedSavings)}/yr
+                Potential savings {formatMoney(opportunity.estimatedSavings)}/yr
               </small>
             </div>
             <button
               type="button"
               className="ss-mini-btn"
               onClick={() => onOpenQuote(opportunity, "partner")}
-              title="Request quote"
+              title="Compare rates"
             >
               <BadgeDollarSign size={14} />
             </button>
@@ -151,12 +219,12 @@ export default function CommandCenterView({
       </section>
 
       <section className="ss-card ss-span">
-        <Section title="Recent COI sends" sub="Package routing history" />
+        <Section title="Recent COI Sends" sub="Latest package deliveries and proof of routing" />
         {latestSends.length === 0 && (
           <div className="ss-empty" style={{ minHeight: 140 }}>
             <FileCheck2 size={30} />
             <h2>No packages sent yet</h2>
-            <p>Send a package to create your compliance send history.</p>
+            <p>Send your first COI package to start your verified delivery history.</p>
           </div>
         )}
         {latestSends.map((sendItem) => (
@@ -179,8 +247,20 @@ export default function CommandCenterView({
           <div className="ss-note danger">
             <AlertTriangle size={16} />
             <span>
-              {criticalCount} critical polic{criticalCount === 1 ? "y requires" : "ies require"} action before sending new packages to
-              {contractors.length ? ` ${contractors[0].name} and other GCs.` : " clients."}
+              {criticalCount} critical polic{criticalCount === 1 ? "y requires" : "ies require"} action before
+              routing new packages.
+            </span>
+          </div>
+        </section>
+      )}
+
+      {openQuoteRequests.length > 0 && (
+        <section className="ss-card ss-span">
+          <div className="ss-note">
+            <Clock3 size={16} />
+            <span>
+              You have {openQuoteRequests.length} open quote request
+              {openQuoteRequests.length === 1 ? "" : "s"} in progress.
             </span>
           </div>
         </section>
