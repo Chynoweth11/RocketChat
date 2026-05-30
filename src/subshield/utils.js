@@ -3,7 +3,7 @@
  * Pure functions only - no React, no DOM beyond localStorage / clipboard.
  */
 
-export const STORAGE_KEY = "subshield.complete.v3";
+export const STORAGE_KEY = "subshield.complete.v4";
 
 export const RENEWAL_REMINDER_DAYS = [90, 60, 30, 10, 0];
 
