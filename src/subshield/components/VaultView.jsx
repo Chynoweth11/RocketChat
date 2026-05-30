@@ -132,7 +132,7 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
         <Info label="Limit" value={policy.coverageLimits || policy.limit} />
         <Info label="Renews" value={formatLongDate(policy.renewalDate || policy.expires)} />
         <Info label="Documents" value={`${policy.documents.length} verified`} />
-        <Info label="Broker" value={policy.brokerId ? "Assigned" : "Not assigned"} />
+        <Info label="Review Partner" value={policy.brokerId ? "Assigned" : "Not assigned"} />
       </div>
 
       <div className={`ss-note ${isCritical ? "danger" : ""}`}>

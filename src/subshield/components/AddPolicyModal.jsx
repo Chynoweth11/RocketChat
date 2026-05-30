@@ -143,9 +143,9 @@ export default function AddPolicyModal({ brokers = [], onClose, onSave }) {
           type="date"
           error={errors.renewalDate}
         />
-        <FormField label="Broker">
+        <FormField label="Insurance review partner">
           <select value={form.brokerId} onChange={change("brokerId")}>
-            <option value="">No broker selected</option>
+            <option value="">No partner selected</option>
             {availableBrokers.map((broker) => (
               <option key={broker.id} value={broker.id}>
                 {broker.name} - {broker.company}

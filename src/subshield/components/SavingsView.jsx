@@ -62,12 +62,12 @@ export default function SavingsView({
       </section>
 
       <section className="ss-card">
-        <Section title="Quote request history" sub="Partner and broker submissions" />
+        <Section title="Quote request history" sub="Coverage and insurance review partner submissions" />
         {quoteRequests.length === 0 && (
           <div className="ss-empty" style={{ minHeight: 180 }}>
             <History size={28} />
             <h2>No quote requests yet</h2>
-            <p>Request a quote to start tracking carrier and broker responses.</p>
+            <p>Request a quote to start tracking partner and advisor responses.</p>
           </div>
         )}
         {quoteRequests.map((request) => {
@@ -80,7 +80,7 @@ export default function SavingsView({
                 <small>
                   {request.routeType === "partner"
                     ? `Partner: ${partner?.name || "Unassigned"}`
-                    : `Broker: ${broker?.name || "Unassigned"}`}
+                    : `Advisor: ${broker?.name || "Unassigned"}`}
                   <br />
                   Submitted {formatLongDate(request.submittedAt)}
                 </small>
@@ -92,7 +92,7 @@ export default function SavingsView({
       </section>
 
       <section className="ss-card">
-        <Section title="Marketplace coverage" sub="Licensed partner footprint" />
+        <Section title="Coverage & Savings Network" sub="Licensed partner footprint and option mix" />
         {partners.filter((partner) => partner.active).map((partner) => (
           <div className="ss-insight" key={partner.id}>
             <div>
@@ -166,7 +166,7 @@ function OpportunityCard({
           onClick={onSendToBroker}
           disabled={!isAvailable && !isSnoozed}
         >
-          <BriefcaseBusiness size={16} /> Send to broker
+          <BriefcaseBusiness size={16} /> Send to advisor
         </button>
         <button
           type="button"

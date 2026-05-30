@@ -418,7 +418,7 @@ export default function SubShieldComplete() {
     const routeLabel =
       request.routeType === "partner"
         ? data.partners.find((item) => item.id === request.partnerId)?.name || "partner"
-        : data.brokers.find((item) => item.id === request.brokerId)?.name || "broker";
+        : data.brokers.find((item) => item.id === request.brokerId)?.name || "advisor";
     const nextOpportunities = updateOpportunityStatus(
       opportunities,
       (opportunity) =>
@@ -625,7 +625,7 @@ export default function SubShieldComplete() {
       (item) => item.email.trim().toLowerCase() === email
     );
     if (exists) {
-      fireToast("Duplicate broker email", "A broker with that email already exists.");
+      fireToast("Duplicate partner email", "A review partner with that email already exists.");
       return;
     }
 
@@ -635,12 +635,12 @@ export default function SubShieldComplete() {
       brokers: [normalized, ...(data.brokers || [])],
       activity: prependActivity(
         data.activity,
-        "Broker contact added",
-        `${normalized.name} (${normalized.company}) added to broker workflow.`
+        "Insurance review partner added",
+        `${normalized.name} (${normalized.company}) added to the coverage and savings network.`
       ),
     });
     setModal(null);
-    fireToast("Broker added", `${normalized.name} is ready for quote requests.`);
+    fireToast("Partner added", `${normalized.name} is ready for coverage review requests.`);
   }
 
   function saveSettingsSection(sectionKey, value, meta = {}) {

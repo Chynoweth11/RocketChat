@@ -19,20 +19,38 @@ export default function BrokersView({
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <Section
-          title="Broker workflow"
-          sub="Store broker contacts and request renewals, endorsements, and quote reviews."
+          title="Coverage & Savings Network"
+          sub="Connect your insurance tracker to licensed advisors, brokers, carriers, and quote partners to review renewals, close coverage gaps, and lower premiums."
           extra={
             <button type="button" className="ss-button soft" onClick={onAddBroker}>
-              <Plus size={15} /> Add broker
+              <Plus size={15} /> Add review partner
             </button>
           }
+        />
+
+        <div className="ss-info-grid">
+          <div className="ss-info">
+            <span>Use this network for</span>
+            <b>Renewal review + quote comparison</b>
+          </div>
+          <div className="ss-info">
+            <span>Best fit for</span>
+            <b>Overpriced, expiring, or missing coverage</b>
+          </div>
+        </div>
+      </section>
+
+      <section className="ss-card ss-span">
+        <Section
+          title="Insurance Review Partners"
+          sub="Your trusted contacts for COI updates, endorsements, renewal reviews, and policy guidance."
         />
 
         {brokers.length === 0 && (
           <div className="ss-empty">
             <BriefcaseBusiness size={28} />
-            <h2>No broker contacts yet</h2>
-            <p>Add a broker contact to request renewal reviews and COI updates faster.</p>
+            <h2>No insurance review partners yet</h2>
+            <p>Add a trusted advisor so renewal and coverage review requests are one click.</p>
           </div>
         )}
 
@@ -65,14 +83,17 @@ export default function BrokersView({
               style={{ minHeight: 36, padding: "8px 14px" }}
               onClick={() => onRequestBrokerQuote(broker)}
             >
-              <Send size={14} /> Request review
+              <Send size={14} /> Request coverage review
             </button>
           </div>
         ))}
       </section>
 
       <section className="ss-card ss-span">
-        <Section title="Partner marketplace" sub="Route quote requests to licensed partners" />
+        <Section
+          title="Quote Partners Marketplace"
+          sub="Request competitive pricing and policy options from licensed coverage and savings partners."
+        />
         {partners.filter((item) => item.active).map((partner) => (
           <div className="ss-broker-card" key={partner.id}>
             <div className="ss-gc-avatar" aria-hidden="true">
@@ -92,7 +113,7 @@ export default function BrokersView({
               style={{ minHeight: 36, padding: "8px 14px" }}
               onClick={() => onRequestPartnerQuote(partner)}
             >
-              <Send size={14} /> Request quote
+              <Send size={14} /> Request savings quote
             </button>
           </div>
         ))}

@@ -67,7 +67,7 @@ export function Sidebar({
         <NavButton
           active={view === "brokers"}
           icon={BriefcaseBusiness}
-          label="Brokers"
+          label="Coverage Network"
           onClick={() => setView("brokers")}
         />
         <NavButton
@@ -144,7 +144,7 @@ export function Header({ view, onScan, onActivity, unread }) {
     vault: "Document Vault",
     savings: "Savings Opportunities",
     contractors: "GC Directory",
-    brokers: "Brokers & Partners",
+    brokers: "Coverage & Savings Network",
     activity: "Activity Log",
     settings: "Settings",
   };
@@ -153,7 +153,7 @@ export function Header({ view, onScan, onActivity, unread }) {
     vault: "Subcontractor compliance",
     savings: "Insurance savings assistant",
     contractors: "Saved certificate holders",
-    brokers: "Licensed partner routing",
+    brokers: "Insurance review, quote, and savings partners",
     activity: "What's happened",
     settings: "Account, team, billing, and security",
   };
