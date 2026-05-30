@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Building2,
   FileText,
   HardHat,
   Lock,
@@ -46,7 +47,19 @@ const TYPES = [
     daysRemaining: 280,
     premiumAmount: 2460,
     coverageLimits: "$1M combined single limit",
-    documents: ["Auto certificate"],
+    documents: ["Auto declarations page"],
+  },
+  {
+    id: "property",
+    label: "Property",
+    icon: Building2,
+    name: "Commercial Property",
+    carrier: "Travelers",
+    policyNumber: "CP-33910477",
+    daysRemaining: 200,
+    premiumAmount: 2150,
+    coverageLimits: "$750k building / $250k contents",
+    documents: ["Property declarations page"],
   },
   {
     id: "workers",
@@ -83,15 +96,15 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
 
   return (
     <Modal
-      title="Vault a document"
-      subtitle="The original carrier PDF stays untouched. SubShield reads and stores document metadata."
+      title="Upload your insurance"
+      subtitle="Upload a carrier document and SubShield reads the details, stores the file, and starts looking for savings."
       onClose={onClose}
     >
       <div className="ss-upload">
         <div className="ss-upload-pdf" aria-hidden="true">PDF</div>
-        <h3>Upload carrier-issued certificate</h3>
+        <h3>Step 1: Upload carrier-issued document</h3>
         <p>
-          Simulation mode: choose a document type below to preview metadata extraction.
+          Simulation mode: choose a document type below to preview how SubShield reads and files your paperwork.
         </p>
         <button type="button" className="ss-button soft" disabled>
           <Upload size={16} /> Choose file (preview mode)
@@ -99,7 +112,7 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
       </div>
 
       <div className="ss-field-label" style={{ marginBottom: 8 }}>
-        Detected document type
+        Step 2: Confirm detected document type
       </div>
       <div className="ss-chip-group" role="radiogroup" aria-label="Document type">
         {TYPES.map((type) => {
@@ -132,8 +145,11 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
 
       {alreadyVaulted && (
         <div className="ss-note">
-          A {selected.label.toLowerCase()} policy is already vaulted.
-          Vaulting will update the existing policy with this newer document.
+          <Lock size={16} />
+          <span>
+            A {selected.label.toLowerCase()} policy is already on file. Uploading will
+            refresh the existing policy with this newer document.
+          </span>
         </div>
       )}
 
@@ -155,7 +171,7 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
         }
       >
         <Lock size={16} />
-        {alreadyVaulted ? "Update vaulted policy" : "Vault verified policy"}
+        {alreadyVaulted ? "Update policy on file" : "Save policy & document"}
       </button>
     </Modal>
   );

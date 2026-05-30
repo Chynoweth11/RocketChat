@@ -46,7 +46,7 @@ export default function QuoteRequestModal({
     const next = {};
     if (!policyId) next.policyId = "Select a policy";
     if (routeType === "partner" && !partnerId) next.partnerId = "Select a partner";
-    if (routeType === "broker" && !brokerId) next.brokerId = "Select a broker";
+    if (routeType === "broker" && !brokerId) next.brokerId = "Select an advisor";
     if (!contactEmail.trim()) next.contactEmail = "Contact email required";
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -81,8 +81,8 @@ export default function QuoteRequestModal({
 
   return (
     <Modal
-      title="Request quote or policy review"
-      subtitle="SubShield routes your coverage details to licensed partners and brokers. SubShield does not issue insurance directly."
+      title="Request coverage review or savings quote"
+      subtitle="SubShield routes your insurance details to licensed insurance review partners, carriers, and brokers. SubShield does not issue insurance directly."
       onClose={onClose}
     >
       <div className="ss-field-grid">
@@ -99,14 +99,14 @@ export default function QuoteRequestModal({
 
         <FormField label="Routing">
           <select value={routeType} onChange={(event) => setRouteType(event.target.value)}>
-            <option value="partner">Partner marketplace</option>
-            <option value="broker">My broker</option>
+            <option value="partner">Coverage & savings network</option>
+            <option value="broker">My insurance advisor</option>
           </select>
         </FormField>
       </div>
 
       {routeType === "partner" ? (
-        <FormField label="Insurance partner">
+        <FormField label="Quote partner">
           <select value={partnerId} onChange={(event) => setPartnerId(event.target.value)}>
             <option value="">Select partner</option>
             {activePartners.map((partner) => (
@@ -118,9 +118,9 @@ export default function QuoteRequestModal({
           {errors.partnerId && <span className="ss-field-error">{errors.partnerId}</span>}
         </FormField>
       ) : (
-        <FormField label="Broker contact">
+        <FormField label="Insurance review partner">
           <select value={brokerId} onChange={(event) => setBrokerId(event.target.value)}>
-            <option value="">Select broker</option>
+            <option value="">Select advisor</option>
             {brokers.map((broker) => (
               <option key={broker.id} value={broker.id}>
                 {broker.name} - {broker.company}
@@ -186,11 +186,11 @@ export default function QuoteRequestModal({
         </FormField>
       </div>
 
-      <FormField label="Notes for partner or broker">
+      <FormField label="Notes for the review partner">
         <textarea
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
-          placeholder="Please review Additional Insured and Waiver of Subrogation requirements before renewal."
+          placeholder="Please review this renewal for coverage gaps, quote options, and premium savings opportunities."
         />
       </FormField>
 

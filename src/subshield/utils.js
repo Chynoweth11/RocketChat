@@ -3,7 +3,7 @@
  * Pure functions only - no React, no DOM beyond localStorage / clipboard.
  */
 
-export const STORAGE_KEY = "subshield.complete.v3";
+export const STORAGE_KEY = "subshield.complete.v5";
 
 export const RENEWAL_REMINDER_DAYS = [90, 60, 30, 10, 0];
 
@@ -12,12 +12,15 @@ const POLICY_TYPE_NAMES = {
   workers: "Workers' Compensation",
   auto: "Commercial Auto",
   umbrella: "Umbrella / Excess Liability",
-  license: "Trade License",
-  pollution: "Pollution Liability",
-  professional: "Professional Liability",
+  property: "Commercial Property",
+  cyber: "Cyber Liability",
+  equipment: "Equipment / Inland Marine",
   tools: "Tools & Equipment",
   builders_risk: "Builder's Risk",
-  bonding: "Bonding",
+  pollution: "Pollution Liability",
+  professional: "Professional Liability",
+  bonding: "Surety Bonding",
+  license: "Trade License",
 };
 
 const DEFAULT_POLICY_LIMITS = {
@@ -25,12 +28,55 @@ const DEFAULT_POLICY_LIMITS = {
   workers: "Statutory / $1M employer liability",
   auto: "$1M combined single limit",
   umbrella: "$2M excess liability",
-  license: "Trade contractor license",
-  pollution: "$1M pollution liability",
-  professional: "$1M professional liability",
+  property: "$750k building / $250k contents",
+  cyber: "$1M cyber liability",
+  equipment: "$150k scheduled equipment",
   tools: "$150k scheduled tools",
   builders_risk: "$500k project limit",
+  pollution: "$1M pollution liability",
+  professional: "$1M professional liability",
   bonding: "$500k bond capacity",
+  license: "Trade contractor license",
+};
+
+/**
+ * Core coverages most commercial businesses should carry. Used to surface
+ * "missing coverage" gaps on the dashboard and savings views.
+ */
+const RECOMMENDED_COVERAGE = [
+  {
+    type: "liability",
+    reason: "Baseline protection nearly every client and contract requires.",
+  },
+  {
+    type: "workers",
+    reason: "Required in most states once you have employees.",
+  },
+  {
+    type: "auto",
+    reason: "Covers vehicles used for business — often required on job sites.",
+  },
+  {
+    type: "property",
+    reason: "Protects your building, tools, and contents from loss.",
+  },
+  {
+    type: "umbrella",
+    reason: "Extends your limits to meet larger contract requirements.",
+  },
+  {
+    type: "cyber",
+    reason: "Covers breaches, wire fraud, and downtime — increasingly required.",
+  },
+];
+
+const DOCUMENT_TYPE_LABELS = {
+  declaration: "Declarations Page",
+  certificate: "Certificate (COI)",
+  endorsement: "Endorsement",
+  quote: "Renewal Quote",
+  invoice: "Invoice",
+  policy: "Policy Document",
 };
 
 const DAY_BUCKETS = ["Today", "Yesterday"];
@@ -48,9 +94,14 @@ const MONTHS_SHORT = [
 const QUOTE_STATUS_LABELS = {
   draft: "Draft",
   submitted: "Submitted",
+  requested: "Requested",
   sent_to_partner: "Sent to partner",
-  quote_received: "Quote received",
-  accepted: "Accepted",
+  quote_received: "Quote ready",
+  available: "Savings available",
+  monitoring: "Monitoring",
+  accepted: "Switched & saving",
+  remind_later: "Snoozed",
+  dismissed: "Dismissed",
   declined: "Declined",
   closed: "Closed",
 };
@@ -129,6 +180,11 @@ export function normalizePolicy(rawPolicy, companyId = "subshield-tile-co") {
   const updatedAt = rawPolicy.updatedAt || createdAt;
   const coverageLimits = rawPolicy.coverageLimits || rawPolicy.limit || DEFAULT_POLICY_LIMITS[policyType] || "";
   const documents = normalizePolicyDocuments(rawPolicy.documents);
+  const rawDeductible = rawPolicy.deductible;
+  const deductible =
+    rawDeductible === null || rawDeductible === undefined || rawDeductible === ""
+      ? null
+      : toNumber(rawDeductible, 0);
 
   return {
     ...rawPolicy,
@@ -142,6 +198,7 @@ export function normalizePolicy(rawPolicy, companyId = "subshield-tile-co") {
     premiumAmount,
     premium: premiumAmount,
     premiumFrequency,
+    deductible,
     effectiveDate: rawPolicy.effectiveDate || dateFromToday(daysRemaining - 365),
     expirationDate,
     renewalDate,
@@ -173,6 +230,13 @@ export function normalizePolicies(policies = [], companyId) {
 
 export function formatMoney(value) {
   return `$${Number(value || 0).toLocaleString()}`;
+}
+
+export function formatDeductible(value) {
+  if (value === null || value === undefined || value === "") return "N/A";
+  const n = Number(value);
+  if (!Number.isFinite(n) || n === 0) return "$0";
+  return formatMoney(n);
 }
 
 export function getStatus(days) {
@@ -207,6 +271,49 @@ export function getComplianceScore(policies = []) {
 export function totalTrackedPremium(policies = []) {
   return policies.reduce((sum, policy) => sum + toNumber(policy.premiumAmount ?? policy.premium, 0), 0);
 }
+
+/**
+ * Coverages the business is recommended to carry but currently does not.
+ * Powers the "missing coverage" surface so users can close protection gaps.
+ */
+export function getCoverageGaps(policies = []) {
+  const existing = new Set(
+    policies.map((policy) => policy.policyType || policy.type)
+  );
+  return RECOMMENDED_COVERAGE.filter((item) => !existing.has(item.type)).map(
+    (item) => ({
+      type: item.type,
+      label: policyLabelFromType(item.type),
+      reason: item.reason,
+    })
+  );
+}
+
+/** Total annual savings still available from open opportunities. */
+export function getPotentialSavings(opportunities = []) {
+  return opportunities
+    .filter((item) => ["available", "quote_received"].includes(item.status))
+    .reduce((sum, item) => sum + savingsForOpportunity(item), 0);
+}
+
+/** Total annual savings already locked in by accepting better quotes. */
+export function getRealizedSavings(opportunities = []) {
+  return opportunities
+    .filter((item) => item.status === "accepted")
+    .reduce((sum, item) => sum + savingsForOpportunity(item), 0);
+}
+
+function savingsForOpportunity(opportunity) {
+  if (opportunity?.alternateQuote?.premium != null) {
+    const delta =
+      toNumber(opportunity.currentPremium, 0) -
+      toNumber(opportunity.alternateQuote.premium, 0);
+    return Math.max(0, delta);
+  }
+  return Math.max(0, toNumber(opportunity?.estimatedSavings, 0));
+}
+
+export { savingsForOpportunity };
 
 export function getUpcomingRenewals(policies = [], limit = 3) {
   return [...policies]
@@ -252,6 +359,49 @@ export function countDocuments(policies = []) {
   );
 }
 
+/* ---------- Documents ---------- */
+
+export function documentTypeLabel(docType) {
+  return DOCUMENT_TYPE_LABELS[docType] || "Document";
+}
+
+export function normalizeDocument(raw = {}) {
+  const docType = DOCUMENT_TYPE_LABELS[raw.docType] ? raw.docType : "policy";
+  return {
+    ...raw,
+    id: raw.id || makeId("doc"),
+    name: String(raw.name || documentTypeLabel(docType)).trim(),
+    docType,
+    policyId: raw.policyId || null,
+    policyType: raw.policyType || null,
+    carrier: raw.carrier || "",
+    fileType: raw.fileType || "PDF",
+    sizeKb: Math.max(1, toNumber(raw.sizeKb, 120)),
+    status: raw.status === "pending" ? "pending" : "verified",
+    addedBy: raw.addedBy || "You",
+    uploadedAt: raw.uploadedAt || new Date().toISOString(),
+  };
+}
+
+export function normalizeDocuments(documents = []) {
+  return (Array.isArray(documents) ? documents : []).map(normalizeDocument);
+}
+
+/**
+ * Non-license policies that do not yet have a stored document on file.
+ * Surfaces "upload your paperwork" nudges on the dashboard.
+ */
+export function getMissingDocuments(policies = [], documents = []) {
+  const documentedPolicyIds = new Set(
+    documents.map((doc) => doc.policyId).filter(Boolean)
+  );
+  return policies.filter((policy) => {
+    const type = policy.policyType || policy.type;
+    if (type === "license") return false;
+    return !documentedPolicyIds.has(policy.id);
+  });
+}
+
 /* ---------- Savings & quotes ---------- */
 
 export function normalizeSavingsOpportunity(raw, policies = [], companyId = "subshield-tile-co") {
@@ -275,6 +425,7 @@ export function normalizeSavingsOpportunity(raw, policies = [], companyId = "sub
     renewalDate,
     status: raw.status || "available",
     partnerId: raw.partnerId || null,
+    alternateQuote: raw.alternateQuote || null,
     createdAt: raw.createdAt || new Date().toISOString(),
     updatedAt: raw.updatedAt || raw.createdAt || new Date().toISOString(),
     notes: raw.notes || "",
@@ -419,6 +570,13 @@ export function groupActivityByDate(activity = []) {
 
 /* ---------- Storage ---------- */
 
+function normalizeStringArray(value = []) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+}
+
 function normalizePreferences(value, fallback = {}) {
   const defaults = {
     alerts: typeof fallback.alerts === "boolean" ? fallback.alerts : true,
@@ -432,6 +590,338 @@ function normalizePreferences(value, fallback = {}) {
     alerts: typeof value.alerts === "boolean" ? value.alerts : defaults.alerts,
     routing: typeof value.routing === "boolean" ? value.routing : defaults.routing,
     autoshop: typeof value.autoshop === "boolean" ? value.autoshop : defaults.autoshop,
+  };
+}
+
+function normalizeTeamMember(raw) {
+  return {
+    ...raw,
+    id: raw.id || makeId("tm"),
+    name: String(raw.name || "Team member").trim(),
+    email: String(raw.email || "").trim().toLowerCase(),
+    role: String(raw.role || "Member").trim(),
+    status: ["active", "invited", "disabled"].includes(raw.status)
+      ? raw.status
+      : "active",
+    lastActiveAt: raw.lastActiveAt || new Date().toISOString(),
+  };
+}
+
+function normalizeRole(raw) {
+  const incoming = raw.permissions || {};
+  return {
+    ...raw,
+    id: raw.id || makeId("role"),
+    name: String(raw.name || "Custom role").trim(),
+    description: String(raw.description || "").trim(),
+    permissions: {
+      vault: Boolean(incoming.vault),
+      sendCoi: Boolean(incoming.sendCoi),
+      manageSettings: Boolean(incoming.manageSettings),
+      manageUsers: Boolean(incoming.manageUsers),
+      manageBilling: Boolean(incoming.manageBilling),
+      requestQuotes: Boolean(incoming.requestQuotes),
+    },
+  };
+}
+
+function normalizeInvoice(raw) {
+  return {
+    ...raw,
+    id: String(raw.id || makeId("inv")).trim(),
+    date: raw.date || new Date().toISOString(),
+    amount: toNumber(raw.amount, 0),
+    status: ["paid", "pending", "failed", "refunded"].includes(raw.status)
+      ? raw.status
+      : "paid",
+  };
+}
+
+function normalizeSettings(value, fallback = {}, company = {}) {
+  const source = value && typeof value === "object" ? value : {};
+  const defaults = fallback && typeof fallback === "object" ? fallback : {};
+  const userProfile = source.userProfile || {};
+  const account = source.account || {};
+  const companyProfile = source.companyProfile || {};
+  const notifications = source.notifications || {};
+  const emailPreferences = source.emailPreferences || {};
+  const security = source.security || {};
+  const password = source.password || {};
+  const billing = source.billing || {};
+  const paymentMethod = source.paymentMethod || {};
+  const documentPreferences = source.documentPreferences || {};
+  const emailTemplates = source.emailTemplates || {};
+  const privacy = source.privacy || {};
+  const dataStorage = source.dataStorage || {};
+  const support = source.support || {};
+
+  return {
+    userProfile: {
+      ...defaults.userProfile,
+      firstName: String(userProfile.firstName ?? defaults.userProfile?.firstName ?? "").trim(),
+      lastName: String(userProfile.lastName ?? defaults.userProfile?.lastName ?? "").trim(),
+      jobTitle: String(userProfile.jobTitle ?? defaults.userProfile?.jobTitle ?? "").trim(),
+      phone: String(userProfile.phone ?? defaults.userProfile?.phone ?? "").trim(),
+      timezone: String(
+        userProfile.timezone ?? defaults.userProfile?.timezone ?? "America/Los_Angeles"
+      ).trim(),
+      avatarColor: String(userProfile.avatarColor ?? defaults.userProfile?.avatarColor ?? "#2563eb"),
+    },
+    account: {
+      ...defaults.account,
+      workspaceName: String(
+        account.workspaceName ??
+          defaults.account?.workspaceName ??
+          company.name ??
+          "SubShield Workspace"
+      ).trim(),
+      loginEmail: String(
+        account.loginEmail ?? defaults.account?.loginEmail ?? company.contactEmail ?? ""
+      ).trim().toLowerCase(),
+      language: String(account.language ?? defaults.account?.language ?? "en-US").trim(),
+      dateFormat: String(
+        account.dateFormat ?? defaults.account?.dateFormat ?? "MM/DD/YYYY"
+      ).trim(),
+      timeFormat: String(account.timeFormat ?? defaults.account?.timeFormat ?? "12h").trim(),
+    },
+    companyProfile: {
+      ...defaults.companyProfile,
+      legalName: String(
+        companyProfile.legalName ?? defaults.companyProfile?.legalName ?? company.name ?? ""
+      ).trim(),
+      dbaName: String(companyProfile.dbaName ?? defaults.companyProfile?.dbaName ?? "").trim(),
+      tradeType: String(
+        companyProfile.tradeType ?? defaults.companyProfile?.tradeType ?? company.tradeType ?? ""
+      ).trim(),
+      state: String(companyProfile.state ?? defaults.companyProfile?.state ?? company.state ?? "").trim(),
+      headquartersAddress: String(
+        companyProfile.headquartersAddress ??
+          defaults.companyProfile?.headquartersAddress ??
+          ""
+      ).trim(),
+      website: String(companyProfile.website ?? defaults.companyProfile?.website ?? "").trim(),
+      licenseNumber: String(
+        companyProfile.licenseNumber ?? defaults.companyProfile?.licenseNumber ?? ""
+      ).trim(),
+      taxId: String(companyProfile.taxId ?? defaults.companyProfile?.taxId ?? "").trim(),
+      revenueRange: String(
+        companyProfile.revenueRange ??
+          defaults.companyProfile?.revenueRange ??
+          company.revenueRange ??
+          ""
+      ).trim(),
+      employees: String(
+        companyProfile.employees ?? defaults.companyProfile?.employees ?? company.employees ?? ""
+      ).trim(),
+    },
+    notifications: {
+      ...defaults.notifications,
+      renewal90Day: Boolean(notifications.renewal90Day ?? defaults.notifications?.renewal90Day),
+      renewal60Day: Boolean(notifications.renewal60Day ?? defaults.notifications?.renewal60Day),
+      renewal30Day: Boolean(notifications.renewal30Day ?? defaults.notifications?.renewal30Day),
+      renewal10Day: Boolean(notifications.renewal10Day ?? defaults.notifications?.renewal10Day),
+      expirationDay: Boolean(notifications.expirationDay ?? defaults.notifications?.expirationDay),
+      expiredNotice: Boolean(notifications.expiredNotice ?? defaults.notifications?.expiredNotice),
+      gcSendDelivery: Boolean(notifications.gcSendDelivery ?? defaults.notifications?.gcSendDelivery),
+      quoteRequestUpdates: Boolean(
+        notifications.quoteRequestUpdates ?? defaults.notifications?.quoteRequestUpdates
+      ),
+      weeklyComplianceSnapshot: Boolean(
+        notifications.weeklyComplianceSnapshot ??
+          defaults.notifications?.weeklyComplianceSnapshot
+      ),
+      pushEnabled: Boolean(notifications.pushEnabled ?? defaults.notifications?.pushEnabled),
+    },
+    emailPreferences: {
+      ...defaults.emailPreferences,
+      complianceAlerts: Boolean(
+        emailPreferences.complianceAlerts ?? defaults.emailPreferences?.complianceAlerts
+      ),
+      quoteUpdates: Boolean(emailPreferences.quoteUpdates ?? defaults.emailPreferences?.quoteUpdates),
+      productUpdates: Boolean(
+        emailPreferences.productUpdates ?? defaults.emailPreferences?.productUpdates
+      ),
+      billingNotices: Boolean(
+        emailPreferences.billingNotices ?? defaults.emailPreferences?.billingNotices
+      ),
+      marketingMessages: Boolean(
+        emailPreferences.marketingMessages ?? defaults.emailPreferences?.marketingMessages
+      ),
+      digestFrequency: String(
+        emailPreferences.digestFrequency ?? defaults.emailPreferences?.digestFrequency ?? "weekly"
+      ).trim(),
+      defaultReplyTo: String(
+        emailPreferences.defaultReplyTo ?? defaults.emailPreferences?.defaultReplyTo ?? ""
+      ).trim().toLowerCase(),
+      signature: String(emailPreferences.signature ?? defaults.emailPreferences?.signature ?? ""),
+    },
+    security: {
+      ...defaults.security,
+      mfaEnabled: Boolean(security.mfaEnabled ?? defaults.security?.mfaEnabled),
+      ssoEnabled: Boolean(security.ssoEnabled ?? defaults.security?.ssoEnabled),
+      sessionTimeoutMinutes: Math.max(
+        15,
+        toNumber(security.sessionTimeoutMinutes ?? defaults.security?.sessionTimeoutMinutes, 60)
+      ),
+      requireDeviceVerification: Boolean(
+        security.requireDeviceVerification ?? defaults.security?.requireDeviceVerification
+      ),
+      allowPasswordLogin: Boolean(
+        security.allowPasswordLogin ?? defaults.security?.allowPasswordLogin
+      ),
+      allowedDomains: normalizeStringArray(
+        security.allowedDomains ?? defaults.security?.allowedDomains ?? []
+      ),
+      ipAllowlist: normalizeStringArray(security.ipAllowlist ?? defaults.security?.ipAllowlist ?? []),
+    },
+    password: {
+      ...defaults.password,
+      lastUpdatedAt:
+        password.lastUpdatedAt || defaults.password?.lastUpdatedAt || new Date().toISOString(),
+      minLength: Math.max(8, toNumber(password.minLength ?? defaults.password?.minLength, 10)),
+      requireSymbols: Boolean(password.requireSymbols ?? defaults.password?.requireSymbols),
+      requireNumbers: Boolean(password.requireNumbers ?? defaults.password?.requireNumbers),
+      requireMixedCase: Boolean(password.requireMixedCase ?? defaults.password?.requireMixedCase),
+    },
+    teamMembers: (Array.isArray(source.teamMembers) ? source.teamMembers : defaults.teamMembers || [])
+      .map(normalizeTeamMember),
+    roles: (Array.isArray(source.roles) ? source.roles : defaults.roles || []).map(normalizeRole),
+    billing: {
+      ...defaults.billing,
+      planName: String(billing.planName ?? defaults.billing?.planName ?? "Starter").trim(),
+      billingCycle: String(
+        billing.billingCycle ?? defaults.billing?.billingCycle ?? "monthly"
+      ).trim(),
+      seatCount: Math.max(1, toNumber(billing.seatCount ?? defaults.billing?.seatCount, 1)),
+      seatPrice: Math.max(0, toNumber(billing.seatPrice ?? defaults.billing?.seatPrice, 0)),
+      basePrice: Math.max(0, toNumber(billing.basePrice ?? defaults.billing?.basePrice, 0)),
+      renewalDate: billing.renewalDate || defaults.billing?.renewalDate || dateFromToday(30),
+      autoRenew: Boolean(billing.autoRenew ?? defaults.billing?.autoRenew),
+      billingEmail: String(
+        billing.billingEmail ?? defaults.billing?.billingEmail ?? company.contactEmail ?? ""
+      ).trim().toLowerCase(),
+    },
+    paymentMethod: {
+      ...defaults.paymentMethod,
+      cardBrand: String(paymentMethod.cardBrand ?? defaults.paymentMethod?.cardBrand ?? "").trim(),
+      last4: String(paymentMethod.last4 ?? defaults.paymentMethod?.last4 ?? "").replace(/\D/g, "").slice(-4),
+      expMonth: String(paymentMethod.expMonth ?? defaults.paymentMethod?.expMonth ?? "").replace(/\D/g, "").slice(0, 2),
+      expYear: String(paymentMethod.expYear ?? defaults.paymentMethod?.expYear ?? "").replace(/\D/g, "").slice(0, 4),
+      nameOnCard: String(
+        paymentMethod.nameOnCard ?? defaults.paymentMethod?.nameOnCard ?? ""
+      ).trim(),
+      billingZip: String(
+        paymentMethod.billingZip ?? defaults.paymentMethod?.billingZip ?? ""
+      ).trim(),
+    },
+    invoices: (Array.isArray(source.invoices) ? source.invoices : defaults.invoices || [])
+      .map(normalizeInvoice),
+    documentPreferences: {
+      ...defaults.documentPreferences,
+      defaultVisibility: String(
+        documentPreferences.defaultVisibility ??
+          defaults.documentPreferences?.defaultVisibility ??
+          "team"
+      ).trim(),
+      requireVerificationBeforeSend: Boolean(
+        documentPreferences.requireVerificationBeforeSend ??
+          defaults.documentPreferences?.requireVerificationBeforeSend
+      ),
+      retainVersionHistory: Boolean(
+        documentPreferences.retainVersionHistory ??
+          defaults.documentPreferences?.retainVersionHistory
+      ),
+      retentionMonths: Math.max(
+        1,
+        toNumber(
+          documentPreferences.retentionMonths ??
+            defaults.documentPreferences?.retentionMonths,
+          24
+        )
+      ),
+      namingTemplate: String(
+        documentPreferences.namingTemplate ??
+          defaults.documentPreferences?.namingTemplate ??
+          "{policyType}-{carrier}-{renewalDate}"
+      ).trim(),
+      defaultFolder: String(
+        documentPreferences.defaultFolder ??
+          defaults.documentPreferences?.defaultFolder ??
+          "Active Policies"
+      ).trim(),
+    },
+    emailTemplates: {
+      ...defaults.emailTemplates,
+      coiSubject: String(emailTemplates.coiSubject ?? defaults.emailTemplates?.coiSubject ?? ""),
+      coiBody: String(emailTemplates.coiBody ?? defaults.emailTemplates?.coiBody ?? ""),
+      brokerRequestSubject: String(
+        emailTemplates.brokerRequestSubject ?? defaults.emailTemplates?.brokerRequestSubject ?? ""
+      ),
+      brokerRequestBody: String(
+        emailTemplates.brokerRequestBody ?? defaults.emailTemplates?.brokerRequestBody ?? ""
+      ),
+      quoteFollowupSubject: String(
+        emailTemplates.quoteFollowupSubject ?? defaults.emailTemplates?.quoteFollowupSubject ?? ""
+      ),
+      quoteFollowupBody: String(
+        emailTemplates.quoteFollowupBody ?? defaults.emailTemplates?.quoteFollowupBody ?? ""
+      ),
+    },
+    privacy: {
+      ...defaults.privacy,
+      profileVisibility: String(
+        privacy.profileVisibility ?? defaults.privacy?.profileVisibility ?? "team_only"
+      ).trim(),
+      shareAnonymizedBenchmarks: Boolean(
+        privacy.shareAnonymizedBenchmarks ?? defaults.privacy?.shareAnonymizedBenchmarks
+      ),
+      partnerLeadSharing: Boolean(
+        privacy.partnerLeadSharing ?? defaults.privacy?.partnerLeadSharing
+      ),
+      allowAnalytics: Boolean(privacy.allowAnalytics ?? defaults.privacy?.allowAnalytics),
+      cookieTracking: Boolean(privacy.cookieTracking ?? defaults.privacy?.cookieTracking),
+    },
+    dataStorage: {
+      ...defaults.dataStorage,
+      storageUsedGb: Math.max(
+        0,
+        toNumber(dataStorage.storageUsedGb ?? defaults.dataStorage?.storageUsedGb, 0)
+      ),
+      storageLimitGb: Math.max(
+        1,
+        toNumber(dataStorage.storageLimitGb ?? defaults.dataStorage?.storageLimitGb, 50)
+      ),
+      backupFrequency: String(
+        dataStorage.backupFrequency ?? defaults.dataStorage?.backupFrequency ?? "daily"
+      ).trim(),
+      exportFormat: String(
+        dataStorage.exportFormat ?? defaults.dataStorage?.exportFormat ?? "zip_pdf_csv"
+      ).trim(),
+      retentionDays: Math.max(
+        30,
+        toNumber(dataStorage.retentionDays ?? defaults.dataStorage?.retentionDays, 2555)
+      ),
+      auditLogRetentionDays: Math.max(
+        30,
+        toNumber(
+          dataStorage.auditLogRetentionDays ?? defaults.dataStorage?.auditLogRetentionDays,
+          3650
+        )
+      ),
+    },
+    support: {
+      ...defaults.support,
+      preferredContactMethod: String(
+        support.preferredContactMethod ?? defaults.support?.preferredContactMethod ?? "email"
+      ).trim(),
+      supportEmail: String(support.supportEmail ?? defaults.support?.supportEmail ?? "").trim(),
+      supportPhone: String(support.supportPhone ?? defaults.support?.supportPhone ?? "").trim(),
+      helpCenterUrl: String(support.helpCenterUrl ?? defaults.support?.helpCenterUrl ?? "").trim(),
+      statusPageUrl: String(support.statusPageUrl ?? defaults.support?.statusPageUrl ?? "").trim(),
+      onboardingCallEnabled: Boolean(
+        support.onboardingCallEnabled ?? defaults.support?.onboardingCallEnabled
+      ),
+    },
   };
 }
 
@@ -526,6 +1016,10 @@ export function readStoredData(fallback) {
       parsed.quoteRequests?.length ? parsed.quoteRequests : fallback.quoteRequests || [],
       companyId
     );
+    const settings = normalizeSettings(parsed.settings, fallback.settings || {}, company);
+    const documents = normalizeDocuments(
+      parsed.documents?.length ? parsed.documents : fallback.documents || []
+    );
 
     return {
       ...fallback,
@@ -540,6 +1034,8 @@ export function readStoredData(fallback) {
       savingsOpportunities,
       quoteRequests,
       coiSends: Array.isArray(parsed.coiSends) ? parsed.coiSends : fallback.coiSends || [],
+      documents,
+      settings,
     };
   } catch {
     return fallback;

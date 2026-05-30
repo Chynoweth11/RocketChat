@@ -50,20 +50,20 @@ export default function AddBrokerModal({ onClose, onSave }) {
 
   return (
     <Modal
-      title="Add broker contact"
-      subtitle="Store your broker team so renewal and quote requests are one click."
+      title="Add insurance review partner"
+      subtitle="Save trusted advisors, brokers, or partner contacts for renewal, coverage, and savings reviews."
       onClose={onClose}
     >
       <div className="ss-field-grid">
         <FormField
-          label="Agent name"
+          label="Advisor name"
           value={form.name}
           onChange={change("name")}
           placeholder="Avery Brooks"
           error={errors.name}
         />
         <FormField
-          label="Broker company"
+          label="Partner organization"
           value={form.company}
           onChange={change("company")}
           placeholder="Lighthouse Construction Risk"
@@ -74,7 +74,7 @@ export default function AddBrokerModal({ onClose, onSave }) {
           value={form.email}
           onChange={change("email")}
           type="email"
-          placeholder="avery@broker.com"
+          placeholder="avery@partner.com"
           error={errors.email}
         />
         <FormField
@@ -96,14 +96,14 @@ export default function AddBrokerModal({ onClose, onSave }) {
         label="Notes"
         value={form.notes}
         onChange={change("notes")}
-        placeholder="Primary contact for urgent certificate updates."
+        placeholder="Primary contact for urgent renewal and savings review requests."
         multiline
       />
 
       <footer className="ss-footer">
-        <span className="ss-footer-info">Broker records are private to your company.</span>
+        <span className="ss-footer-info">Partner records are private to your company.</span>
         <button type="button" className="ss-button" onClick={handleSave}>
-          <BriefcaseBusiness size={16} /> Save broker
+          <BriefcaseBusiness size={16} /> Save partner
         </button>
       </footer>
     </Modal>

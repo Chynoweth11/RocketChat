@@ -32,17 +32,21 @@ export default function SendModal({
     `To: ${contractor.email}\n` +
     `Subject: COI Package - ${finalProject}\n\n` +
     `Hello ${firstName}, please see the attached verified insurance package for ${finalProject}. ` +
-    "All documents are originals issued by our carriers and licensed broker partners.";
+    "All documents are originals issued by our carriers and licensed insurance partners.";
 
   return (
     <Modal
-      title="Review COI package"
+      title="Send COI Package"
       subtitle={`${docs} verified files - routed to ${contractor.email}`}
       onClose={onClose}
     >
+      <div className="ss-note success" style={{ marginTop: 0 }}>
+        Review recipient, project, and holder wording before sending. This send will be logged in your activity history.
+      </div>
+
       <div className="ss-field-grid">
         <label className="ss-field">
-          <span className="ss-field-label">General contractor</span>
+          <span className="ss-field-label">Recipient company</span>
           <select
             value={contractor.id}
             onChange={(event) => onContractorChange(event.target.value)}
@@ -74,7 +78,7 @@ export default function SendModal({
       </div>
 
       <label className="ss-field">
-        <span className="ss-field-label">Or create new project</span>
+        <span className="ss-field-label">Or enter a new project name</span>
         <input
           value={newProject}
           onChange={(event) => onNewProjectChange(event.target.value)}
@@ -112,7 +116,7 @@ export default function SendModal({
         <p style={{ marginTop: 8 }}>
           Hello {firstName}, please see the attached verified insurance package
           for {finalProject}. All documents are originals issued by our
-          carriers and licensed broker partners.
+          carriers and licensed insurance partners.
         </p>
       </div>
 
@@ -125,7 +129,7 @@ export default function SendModal({
       </div>
 
       <footer className="ss-footer">
-        <span className="ss-footer-info">{docs} verified files ready</span>
+        <span className="ss-footer-info">{docs} verified files ready for delivery</span>
         <button
           type="button"
           className="ss-button"
