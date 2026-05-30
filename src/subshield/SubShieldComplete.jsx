@@ -30,6 +30,7 @@ import { Header, Sidebar } from "./components/Layout.jsx";
 import DashboardView from "./components/DashboardView.jsx";
 import PoliciesView from "./components/PoliciesView.jsx";
 import SavingsView from "./components/SavingsView.jsx";
+import RenewalsView from "./components/RenewalsView.jsx";
 import CertificatesView from "./components/CertificatesView.jsx";
 import DocumentsView from "./components/DocumentsView.jsx";
 import ActivityView from "./components/ActivityView.jsx";
@@ -138,6 +139,15 @@ export default function SubShieldComplete() {
     () => getOpenQuoteRequests(quoteRequests),
     [quoteRequests]
   );
+  const pendingCertificates = useMemo(() => {
+    const holders = data.contractors?.length || 0;
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const recentSends = (data.coiSends || []).filter((item) => {
+      const sentAt = new Date(item.sentAt).getTime();
+      return Number.isFinite(sentAt) && sentAt >= thirtyDaysAgo;
+    }).length;
+    return Math.max(0, holders - recentSends);
+  }, [data.contractors, data.coiSends]);
 
   const score = useMemo(() => getComplianceScore(policies), [policies]);
   const docs = useMemo(() => countDocuments(policies), [policies]);
@@ -917,6 +927,8 @@ export default function SubShieldComplete() {
               onAddCoverage={openAddPolicy}
               onUpload={() => setModal("scan")}
               onQueueAction={(target) => setView(target)}
+              activity={data.activity}
+              pendingCertificates={pendingCertificates}
             />
           )}
 
@@ -955,6 +967,16 @@ export default function SubShieldComplete() {
               onRemindLater={remindLaterOpportunity}
               onReactivate={reactivateOpportunity}
               onAddAdvisor={() => setModal("add-broker")}
+            />
+          )}
+
+          {view === "renewals" && (
+            <RenewalsView
+              policies={policies}
+              reminders={reminders}
+              totalPremium={totalPremium}
+              onOpenPolicies={() => setView("policies")}
+              onReviewSavings={() => setView("savings")}
             />
           )}
 

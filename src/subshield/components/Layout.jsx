@@ -2,6 +2,7 @@ import {
   ArrowRight,
   BadgeDollarSign,
   Bell,
+  CalendarClock,
   FileCheck2,
   FolderOpen,
   History,
@@ -15,8 +16,9 @@ import { formatMoney, getStatus } from "../utils.js";
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "policies", label: "Policies", icon: ShieldCheck },
-  { id: "savings", label: "Savings", icon: BadgeDollarSign },
+  { id: "policies", label: "My Insurance", icon: ShieldCheck },
+  { id: "savings", label: "Lower My Insurance", icon: BadgeDollarSign },
+  { id: "renewals", label: "Renewals", icon: CalendarClock },
   { id: "certificates", label: "Certificates", icon: FileCheck2 },
   { id: "documents", label: "Documents", icon: FolderOpen },
   { id: "activity", label: "Activity", icon: History },
@@ -119,18 +121,20 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
 
 export function Header({ view, onUpload, onActivity, unread }) {
   const titles = {
-    dashboard: "Insurance Dashboard",
-    policies: "Your Policies",
-    savings: "Savings Center",
+    dashboard: "Dashboard",
+    policies: "My Insurance",
+    savings: "Lower My Insurance",
+    renewals: "Renewals",
     certificates: "Certificates of Insurance",
-    documents: "Document Center",
-    activity: "Activity & Audit Trail",
+    documents: "Documents",
+    activity: "Activity",
     settings: "Settings",
   };
   const eyebrow = {
-    dashboard: "Everything about your business insurance, in one place",
+    dashboard: "Insurance command center",
     policies: "Coverage, premiums, deductibles, and renewals",
-    savings: "We review your insurance and find lower-cost options",
+    savings: "Find better rates through licensed coverage partners",
+    renewals: "Never miss a renewal deadline",
     certificates: "Send and track certificates of insurance",
     documents: "Declarations, certificates, endorsements, and quotes",
     activity: "A complete record of every insurance action",

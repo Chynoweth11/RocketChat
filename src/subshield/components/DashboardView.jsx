@@ -1,16 +1,13 @@
 import {
   AlertTriangle,
   ArrowRight,
-  BadgeDollarSign,
   CalendarClock,
   CheckCircle2,
   Clock3,
   FileCheck2,
   FileWarning,
   PiggyBank,
-  Send,
   Shield,
-  ShieldPlus,
   Sparkles,
 } from "lucide-react";
 import {
@@ -20,91 +17,21 @@ import {
   policyLabelFromType,
   savingsForOpportunity,
 } from "../utils.js";
-import { Section, Info } from "./Layout.jsx";
+import { Section } from "./Layout.jsx";
 
-function buildActionQueue({
-  reminders,
-  opportunities,
-  openQuoteRequests,
-  coverageGaps,
-  missingDocuments,
-}) {
-  const queue = [];
+function buildSpendBars(policies) {
+  const top = [...policies]
+    .filter((policy) => (policy.policyType || policy.type) !== "license")
+    .sort((a, b) => (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0))
+    .slice(0, 6)
+    .map((policy) => ({
+      id: policy.id,
+      label: policyLabelFromType(policy.policyType || policy.type).slice(0, 3).toUpperCase(),
+      value: Math.round((policy.premiumAmount ?? policy.premium ?? 0) / 12),
+    }));
 
-  opportunities
-    .filter((item) => item.status === "quote_received")
-    .slice(0, 2)
-    .forEach((opportunity) => {
-      queue.push({
-        id: `quote-ready-${opportunity.id}`,
-        severity: "success",
-        title: `Better ${policyLabelFromType(opportunity.policyType)} rate ready`,
-        detail: `Save ${formatMoney(savingsForOpportunity(opportunity))}/yr by switching - review and approve.`,
-        actionLabel: "Review & switch",
-        target: "savings",
-      });
-    });
-
-  reminders.slice(0, 3).forEach((reminder) => {
-    queue.push({
-      id: `renew-${reminder.id}`,
-      severity: reminder.daysRemaining <= 10 ? "danger" : "warning",
-      title: `${reminder.policyName} renews soon`,
-      detail: reminder.message,
-      actionLabel: "Review policy",
-      target: "policies",
-    });
-  });
-
-  opportunities
-    .filter((item) => item.status === "available")
-    .slice(0, 2)
-    .forEach((opportunity) => {
-      queue.push({
-        id: `save-${opportunity.id}`,
-        severity: "success",
-        title: `${policyLabelFromType(opportunity.policyType)} savings available`,
-        detail: `Up to ${formatMoney(savingsForOpportunity(opportunity))}/yr in potential savings before ${formatShortDate(opportunity.renewalDate)}.`,
-        actionLabel: "Find better rate",
-        target: "savings",
-      });
-    });
-
-  coverageGaps.slice(0, 2).forEach((gap) => {
-    queue.push({
-      id: `gap-${gap.type}`,
-      severity: "warning",
-      title: `Missing coverage: ${gap.label}`,
-      detail: gap.reason,
-      actionLabel: "Add coverage",
-      target: "add-coverage",
-      gapType: gap.type,
-    });
-  });
-
-  missingDocuments.slice(0, 1).forEach((policy) => {
-    queue.push({
-      id: `doc-${policy.id}`,
-      severity: "warning",
-      title: `Upload ${policy.name} paperwork`,
-      detail: "We don't have a stored document for this policy yet. Upload the declarations page.",
-      actionLabel: "Upload",
-      target: "upload",
-    });
-  });
-
-  openQuoteRequests.slice(0, 1).forEach((request) => {
-    queue.push({
-      id: `req-${request.id}`,
-      severity: "warning",
-      title: "Quote request in progress",
-      detail: `Your ${policyLabelFromType(request.policyType || "liability")} quote is awaiting a partner response.`,
-      actionLabel: "Track request",
-      target: "savings",
-    });
-  });
-
-  return queue.slice(0, 6);
+  const peak = Math.max(1, ...top.map((item) => item.value));
+  return top.map((item) => ({ ...item, percent: Math.max(14, Math.round((item.value / peak) * 100)) }));
 }
 
 export default function DashboardView({
@@ -115,7 +42,6 @@ export default function DashboardView({
   policies,
   docsCount,
   upcoming,
-  reminders,
   opportunities,
   openQuoteRequests,
   coiSends,
@@ -124,177 +50,178 @@ export default function DashboardView({
   recommendedAction,
   onReviewSavings,
   onOpenPolicies,
-  onAddCoverage,
   onUpload,
   onQueueAction,
+  activity = [],
+  pendingCertificates = 0,
 }) {
-  const criticalCount = policies.filter((policy) => (policy.daysRemaining ?? 0) <= 10).length;
-  const activePolicies = policies.filter((p) => (p.policyType || p.type) !== "license").length;
-  const latestSends = [...coiSends].slice(0, 3);
+  const activePolicies = policies.filter((policy) => (policy.policyType || policy.type) !== "license");
+  const policyAccounts = [...activePolicies].sort(
+    (a, b) => (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0)
+  );
+  const spendBars = buildSpendBars(policyAccounts);
+  const savingsCards = opportunities
+    .filter((item) => ["available", "quote_received"].includes(item.status))
+    .slice(0, 3);
+  const recentActivity = activity.slice(0, 6);
   const readyQuotes = opportunities.filter((item) => item.status === "quote_received");
-  const actionQueue = buildActionQueue({
-    reminders,
-    opportunities,
-    openQuoteRequests,
-    coverageGaps,
-    missingDocuments,
-  });
+  const criticalRenewals = upcoming.filter((policy) => (policy.daysRemaining ?? 0) <= 10);
+  const monthlySpend = Math.round(totalPremium / 12);
+  const missingDocCount = missingDocuments.length;
 
-  const headline =
-    realizedSavings > 0
-      ? `${formatMoney(realizedSavings)}/yr saved so far`
-      : potentialSavings > 0
-      ? `${formatMoney(potentialSavings)}/yr in savings found`
-      : "Your insurance is in good shape";
+  const metricCards = [
+    { label: "Total annual premium", value: `${formatMoney(totalPremium)}/yr` },
+    { label: "Active policies", value: activePolicies.length },
+    { label: "Estimated savings", value: `${formatMoney(potentialSavings)}/yr` },
+    { label: "Upcoming renewals", value: upcoming.length, action: "View renewals", target: "renewals" },
+    { label: "Missing documents", value: missingDocCount, action: "Upload", target: "upload" },
+    {
+      label: "Pending certificates",
+      value: pendingCertificates,
+      action: "Open certificates",
+      target: "certificates",
+    },
+    { label: "Open quote reviews", value: openQuoteRequests.length, action: "Open", target: "savings" },
+    { label: "Coverage gaps", value: coverageGaps.length, action: "Review", target: "policies" },
+  ];
 
   return (
-    <div className="ss-grid">
+    <div className="ss-grid ss-dashboard-grid">
       <section className="ss-card ss-span">
-        <div className="ss-hero">
-          <div>
-            <span className="ss-hero-kicker">Trusted coverage and savings workspace</span>
+        <div className="ss-dash-top-grid">
+          <div className="ss-dash-spend-panel">
             <span className="ss-eyebrow">
-              {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
+              {firstName ? `Good evening, ${firstName}` : "Welcome back"}
             </span>
-            <h2>{headline}</h2>
-            <p>
-              SubShield reviews your business insurance, watches every renewal, and
-              finds lower-cost options from licensed partners - so you stay covered
-              and stop overpaying.
+            <h2>Current insurance spend</h2>
+            <div className="ss-dash-spend-value">{formatMoney(totalPremium)}</div>
+            <p className="ss-muted">
+              About {formatMoney(monthlySpend)}/month across {activePolicies.length} active policies.
             </p>
             <div className="ss-row">
-              <button className="ss-button" onClick={onReviewSavings}>
-                <PiggyBank size={16} /> Review savings
+              <button type="button" className="ss-button" onClick={onReviewSavings}>
+                <PiggyBank size={16} /> Lower my insurance
               </button>
-              <button className="ss-button soft" onClick={onOpenPolicies}>
-                <Shield size={16} /> View policies
+              <button type="button" className="ss-button soft" onClick={onOpenPolicies}>
+                <Shield size={16} /> My insurance
               </button>
             </div>
           </div>
 
-          <div className="ss-command-tip">
-            <b>Recommended next step</b>
-            <p>{recommendedAction.detail}</p>
-            <button type="button" className="ss-copy-btn" onClick={onReviewSavings}>
-              {recommendedAction.label} <ArrowRight size={13} />
-            </button>
+          <div className="ss-dash-accounts-panel">
+            <Section
+              title="Insurance accounts / policies"
+              sub="Grouped coverage and annual cost summary"
+              extra={
+                <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
+                  View all <ArrowRight size={13} />
+                </button>
+              }
+            />
+            {policyAccounts.slice(0, 6).map((policy) => (
+              <div className="ss-dash-account-row" key={policy.id}>
+                <div>
+                  <b>{policy.name}</b>
+                  <small>
+                    {policy.carrier} - {policy.daysRemaining}d to renew
+                  </small>
+                </div>
+                <strong>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</strong>
+              </div>
+            ))}
+            {policyAccounts.length === 0 && (
+              <div className="ss-note">
+                <FileWarning size={16} />
+                <span>No policies added yet. Upload a policy to start tracking spend.</span>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="ss-command-metrics">
-          <Info label="Tracked premium" value={`${formatMoney(totalPremium)}/yr`} />
-          <Info
-            label="Potential savings"
-            value={`${formatMoney(potentialSavings)}/yr`}
-            hint={readyQuotes.length ? `${readyQuotes.length} quote ready` : undefined}
-          />
-          <Info label="Active policies" value={activePolicies} />
-          <Info label="Upcoming renewals" value={upcoming.length} />
-          <Info label="Open quotes" value={openQuoteRequests.length} />
-          <Info
-            label="Coverage gaps"
-            value={coverageGaps.length}
-            hint={coverageGaps.length ? "Action suggested" : "All covered"}
-          />
+        <div className="ss-dash-trend">
+          <div>
+            <b>Premium trend by policy group</b>
+            <small>Monthly equivalent spend for your highest-cost policies</small>
+          </div>
+          <div className="ss-dash-trend-bars">
+            {spendBars.map((item) => (
+              <div className="ss-dash-trend-item" key={item.id}>
+                <span style={{ height: `${item.percent}%` }} />
+                <small>{item.label}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="ss-dash-metrics">
+          {metricCards.map((item) => (
+            <div className="ss-dash-metric" key={item.label}>
+              <span>{item.label}</span>
+              <b>{item.value}</b>
+              {item.action && (
+                <button
+                  type="button"
+                  className="ss-copy-btn"
+                  onClick={() => {
+                    if (item.target === "upload") onUpload();
+                    else if (item.target) onQueueAction(item.target);
+                  }}
+                >
+                  {item.action}
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className="ss-card ss-span">
+      <section className="ss-card">
         <Section
-          title="Your priority queue"
-          sub="Everything that needs a decision, ranked so you always know what's next."
+          title="Recent insurance activity"
+          sub="Latest policy, certificate, and savings actions"
           extra={
-            <span className="ss-section-extra">
-              {actionQueue.length} item{actionQueue.length === 1 ? "" : "s"}
-            </span>
+            <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("activity")}>
+              Open activity <ArrowRight size={13} />
+            </button>
           }
         />
 
-        {actionQueue.length === 0 && (
+        {recentActivity.length === 0 && (
           <div className="ss-note success">
             <CheckCircle2 size={16} />
-            <span>You're all caught up. No renewals, savings, or gaps need attention.</span>
+            <span>No recent activity yet. Actions will appear here in real time.</span>
           </div>
         )}
 
-        {actionQueue.map((item) => (
-          <div className="ss-task-row" key={item.id}>
-            <span className={`ss-task-dot ${item.severity}`} aria-hidden="true" />
-            <div className="ss-task-copy">
+        {recentActivity.map((item) => (
+          <div className="ss-dash-activity-row" key={item.id}>
+            <Clock3 size={15} />
+            <div>
               <b>{item.title}</b>
-              <small>{item.detail}</small>
+              <small>{item.body}</small>
             </div>
-            <button
-              type="button"
-              className="ss-button soft ss-button-sm"
-              onClick={() => {
-                if (item.target === "add-coverage") onAddCoverage(item.gapType);
-                else if (item.target === "upload") onUpload();
-                else onQueueAction(item.target);
-              }}
-            >
-              {item.actionLabel}
-            </button>
           </div>
         ))}
       </section>
 
       <section className="ss-card">
         <Section
-          title="Better options found"
-          sub="Lower-cost coverage we surfaced for you"
+          title="Upcoming renewals"
+          sub="Deadlines that need action first"
           extra={
-            <button type="button" className="ss-copy-btn" onClick={onReviewSavings}>
-              View all <ArrowRight size={13} />
+            <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("renewals")}>
+              See all <ArrowRight size={13} />
             </button>
           }
         />
-        {opportunities.filter((o) => ["available", "quote_received"].includes(o.status)).length === 0 && (
-          <div className="ss-note success">
-            <Sparkles size={16} />
-            <span>No new savings right now. We'll keep monitoring the market and your renewals.</span>
-          </div>
-        )}
-        {opportunities
-          .filter((o) => ["available", "quote_received"].includes(o.status))
-          .slice(0, 3)
-          .map((opportunity) => {
-            const saving = savingsForOpportunity(opportunity);
-            const ready = opportunity.status === "quote_received";
-            return (
-              <div className="ss-insight" key={opportunity.id}>
-                <div>
-                  <b>{policyLabelFromType(opportunity.policyType)}</b>
-                  <small>
-                    {ready
-                      ? `Quote ready from ${opportunity.alternateQuote?.carrier || "a partner"}`
-                      : `Current ${formatMoney(opportunity.currentPremium)}/yr`}
-                  </small>
-                </div>
-                <div className="ss-insight-amount">
-                  <strong className="ss-savings-pos">{formatMoney(saving)}/yr</strong>
-                  <button
-                    type="button"
-                    className="ss-copy-btn"
-                    onClick={onReviewSavings}
-                    title="Review savings"
-                  >
-                    {ready ? "Review" : "Compare"} <ArrowRight size={12} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-      </section>
 
-      <section className="ss-card">
-        <Section title="Renewal timeline" sub="What's coming up next" />
         {upcoming.length === 0 && (
           <div className="ss-note success">
             <CheckCircle2 size={16} />
-            <span>No renewals in your current window.</span>
+            <span>No upcoming renewals in your current timeline.</span>
           </div>
         )}
+
         {upcoming.map((policy) => {
           const status = getStatus(policy.daysRemaining);
           return (
@@ -305,91 +232,91 @@ export default function DashboardView({
                   {policy.carrier} - {formatShortDate(policy.renewalDate || policy.expires)}
                 </small>
               </div>
-              <small className={`ss-upcoming-days ${status.className}`}>
-                {policy.daysRemaining}d
-              </small>
+              <small className={`ss-upcoming-days ${status.className}`}>{policy.daysRemaining}d</small>
             </div>
           );
         })}
-      </section>
 
-      {coverageGaps.length > 0 && (
-        <section className="ss-card ss-span">
-          <Section
-            title="Close your coverage gaps"
-            sub="Protection most businesses in your category carry"
-          />
-          <div className="ss-gap-grid">
-            {coverageGaps.map((gap) => (
-              <div className="ss-gap-card" key={gap.type}>
-                <span className="ss-gap-icon" aria-hidden="true">
-                  <ShieldPlus size={18} />
-                </span>
-                <div className="ss-gap-body">
-                  <b>{gap.label}</b>
-                  <small>{gap.reason}</small>
-                </div>
-                <button
-                  type="button"
-                  className="ss-button soft ss-button-sm"
-                  onClick={() => onAddCoverage(gap.type)}
-                >
-                  Add coverage
-                </button>
-              </div>
-            ))}
+        {criticalRenewals.length > 0 && (
+          <div className="ss-note danger" style={{ marginTop: 12 }}>
+            <AlertTriangle size={16} />
+            <span>
+              {criticalRenewals.length} polic
+              {criticalRenewals.length === 1 ? "y is" : "ies are"} near expiration. Review now.
+            </span>
           </div>
-        </section>
-      )}
-
-      <section className="ss-card ss-span">
-        <Section
-          title="Recent certificates"
-          sub="Latest proof-of-insurance deliveries"
-          extra={<span className="ss-section-extra">{docsCount} verified files</span>}
-        />
-        {latestSends.length === 0 ? (
-          <div className="ss-empty" style={{ minHeight: 140 }}>
-            <FileCheck2 size={30} />
-            <h2>No certificates sent yet</h2>
-            <p>Send your first certificate of insurance to start your delivery history.</p>
-          </div>
-        ) : (
-          latestSends.map((sendItem) => (
-            <div className="ss-insight" key={sendItem.id}>
-              <div>
-                <b>{sendItem.project}</b>
-                <small>
-                  {sendItem.email} - {sendItem.docCount} verified files
-                </small>
-              </div>
-              <span className="ss-pill" style={{ padding: "6px 10px", fontSize: 11 }}>
-                <CalendarClock size={12} /> {formatShortDate(sendItem.sentAt)}
-              </span>
-            </div>
-          ))
         )}
       </section>
 
-      {criticalCount > 0 && (
-        <section className="ss-card ss-span">
-          <div className="ss-note danger">
-            <AlertTriangle size={16} />
-            <span>
-              {criticalCount} polic{criticalCount === 1 ? "y is" : "ies are"} expiring within 10 days.
-              Renew or switch before they lapse.
-            </span>
-          </div>
-        </section>
-      )}
+      <section className="ss-card ss-span">
+        <Section title="Ways to save" sub="Compare better options before renewal and reduce premium spend" />
 
-      {missingDocuments.length > 0 && (
+        <div className="ss-dash-save-grid">
+          <div className="ss-dash-save-primary">
+            <b>{recommendedAction.label}</b>
+            <p>{recommendedAction.detail}</p>
+            <button type="button" className="ss-button" onClick={onReviewSavings}>
+              Open Lower My Insurance
+            </button>
+          </div>
+
+          <div className="ss-dash-save-list">
+            {savingsCards.length === 0 && (
+              <div className="ss-note success">
+                <Sparkles size={16} />
+                <span>No new savings opportunities yet. We will keep checking partner rates.</span>
+              </div>
+            )}
+
+            {savingsCards.map((opportunity) => {
+              const saving = savingsForOpportunity(opportunity);
+              return (
+                <div className="ss-dash-save-row" key={opportunity.id}>
+                  <div>
+                    <b>{policyLabelFromType(opportunity.policyType)}</b>
+                    <small>
+                      {opportunity.status === "quote_received"
+                        ? "Quote is ready to review"
+                        : `Renews ${formatShortDate(opportunity.renewalDate)}`}
+                    </small>
+                  </div>
+                  <strong>{formatMoney(saving)}/yr</strong>
+                </div>
+              );
+            })}
+
+            <div className="ss-dash-save-footer">
+              <div>
+                <small>Open quote reviews</small>
+                <b>{openQuoteRequests.length}</b>
+              </div>
+              <div>
+                <small>Realized savings</small>
+                <b>{formatMoney(realizedSavings)}/yr</b>
+              </div>
+              <div>
+                <small>Certificates sent</small>
+                <b>{coiSends.length}</b>
+              </div>
+              <div>
+                <small>Verified files</small>
+                <b>{docsCount}</b>
+              </div>
+              <button type="button" className="ss-copy-btn" onClick={onReviewSavings}>
+                Review all <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {missingDocCount > 0 && (
         <section className="ss-card ss-span">
           <div className="ss-note">
-            <FileWarning size={16} />
+            <FileCheck2 size={16} />
             <span>
-              {missingDocuments.length} polic{missingDocuments.length === 1 ? "y is" : "ies are"} missing
-              stored documents. Upload them so certificates are always ready.
+              {missingDocCount} polic{missingDocCount === 1 ? "y is" : "ies are"} missing supporting
+              documents. Upload now so certificates stay ready.
             </span>
           </div>
         </section>
