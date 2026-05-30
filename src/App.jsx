@@ -1,5 +1,10 @@
 import SubShieldComplete from "./subshield/SubShieldComplete.jsx";
+import ErrorBoundary from "./subshield/components/ErrorBoundary.jsx";
 
 export default function App() {
-  return <SubShieldComplete />;
+  return (
+    <ErrorBoundary>
+      <SubShieldComplete />
+    </ErrorBoundary>
+  );
 }

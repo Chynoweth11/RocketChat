@@ -7,6 +7,7 @@ import {
   FolderOpen,
   History,
   LayoutDashboard,
+  Search,
   Settings,
   Shield,
   ShieldCheck,
@@ -155,7 +156,7 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
   );
 }
 
-export function Header({ view, onUpload, onActivity, unread }) {
+export function Header({ view, onUpload, onActivity, onSearch, unread }) {
   const todayLabel = new Date().toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -191,6 +192,18 @@ export function Header({ view, onUpload, onActivity, unread }) {
       </div>
       <div className="ss-top-actions">
         <small className="ss-top-date">Synced {todayLabel}</small>
+        {onSearch && (
+          <button
+            type="button"
+            className="ss-search-trigger"
+            onClick={onSearch}
+            aria-label="Search (Command or Control + K)"
+          >
+            <Search size={15} />
+            <span>Search</span>
+            <kbd>⌘K</kbd>
+          </button>
+        )}
         <button
           type="button"
           className="ss-button soft ss-upload-btn"

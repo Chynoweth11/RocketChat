@@ -43,6 +43,7 @@ import EditHolderModal from "./components/EditHolderModal.jsx";
 import AddPolicyModal from "./components/AddPolicyModal.jsx";
 import AddBrokerModal from "./components/AddBrokerModal.jsx";
 import QuoteRequestModal from "./components/QuoteRequestModal.jsx";
+import CommandPalette from "./components/CommandPalette.jsx";
 import "./styles.css";
 
 function prependActivity(activity, title, body) {
@@ -158,6 +159,7 @@ export default function SubShieldComplete() {
   const [renewingId, setRenewingId] = useState(null);
   const [findingId, setFindingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const company = data.company || initialData.company;
   const settings = data.settings || initialData.settings;
@@ -270,6 +272,18 @@ export default function SubShieldComplete() {
     const timeout = setTimeout(() => setToast(null), 3200);
     return () => clearTimeout(timeout);
   }, [toast]);
+
+  useEffect(() => {
+    function onKey(event) {
+      const key = event.key?.toLowerCase();
+      if ((event.metaKey || event.ctrlKey) && key === "k") {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   function commit(next) {
     setData(next);
@@ -1091,6 +1105,33 @@ export default function SubShieldComplete() {
     }
   }
 
+  function runPaletteAction(action, payload) {
+    switch (action) {
+      case "upload":
+        setModal("scan");
+        break;
+      case "add-policy":
+        openAddPolicy();
+        break;
+      case "add-gc":
+        setModal("add-gc");
+        break;
+      case "open-policy":
+        setPolicyId(payload);
+        setView("policies");
+        break;
+      case "open-holder":
+        setContractorId(payload);
+        setView("certificates");
+        break;
+      case "open-documents":
+        setView("documents");
+        break;
+      default:
+        break;
+    }
+  }
+
   const existingTypes = policies.map((policy) => policy.policyType || policy.type);
 
   return (
@@ -1111,6 +1152,7 @@ export default function SubShieldComplete() {
             view={view}
             onUpload={() => setModal("scan")}
             onActivity={() => setView("activity")}
+            onSearch={() => setPaletteOpen(true)}
             unread={critical.length + reminders.length}
           />
 
@@ -1310,6 +1352,17 @@ export default function SubShieldComplete() {
           }}
           onSave={updateContractor}
           onDelete={deleteContractor}
+        />
+      )}
+
+      {paletteOpen && (
+        <CommandPalette
+          onClose={() => setPaletteOpen(false)}
+          onNavigate={(target) => setView(target)}
+          onAction={runPaletteAction}
+          policies={policies}
+          contractors={data.contractors}
+          documents={documents}
         />
       )}
 

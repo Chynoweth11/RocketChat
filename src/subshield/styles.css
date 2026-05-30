@@ -2990,3 +2990,248 @@ textarea {
     border-radius: 16px;
   }
 }
+
+/* ---------- Command palette ---------- */
+.ss-cmd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 16px 16px;
+}
+
+.ss-cmd {
+  width: 100%;
+  max-width: 580px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 32, 61, 0.28);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+  animation: ss-cmd-pop 0.14s ease-out;
+}
+
+@keyframes ss-cmd-pop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ss-cmd-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--muted);
+}
+
+.ss-cmd-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text);
+  background: transparent;
+  font-family: inherit;
+}
+
+.ss-cmd-kbd,
+.ss-cmd-foot kbd {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-family: inherit;
+}
+
+.ss-cmd-list {
+  overflow-y: auto;
+  padding: 8px;
+  scrollbar-width: thin;
+}
+
+.ss-cmd-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.ss-cmd-group {
+  margin-bottom: 6px;
+}
+
+.ss-cmd-group-label {
+  padding: 8px 10px 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.ss-cmd-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ss-cmd-item.active {
+  background: var(--brand-soft, #eef4ff);
+  color: var(--brand, #2457d4);
+}
+
+.ss-cmd-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-cmd-item-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
+}
+
+.ss-cmd-item-enter {
+  color: var(--brand, #2457d4);
+}
+
+.ss-cmd-foot {
+  display: flex;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.ss-cmd-foot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ---------- Header search trigger ---------- */
+.ss-search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-soft, #f8fafd);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ss-search-trigger:hover {
+  border-color: #c8d3e2;
+  background: #fff;
+}
+
+.ss-search-trigger kbd {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  background: #eef2f7;
+  border-radius: 5px;
+  padding: 2px 5px;
+  font-family: inherit;
+}
+
+/* ---------- Fatal error boundary ---------- */
+.ss-fatal {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--surface-soft, #f4f7fb);
+}
+
+.ss-fatal-card {
+  max-width: 440px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: var(--shadow-sm, 0 10px 30px rgba(15,32,61,0.08));
+}
+
+.ss-fatal-mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  border-radius: 14px;
+  background: #fdecec;
+  color: #d4453b;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.ss-fatal-card h1 {
+  font-size: 22px;
+  margin: 0 0 10px;
+}
+
+.ss-fatal-card p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.ss-fatal-detail {
+  display: block;
+  font-size: 12px;
+  color: #b63830;
+  background: #fdf2f2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 18px;
+  word-break: break-word;
+}
+
+.ss-fatal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .ss-search-trigger span,
+  .ss-search-trigger kbd {
+    display: none;
+  }
+  .ss-cmd-overlay {
+    padding: 8vh 10px 10px;
+  }
+}
