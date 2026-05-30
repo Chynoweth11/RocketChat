@@ -124,7 +124,7 @@ export default function RenewalsView({
               <div>
                 <b>{policy.name}</b>
                 <small>
-                  {policy.carrier} - {policy.policyNumber}
+                  {policy.carrier} | {policy.policyNumber}
                 </small>
               </div>
               <div className="ss-renewal-meta">

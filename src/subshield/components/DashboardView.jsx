@@ -135,7 +135,7 @@ export default function DashboardView({
                   <div>
                     <b>{policy.name}</b>
                     <small>
-                      {policy.carrier}  -  {policy.daysRemaining}d to renew
+                      {policy.carrier} | {policy.daysRemaining}d to renew
                     </small>
                   </div>
                   <div className="ss-insight-amount">
@@ -216,7 +216,7 @@ export default function DashboardView({
               <div>
                 <span>{policy.name}</span>
                 <small style={{ display: "block" }}>
-                  {policy.carrier}  -  {formatShortDate(policy.renewalDate || policy.expires)}
+                  {policy.carrier} | {formatShortDate(policy.renewalDate || policy.expires)}
                 </small>
               </div>
               <small className={`ss-upcoming-days ${status.className}`}>{policy.daysRemaining}d</small>

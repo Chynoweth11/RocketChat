@@ -164,7 +164,7 @@ export default function SavingsView({
           sub="Comparable coverage at lower cost, organized by priority."
           extra={
             <span className="ss-section-extra">
-              {availableCount} open - {switchedCount} switched
+              {availableCount} open | {switchedCount} switched
             </span>
           }
         />
@@ -770,7 +770,7 @@ function OpportunityCard({
           </span>
           <h2>{name}</h2>
           <p className="ss-muted">
-            Current carrier {opportunity.currentCarrier} - Renews{" "}
+            Current carrier {opportunity.currentCarrier} | Renews{" "}
             {formatLongDate(opportunity.renewalDate)}
           </p>
         </div>
@@ -837,7 +837,7 @@ function OpportunityCard({
           </div>
           {quote.amRating ? (
             <p className="ss-fine">
-              {quote.carrier} - AM Best rating {quote.amRating}. Quote valid through{" "}
+              {quote.carrier} | AM Best rating {quote.amRating}. Quote valid through{" "}
               {formatLongDate(quote.bindableUntil)}.
             </p>
           ) : null}

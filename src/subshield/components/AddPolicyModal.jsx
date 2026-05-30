@@ -165,7 +165,7 @@ export default function AddPolicyModal({ brokers = [], defaultType, onClose, onS
             <option value="">No partner selected</option>
             {availableBrokers.map((broker) => (
               <option key={broker.id} value={broker.id}>
-                {broker.name} - {broker.company}
+                {broker.name} | {broker.company}
               </option>
             ))}
           </select>

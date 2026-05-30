@@ -90,7 +90,7 @@ export default function QuoteRequestModal({
           <select value={policyId} onChange={(event) => setPolicyId(event.target.value)}>
             {policies.map((policy) => (
               <option key={policy.id} value={policy.id}>
-                {policy.name} - {policy.carrier}
+                {policy.name} | {policy.carrier}
               </option>
             ))}
           </select>
@@ -123,7 +123,7 @@ export default function QuoteRequestModal({
             <option value="">Select advisor</option>
             {brokers.map((broker) => (
               <option key={broker.id} value={broker.id}>
-                {broker.name} - {broker.company}
+                {broker.name} | {broker.company}
               </option>
             ))}
           </select>
@@ -153,9 +153,9 @@ export default function QuoteRequestModal({
           <p>
             {company.name}
             <br />
-            {company.tradeType} - {company.state}
+            {company.tradeType} | {company.state}
             <br />
-            {revenueRange || "Revenue range not set"} - {employees || "Employees not set"}
+            {revenueRange || "Revenue range not set"} | {employees || "Employees not set"}
           </p>
         </div>
       </div>

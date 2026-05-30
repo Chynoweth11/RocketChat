@@ -140,13 +140,13 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
                 <b>{doc.name}</b>
                 <small>
                   {documentTypeLabel(doc.docType)}
-                  {doc.carrier ? `  -  ${doc.carrier}` : ""}
-                  {policy ? `  -  ${policy.name}` : ""}
+                  {doc.carrier ? ` | ${doc.carrier}` : ""}
+                  {policy ? ` | ${policy.name}` : ""}
                 </small>
               </div>
               <div className="ss-doc-meta">
                 <span className="ss-doc-size">
-                  {doc.fileType}  -  {doc.sizeKb} KB
+                  {doc.fileType} | {doc.sizeKb} KB
                 </span>
                 <span className="ss-doc-date">{formatShortDate(doc.uploadedAt)}</span>
               </div>

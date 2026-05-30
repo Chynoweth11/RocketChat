@@ -191,7 +191,7 @@ function PolicyRow({ policy, selected, onClick }) {
       <span className="ss-policy-copy">
         <b>{policy.name}</b>
         <small>
-          {policy.carrier} - {formatMoney(policy.premiumAmount ?? policy.premium)}/yr
+          {policy.carrier} | {formatMoney(policy.premiumAmount ?? policy.premium)}/yr
         </small>
       </span>
       <em className={`ss-status ${status.className}`}>{status.label}</em>
@@ -215,7 +215,7 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
           <span className="ss-eyebrow">Policy detail</span>
           <h2>{policy.name}</h2>
           <p className="ss-muted">
-            {policy.carrier} - {policy.policyNumber}
+            {policy.carrier} | {policy.policyNumber}
           </p>
         </div>
       </div>
@@ -290,7 +290,7 @@ function DocumentRow({ name }) {
       <span className="ss-pdf" aria-hidden="true">PDF</span>
       <div className="ss-doc-body">
         <b>{name}</b>
-        <small>Carrier-issued document - verified</small>
+        <small>Carrier-issued document | verified</small>
       </div>
       <em className="ss-verified">
         <Check size={13} /> Verified

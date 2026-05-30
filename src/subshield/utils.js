@@ -54,7 +54,7 @@ const RECOMMENDED_COVERAGE = [
   },
   {
     type: "auto",
-    reason: "Covers vehicles used for business  -  often required on job sites.",
+    reason: "Covers vehicles used for business and is often required on job sites.",
   },
   {
     type: "property",
@@ -66,7 +66,7 @@ const RECOMMENDED_COVERAGE = [
   },
   {
     type: "cyber",
-    reason: "Covers breaches, wire fraud, and downtime  -  increasingly required.",
+    reason: "Covers breaches, wire fraud, and downtime, and is increasingly required.",
   },
 ];
 

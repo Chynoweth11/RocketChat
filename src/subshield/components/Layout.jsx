@@ -33,7 +33,7 @@ export function Brand() {
       </span>
       <div>
         <b>SubShield</b>
-        <small className="ss-small">Business insurance, handled</small>
+        <small className="ss-small">Insurance workspace for subcontractors</small>
       </div>
     </div>
   );
@@ -92,8 +92,8 @@ export function Sidebar({
         </strong>
         <p>
           {potentialSavings > 0
-            ? "We found lower-cost options on your current coverage. Review and switch in a few clicks."
-            : "No new savings right now. We'll keep watching renewals and partner rates."}
+            ? "Lower-rate options are available on your active coverage. Review them before renewal."
+            : "No new savings right now. We'll keep monitoring renewals and partner rates."}
         </p>
         <div className="ss-savings-stack">
           <div>
@@ -113,10 +113,10 @@ export function Sidebar({
 
       <div className="ss-sidebar-footer">
         <button type="button" className="ss-sidebar-link">
-          Suggest a feature
+          Product feedback
         </button>
         <button type="button" className="ss-sidebar-link">
-          Chat with support
+          Contact support
         </button>
         <small>SubShield Insurance Workspace</small>
       </div>
@@ -174,7 +174,7 @@ export function Header({ view, onUpload, onActivity, unread }) {
         <h1>{titles[view]}</h1>
       </div>
       <div className="ss-top-actions">
-        <small className="ss-top-date">Updated {todayLabel}</small>
+        <small className="ss-top-date">Synced {todayLabel}</small>
         <button
           type="button"
           className="ss-button soft ss-upload-btn"

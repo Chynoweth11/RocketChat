@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   Building2,
@@ -213,6 +213,15 @@ export default function SettingsView({
     })).filter((group) => group.tabs.length > 0);
   }, [tabQuery]);
 
+  useEffect(() => {
+    const hasActiveTab = filteredGroups.some((group) =>
+      group.tabs.some((tab) => tab.id === activeTab)
+    );
+    if (hasActiveTab) return;
+    const fallbackTabId = filteredGroups[0]?.tabs[0]?.id;
+    if (fallbackTabId) setActiveTab(fallbackTabId);
+  }, [activeTab, filteredGroups]);
+
   return (
     <div className="ss-settings-layout">
       <section className="ss-card ss-settings-nav-card">
@@ -225,7 +234,7 @@ export default function SettingsView({
           </div>
           <h2>{company?.name || "SubShield Company"}</h2>
           <p className="ss-muted">
-            {settings.userProfile.jobTitle || "Account Owner"} - {company?.state || "N/A"}
+            {settings.userProfile.jobTitle || "Account Owner"} | {company?.state || "N/A"}
           </p>
         </div>
 
