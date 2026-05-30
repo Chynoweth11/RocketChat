@@ -8,10 +8,13 @@ const POLICY_TYPES = [
   "workers",
   "auto",
   "umbrella",
-  "professional",
-  "pollution",
+  "property",
+  "cyber",
+  "equipment",
   "tools",
   "builders_risk",
+  "professional",
+  "pollution",
   "bonding",
   "license",
 ];
@@ -22,6 +25,7 @@ const EMPTY = {
   policyNumber: "",
   premiumAmount: "",
   premiumFrequency: "annual",
+  deductible: "",
   effectiveDate: "",
   renewalDate: "",
   coverageLimits: "",
@@ -29,8 +33,11 @@ const EMPTY = {
   documents: "",
 };
 
-export default function AddPolicyModal({ brokers = [], onClose, onSave }) {
-  const [form, setForm] = useState(EMPTY);
+export default function AddPolicyModal({ brokers = [], defaultType, onClose, onSave }) {
+  const [form, setForm] = useState({
+    ...EMPTY,
+    policyType: defaultType || EMPTY.policyType,
+  });
   const [errors, setErrors] = useState({});
 
   const availableBrokers = useMemo(() => brokers || [], [brokers]);
@@ -55,6 +62,8 @@ export default function AddPolicyModal({ brokers = [], onClose, onSave }) {
     const renewalDate = form.renewalDate;
     const effectiveDate = form.effectiveDate || renewalDate;
     const premiumAmount = Number(form.premiumAmount);
+    const deductible =
+      form.deductible === "" ? null : Number(String(form.deductible).replace(/[^\d.]/g, ""));
     const documents = form.documents
       .split("\n")
       .map((line) => line.trim())
@@ -70,6 +79,7 @@ export default function AddPolicyModal({ brokers = [], onClose, onSave }) {
       premiumAmount,
       premium: premiumAmount,
       premiumFrequency: form.premiumFrequency,
+      deductible,
       effectiveDate,
       expirationDate: renewalDate,
       renewalDate,
@@ -130,6 +140,13 @@ export default function AddPolicyModal({ brokers = [], onClose, onSave }) {
             <option value="monthly">Monthly</option>
           </select>
         </FormField>
+        <FormField
+          label="Deductible (optional)"
+          value={form.deductible}
+          onChange={change("deductible")}
+          type="number"
+          placeholder="1000"
+        />
         <FormField
           label="Effective date"
           value={form.effectiveDate}

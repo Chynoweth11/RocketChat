@@ -1,7 +1,21 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, Check, Search, Send, Upload, Zap } from "lucide-react";
+import {
+  AlertTriangle,
+  BadgeDollarSign,
+  Check,
+  Plus,
+  Search,
+  Send,
+  Upload,
+  Zap,
+} from "lucide-react";
 import { policyIcon } from "../icons.js";
-import { formatLongDate, formatMoney, getStatus } from "../utils.js";
+import {
+  formatDeductible,
+  formatLongDate,
+  formatMoney,
+  getStatus,
+} from "../utils.js";
 import { Section, Info, Spinner } from "./Layout.jsx";
 import ScoreRing from "./ScoreRing.jsx";
 
@@ -12,20 +26,20 @@ const FILTERS = [
   { id: "success", label: "Active" },
 ];
 
-export default function VaultView({
+export default function PoliciesView({
   score,
   docs,
   critical,
   policies,
+  totalPremium,
   selectedPolicy,
   onSelectPolicy,
   onRenew,
-  onShop,
   onSend,
-  onScan,
+  onUpload,
   onAddPolicy,
+  onFindSavings,
   renewingId,
-  shoppingId,
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -47,7 +61,9 @@ export default function VaultView({
   const selectedInFiltered = selectedPolicy
     ? filteredPolicies.some((policy) => policy.id === selectedPolicy.id)
     : false;
-  const policyForDetail = selectedInFiltered ? selectedPolicy : filteredPolicies[0] || selectedPolicy;
+  const policyForDetail = selectedInFiltered
+    ? selectedPolicy
+    : filteredPolicies[0] || selectedPolicy;
 
   return (
     <div className="ss-grid">
@@ -55,22 +71,23 @@ export default function VaultView({
         <div className="ss-hero">
           <div>
             <span className="ss-eyebrow">
-              {critical.length ? "Action needed" : "Coverage ready"}
+              {critical.length ? "Action needed" : "Coverage healthy"}
             </span>
-            <h2>{score}% compliant</h2>
+            <h2>{policies.length} policies tracked</h2>
             <p>
-              Keep policy data, renewal timelines, and original documents in one clean
-              workspace so sends and renewals are faster.
+              Every policy, premium, deductible, and renewal date in one place.
+              Add coverage, upload documents, and act on renewals without digging
+              through email.
             </p>
             <div className="ss-row">
-              <button className="ss-button" onClick={onSend}>
-                <Send size={16} /> Send package
+              <button className="ss-button" onClick={onAddPolicy}>
+                <Plus size={16} /> Add policy
               </button>
-              <button className="ss-button soft" onClick={onAddPolicy}>
-                <Zap size={16} /> Add policy
+              <button className="ss-button soft" onClick={onUpload}>
+                <Upload size={16} /> Upload document
               </button>
-              <button className="ss-button soft" onClick={onScan}>
-                <Upload size={16} /> Add document
+              <button className="ss-button soft" onClick={onSend}>
+                <Send size={16} /> Send certificate
               </button>
             </div>
           </div>
@@ -79,19 +96,16 @@ export default function VaultView({
 
         <div className="ss-command-metrics">
           <Info label="Policies tracked" value={policies.length} />
+          <Info label="Tracked premium" value={`${formatMoney(totalPremium)}/yr`} />
           <Info label="Critical" value={critical.length} />
           <Info label="Verified files" value={docs} />
-          <Info
-            label="Expiring in 30 days"
-            value={policies.filter((policy) => (policy.daysRemaining ?? 0) <= 30).length}
-          />
         </div>
       </section>
 
       <section className="ss-card">
         <Section
-          title="Policy List"
-          sub={`${filteredPolicies.length} policy${filteredPolicies.length === 1 ? "" : "ies"} shown`}
+          title="Policy list"
+          sub={`${filteredPolicies.length} ${filteredPolicies.length === 1 ? "policy" : "policies"} shown`}
         />
 
         {policies.length > 0 && (
@@ -102,7 +116,7 @@ export default function VaultView({
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by policy, carrier, or policy number..."
+                placeholder="Search by policy, carrier, or number..."
                 aria-label="Search policies"
               />
             </div>
@@ -134,7 +148,7 @@ export default function VaultView({
           <PolicyRow
             key={policy.id}
             policy={policy}
-            selected={policy.id === policyForDetail.id}
+            selected={policyForDetail && policy.id === policyForDetail.id}
             onClick={() => onSelectPolicy(policy.id)}
           />
         ))}
@@ -145,10 +159,9 @@ export default function VaultView({
           <PolicyDetail
             policy={policyForDetail}
             onRenew={() => onRenew(policyForDetail.id)}
-            onShop={() => onShop(policyForDetail.id)}
+            onFindSavings={() => onFindSavings(policyForDetail.id)}
             onSend={onSend}
             isRenewing={renewingId === policyForDetail.id}
-            isShopping={shoppingId === policyForDetail.id}
           />
         ) : (
           <div className="ss-empty" style={{ minHeight: 220 }}>
@@ -178,7 +191,7 @@ function PolicyRow({ policy, selected, onClick }) {
       <span className="ss-policy-copy">
         <b>{policy.name}</b>
         <small>
-          {policy.carrier} - {policy.policyNumber}
+          {policy.carrier} · {formatMoney(policy.premiumAmount ?? policy.premium)}/yr
         </small>
       </span>
       <em className={`ss-status ${status.className}`}>{status.label}</em>
@@ -186,7 +199,7 @@ function PolicyRow({ policy, selected, onClick }) {
   );
 }
 
-function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping }) {
+function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
   const width = `${Math.max(0, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
@@ -202,7 +215,7 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
           <span className="ss-eyebrow">Policy detail</span>
           <h2>{policy.name}</h2>
           <p className="ss-muted">
-            {policy.carrier} - {policy.policyNumber}
+            {policy.carrier} · {policy.policyNumber}
           </p>
         </div>
       </div>
@@ -219,10 +232,12 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
       </div>
 
       <div className="ss-info-grid">
-        <Info label="Limit" value={policy.coverageLimits || policy.limit} />
+        <Info label="Annual premium" value={`${formatMoney(policy.premiumAmount ?? policy.premium)}`} />
+        <Info label="Deductible" value={formatDeductible(policy.deductible)} />
+        <Info label="Coverage limit" value={policy.coverageLimits || policy.limit} />
         <Info label="Renews" value={formatLongDate(policy.renewalDate || policy.expires)} />
-        <Info label="Documents" value={`${policy.documents.length} verified`} />
-        <Info label="Review Partner" value={policy.brokerId ? "Assigned" : "Not assigned"} />
+        <Info label="Documents" value={`${policy.documents.length} on file`} />
+        <Info label="Advisor" value={policy.brokerId ? "Assigned" : "Not assigned"} />
       </div>
 
       <div className={`ss-note ${isCritical ? "danger" : ""}`}>
@@ -230,17 +245,22 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
         <span>{policy.statusNote}</span>
       </div>
 
-      <Section title="Verified Documents" sub={`${policy.documents.length} file${policy.documents.length === 1 ? "" : "s"}`} />
+      <Section
+        title="Documents on file"
+        sub={`${policy.documents.length} file${policy.documents.length === 1 ? "" : "s"}`}
+      />
+      {policy.documents.length === 0 && (
+        <div className="ss-note">
+          <AlertTriangle size={16} />
+          <span>No documents stored yet. Upload the declarations page to keep certificates ready.</span>
+        </div>
+      )}
       {policy.documents.map((doc) => (
         <DocumentRow key={doc} name={doc} />
       ))}
 
       <div className="ss-row">
-        <button
-          className="ss-button"
-          onClick={onRenew}
-          disabled={isRenewing || isShopping}
-        >
+        <button className="ss-button" onClick={onRenew} disabled={isRenewing}>
           {isRenewing ? (
             <>
               <Spinner /> Renewing...
@@ -251,19 +271,11 @@ function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping 
             </>
           )}
         </button>
-        <button
-          className="ss-button soft"
-          onClick={onShop}
-          disabled={isShopping || isRenewing}
-        >
-          {isShopping ? (
-            <>
-              <Spinner /> Shopping rates...
-            </>
-          ) : (
-            <>Lower bill</>
-          )}
-        </button>
+        {(policy.type || policy.policyType) !== "license" && (
+          <button className="ss-button soft" onClick={onFindSavings}>
+            <BadgeDollarSign size={16} /> Find savings
+          </button>
+        )}
         <button className="ss-button soft" onClick={onSend}>
           <Send size={16} /> Send
         </button>
@@ -278,7 +290,7 @@ function DocumentRow({ name }) {
       <span className="ss-pdf" aria-hidden="true">PDF</span>
       <div className="ss-doc-body">
         <b>{name}</b>
-        <small>Original carrier-issued document - verified</small>
+        <small>Carrier-issued document · verified</small>
       </div>
       <em className="ss-verified">
         <Check size={13} /> Verified

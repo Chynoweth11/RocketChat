@@ -4,27 +4,34 @@ import {
   dateFromToday,
   formatMoney,
   getComplianceScore,
+  getCoverageGaps,
+  getMissingDocuments,
   getNextRecommendedAction,
   getOpenQuoteRequests,
+  getPotentialSavings,
+  getRealizedSavings,
   getRenewalReminders,
   getUpcomingRenewals,
   makeId,
+  normalizeDocument,
   normalizePolicies,
   normalizePolicy,
   normalizeQuoteRequest,
   normalizeSavingsOpportunity,
   packagePolicies,
+  policyLabelFromType,
   readStoredData,
+  savingsForOpportunity,
   totalTrackedPremium,
   writeStoredData,
 } from "./utils.js";
 import { initialData } from "./data.js";
 import { Header, Sidebar } from "./components/Layout.jsx";
-import CommandCenterView from "./components/CommandCenterView.jsx";
-import VaultView from "./components/VaultView.jsx";
+import DashboardView from "./components/DashboardView.jsx";
+import PoliciesView from "./components/PoliciesView.jsx";
 import SavingsView from "./components/SavingsView.jsx";
-import ContractorsView from "./components/ContractorsView.jsx";
-import BrokersView from "./components/BrokersView.jsx";
+import CertificatesView from "./components/CertificatesView.jsx";
+import DocumentsView from "./components/DocumentsView.jsx";
 import ActivityView from "./components/ActivityView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import SendModal from "./components/SendModal.jsx";
@@ -76,16 +83,12 @@ function addProjectIfMissing(projects, project) {
   return exists ? current : [normalized, ...current];
 }
 
-function updateOpportunityStatus(opportunities, matcher, nextStatus, notes) {
-  return opportunities.map((opportunity) => {
-    if (!matcher(opportunity)) return opportunity;
-    return {
-      ...opportunity,
-      status: nextStatus,
-      notes: notes || opportunity.notes,
-      updatedAt: new Date().toISOString(),
-    };
-  });
+function patchOpportunity(opportunities, id, patch) {
+  return opportunities.map((opportunity) =>
+    opportunity.id === id
+      ? { ...opportunity, ...patch, updatedAt: new Date().toISOString() }
+      : opportunity
+  );
 }
 
 export default function SubShieldComplete() {
@@ -102,12 +105,16 @@ export default function SubShieldComplete() {
   const [modal, setModal] = useState(null);
   const [editingContractor, setEditingContractor] = useState(null);
   const [quoteDefaults, setQuoteDefaults] = useState({});
+  const [addPolicyType, setAddPolicyType] = useState(null);
   const [lastSent, setLastSent] = useState(null);
   const [renewingId, setRenewingId] = useState(null);
-  const [shoppingId, setShoppingId] = useState(null);
+  const [findingId, setFindingId] = useState(null);
   const [toast, setToast] = useState(null);
 
   const company = data.company || initialData.company;
+  const settings = data.settings || initialData.settings;
+  const firstName = settings.userProfile?.firstName || "";
+
   const policies = useMemo(
     () => normalizePolicies(data.policies, company.id),
     [data.policies, company.id]
@@ -123,34 +130,33 @@ export default function SubShieldComplete() {
     () => (data.quoteRequests || []).map((item) => normalizeQuoteRequest(item, company.id)),
     [data.quoteRequests, company.id]
   );
+  const documents = useMemo(
+    () => (data.documents || []).map((item) => normalizeDocument(item)),
+    [data.documents]
+  );
   const openQuoteRequests = useMemo(
     () => getOpenQuoteRequests(quoteRequests),
     [quoteRequests]
   );
-  const settings = data.settings || initialData.settings;
 
   const score = useMemo(() => getComplianceScore(policies), [policies]);
   const docs = useMemo(() => countDocuments(policies), [policies]);
   const totalPremium = useMemo(() => totalTrackedPremium(policies), [policies]);
+  const potentialSavings = useMemo(() => getPotentialSavings(opportunities), [opportunities]);
+  const realizedSavings = useMemo(() => getRealizedSavings(opportunities), [opportunities]);
+  const coverageGaps = useMemo(() => getCoverageGaps(policies), [policies]);
+  const missingDocuments = useMemo(
+    () => getMissingDocuments(policies, documents),
+    [policies, documents]
+  );
   const critical = useMemo(
     () => policies.filter((policy) => policy.daysRemaining <= 10),
     [policies]
   );
-  const upcoming = useMemo(
-    () => getUpcomingRenewals(policies, 5),
-    [policies]
-  );
-  const reminders = useMemo(
-    () => getRenewalReminders(policies),
-    [policies]
-  );
+  const upcoming = useMemo(() => getUpcomingRenewals(policies, 5), [policies]);
+  const reminders = useMemo(() => getRenewalReminders(policies), [policies]);
   const recommendedAction = useMemo(
-    () =>
-      getNextRecommendedAction({
-        reminders,
-        opportunities,
-        openQuoteRequests,
-      }),
+    () => getNextRecommendedAction({ reminders, opportunities, openQuoteRequests }),
     [reminders, opportunities, openQuoteRequests]
   );
 
@@ -158,6 +164,10 @@ export default function SubShieldComplete() {
   const selectedContractor =
     data.contractors.find((contractor) => contractor.id === contractorId) ||
     data.contractors[0];
+
+  const availableSavingsCount = opportunities.filter((item) =>
+    ["available", "quote_received"].includes(item.status)
+  ).length;
 
   useEffect(() => {
     if (!policies.find((policy) => policy.id === policyId) && policies[0]) {
@@ -190,6 +200,8 @@ export default function SubShieldComplete() {
     setToast({ title, body });
   }
 
+  /* ---------- Policies ---------- */
+
   function renewPolicy(id) {
     const policy = policies.find((item) => item.id === id);
     if (!policy || renewingId) return;
@@ -205,79 +217,36 @@ export default function SubShieldComplete() {
               expires: renewalDate,
               daysRemaining: 365,
               status: "active",
-              statusNote: "Renewed and ready for routing.",
+              statusNote: "Renewed and ready for certificates.",
               updatedAt: new Date().toISOString(),
             }
           : item
       );
 
-      const next = {
+      commit({
         ...data,
         policies: nextPolicies,
-        savingsOpportunities: updateOpportunityStatus(
+        savingsOpportunities: patchOpportunity(
           opportunities,
-          (opportunity) => opportunity.policyId === id,
-          "monitoring",
-          "Policy renewed. Continue monitoring market rates."
+          opportunities.find((o) => o.policyId === id)?.id,
+          { status: "monitoring", notes: "Policy renewed. Monitoring market rates." }
         ),
         activity: prependActivity(
           data.activity,
           `${policy.name} renewed`,
-          `${policy.carrier} - active through ${renewalDate}.`
+          `${policy.carrier} — active through ${renewalDate}.`
         ),
-      };
-      commit(next);
+      });
       setRenewingId(null);
       fireToast("Policy renewed", `${policy.name} is active for 365 days.`);
     }, 850);
-  }
-
-  function shopPolicy(id) {
-    const policy = policies.find((item) => item.id === id);
-    if (!policy || shoppingId) return;
-    setShoppingId(id);
-    setTimeout(() => {
-      const savings = Math.min(520, Math.round((policy.premiumAmount || 0) * 0.18));
-      const updatedPremium = Math.max(350, (policy.premiumAmount || 0) - savings);
-      const nextPolicies = data.policies.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              carrier: "NEXT Insurance",
-              premiumAmount: updatedPremium,
-              premium: updatedPremium,
-              statusNote: `Quoted and switched. Estimated savings: ${formatMoney(savings)}/yr.`,
-              lastQuotedAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            }
-          : item
-      );
-      const next = {
-        ...data,
-        policies: nextPolicies,
-        savingsOpportunities: updateOpportunityStatus(
-          opportunities,
-          (opportunity) => opportunity.policyId === id,
-          "accepted",
-          "Coverage moved to a lower premium option."
-        ),
-        activity: prependActivity(
-          data.activity,
-          `${policy.name} premium lowered`,
-          `Switched to NEXT Insurance - saving ${formatMoney(savings)}/yr.`
-        ),
-      };
-      commit(next);
-      setShoppingId(null);
-      fireToast("Lower rate secured", `Saving ${formatMoney(savings)}/yr on ${policy.name}.`);
-    }, 1100);
   }
 
   function addPolicy(policyInput) {
     const normalized = normalizePolicy(policyInput, company.id);
     const exists = policies.some((policy) => policy.policyNumber === normalized.policyNumber);
     if (exists) {
-      fireToast("Policy already exists", "This policy number is already in your wallet.");
+      fireToast("Policy already exists", "This policy number is already tracked.");
       return;
     }
 
@@ -291,9 +260,9 @@ export default function SubShieldComplete() {
               policyType: normalized.policyType,
               currentCarrier: normalized.carrier,
               currentPremium: normalized.premiumAmount,
-              estimatedSavings: Math.round(normalized.premiumAmount * 0.1),
+              estimatedSavings: Math.round(normalized.premiumAmount * 0.12),
               renewalDate: normalized.renewalDate,
-              status: normalized.daysRemaining <= 60 ? "available" : "monitoring",
+              status: normalized.daysRemaining <= 90 ? "available" : "monitoring",
             },
             nextPolicies,
             company.id
@@ -309,12 +278,13 @@ export default function SubShieldComplete() {
       activity: prependActivity(
         data.activity,
         `${normalized.name} added`,
-        `${normalized.carrier} policy ${normalized.policyNumber} added to insurance wallet.`
+        `${normalized.carrier} policy ${normalized.policyNumber} is now tracked.`
       ),
     });
     setPolicyId(normalized.id);
+    setAddPolicyType(null);
     setModal(null);
-    fireToast("Policy saved", `${normalized.name} added to your command center.`);
+    fireToast("Policy saved", `${normalized.name} added. We'll watch it for savings.`);
   }
 
   function vaultDocument(detected) {
@@ -327,6 +297,17 @@ export default function SubShieldComplete() {
       company.id
     );
 
+    const targetId = existing ? existing.id : normalizedDetected.id;
+    const documentRecord = normalizeDocument({
+      name: `${normalizedDetected.name} Declarations`,
+      docType: "declaration",
+      policyId: targetId,
+      policyType: normalizedDetected.policyType,
+      carrier: normalizedDetected.carrier,
+      status: "verified",
+      addedBy: firstName || "You",
+    });
+
     if (existing) {
       const nextPolicies = data.policies.map((policy) =>
         policy.id === existing.id
@@ -337,7 +318,7 @@ export default function SubShieldComplete() {
               documents: Array.from(
                 new Set([...(policy.documents || []), ...normalizedDetected.documents])
               ),
-              statusNote: "Re-vaulted from a fresh carrier document.",
+              statusNote: "Refreshed from a new carrier document.",
             }
           : policy
       );
@@ -345,16 +326,17 @@ export default function SubShieldComplete() {
       commit({
         ...data,
         policies: nextPolicies,
+        documents: [documentRecord, ...(data.documents || [])],
         activity: prependActivity(
           data.activity,
-          `${normalizedDetected.name} re-vaulted`,
-          `Updated ${normalizedDetected.carrier} documents for current compliance records.`
+          `${normalizedDetected.name} updated`,
+          `Refreshed ${normalizedDetected.carrier} documents.`
         ),
       });
       setPolicyId(existing.id);
-      fireToast("Policy updated", `${normalizedDetected.name} refreshed from uploaded document.`);
+      fireToast("Policy updated", `${normalizedDetected.name} refreshed from your upload.`);
     } else {
-      const policy = { ...normalizedDetected, id: makeId(normalizedDetected.policyType) };
+      const policy = { ...normalizedDetected, id: targetId };
       const nextPolicies = [...data.policies, policy];
       const nextOpportunities =
         policy.policyType === "license"
@@ -366,9 +348,9 @@ export default function SubShieldComplete() {
                   policyType: policy.policyType,
                   currentCarrier: policy.carrier,
                   currentPremium: policy.premiumAmount,
-                  estimatedSavings: Math.round(policy.premiumAmount * 0.1),
+                  estimatedSavings: Math.round(policy.premiumAmount * 0.12),
                   renewalDate: policy.renewalDate,
-                  status: policy.daysRemaining <= 60 ? "available" : "monitoring",
+                  status: policy.daysRemaining <= 90 ? "available" : "monitoring",
                 },
                 nextPolicies,
                 company.id
@@ -380,17 +362,178 @@ export default function SubShieldComplete() {
         ...data,
         policies: nextPolicies,
         savingsOpportunities: nextOpportunities,
+        documents: [documentRecord, ...(data.documents || [])],
         activity: prependActivity(
           data.activity,
-          `${policy.name} vaulted`,
-          `Original ${policy.carrier} document added to verified insurance wallet.`
+          `${policy.name} uploaded`,
+          `${policy.carrier} document added and filed in your document center.`
         ),
       });
       setPolicyId(policy.id);
-      fireToast("Document vaulted", `${policy.name} added to your policy vault.`);
+      fireToast("Insurance uploaded", `${policy.name} added — checking for savings.`);
     }
     setModal(null);
   }
+
+  /* ---------- Savings ---------- */
+
+  function findBetterRate(opportunity) {
+    if (findingId) return;
+    setFindingId(opportunity.id);
+    setTimeout(() => {
+      const policy = policies.find((item) => item.id === opportunity.policyId);
+      const base = opportunity.currentPremium || policy?.premiumAmount || 0;
+      const est = opportunity.estimatedSavings || Math.round(base * 0.12);
+      const newPremium = Math.max(200, base - est);
+      const savings = base - newPremium;
+      const partner =
+        data.partners.find((p) => p.id === opportunity.partnerId && p.active) ||
+        data.partners.find(
+          (p) => p.active && p.policyTypes?.includes(opportunity.policyType)
+        ) ||
+        data.partners.find((p) => p.active);
+
+      const alternateQuote = {
+        partnerId: partner?.id || null,
+        partnerName: partner?.name || "Licensed partner",
+        carrier: partner?.name || "Licensed partner",
+        premium: newPremium,
+        deductible: policy?.deductible ?? null,
+        coverageLimits: policy?.coverageLimits || "",
+        amRating: partner?.amRating || "A (Excellent)",
+        bindableUntil: dateFromToday(14),
+        highlights: [
+          "Comparable coverage and limits",
+          `${formatMoney(savings)}/yr lower premium`,
+          "No coverage gap when you switch",
+        ],
+      };
+
+      const quoteDoc = normalizeDocument({
+        name: `${policy?.name || policyLabelFromType(opportunity.policyType)} Quote — ${alternateQuote.carrier}`,
+        docType: "quote",
+        policyId: opportunity.policyId,
+        policyType: opportunity.policyType,
+        carrier: alternateQuote.carrier,
+        status: "pending",
+        addedBy: "SubShield",
+      });
+
+      const quoteRequest = normalizeQuoteRequest(
+        {
+          policyId: opportunity.policyId,
+          partnerId: partner?.id || null,
+          routeType: "partner",
+          status: "quote_received",
+          submittedAt: new Date().toISOString(),
+          respondedAt: new Date().toISOString(),
+          notes: `Auto-shopped — ${formatMoney(savings)}/yr below current premium.`,
+        },
+        company.id
+      );
+
+      commit({
+        ...data,
+        savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+          status: "quote_received",
+          alternateQuote,
+          partnerId: partner?.id || opportunity.partnerId,
+        }),
+        quoteRequests: [quoteRequest, ...quoteRequests],
+        documents: [quoteDoc, ...(data.documents || [])],
+        activity: prependActivity(
+          data.activity,
+          `Better ${policyLabelFromType(opportunity.policyType)} rate found`,
+          `${alternateQuote.carrier} quoted ${formatMoney(newPremium)}/yr — saving ${formatMoney(savings)}/yr.`
+        ),
+      });
+      setFindingId(null);
+      fireToast("Better rate found", `Save ${formatMoney(savings)}/yr — review the comparison.`);
+    }, 1100);
+  }
+
+  function acceptQuote(opportunity) {
+    const quote = opportunity.alternateQuote;
+    if (!quote) return;
+    const policy = policies.find((item) => item.id === opportunity.policyId);
+    const savings = savingsForOpportunity(opportunity);
+
+    const nextPolicies = data.policies.map((item) =>
+      item.id === opportunity.policyId
+        ? {
+            ...item,
+            carrier: quote.carrier,
+            premiumAmount: quote.premium,
+            premium: quote.premium,
+            deductible: quote.deductible ?? item.deductible,
+            coverageLimits: quote.coverageLimits || item.coverageLimits,
+            limit: quote.coverageLimits || item.limit,
+            statusNote: `Switched to ${quote.carrier} — saving ${formatMoney(savings)}/yr.`,
+            lastQuotedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        : item
+    );
+
+    commit({
+      ...data,
+      policies: nextPolicies,
+      savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+        status: "accepted",
+        currentCarrier: quote.carrier,
+      }),
+      activity: prependActivity(
+        data.activity,
+        `Switched ${policy?.name || "policy"} to ${quote.carrier}`,
+        `Now saving ${formatMoney(savings)}/yr. SubShield is handling the paperwork.`
+      ),
+    });
+    fireToast("Coverage switched", `You're saving ${formatMoney(savings)}/yr.`);
+  }
+
+  function keepCurrentOpportunity(opportunity) {
+    commit({
+      ...data,
+      savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+        status: "dismissed",
+        notes: "Marked not interested.",
+      }),
+      activity: prependActivity(
+        data.activity,
+        `${policyLabelFromType(opportunity.policyType)} savings dismissed`,
+        "You chose to keep your current coverage."
+      ),
+    });
+    fireToast("Kept current coverage", "We'll stop prompting this one.");
+  }
+
+  function remindLaterOpportunity(opportunity) {
+    commit({
+      ...data,
+      savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+        status: "remind_later",
+        notes: "Snoozed until closer to renewal.",
+      }),
+      activity: prependActivity(
+        data.activity,
+        `${policyLabelFromType(opportunity.policyType)} savings snoozed`,
+        "SubShield will resurface this near renewal."
+      ),
+    });
+    fireToast("Snoozed", "We'll resurface this opportunity later.");
+  }
+
+  function reactivateOpportunity(opportunity) {
+    commit({
+      ...data,
+      savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+        status: opportunity.alternateQuote ? "quote_received" : "available",
+      }),
+    });
+    fireToast("Reopened", "This savings opportunity is active again.");
+  }
+
+  /* ---------- Quote requests ---------- */
 
   function openQuoteModal(opportunity, defaultRouteType = "partner", extra = {}) {
     const defaultPolicyId = extra.defaultPolicyId || opportunity?.policyId || selectedPolicy?.id;
@@ -419,22 +562,20 @@ export default function SubShieldComplete() {
       request.routeType === "partner"
         ? data.partners.find((item) => item.id === request.partnerId)?.name || "partner"
         : data.brokers.find((item) => item.id === request.brokerId)?.name || "advisor";
-    const nextOpportunities = updateOpportunityStatus(
-      opportunities,
-      (opportunity) =>
-        opportunity.id === request.opportunityId || opportunity.policyId === request.policyId,
-      request.routeType === "partner" ? "sent_to_partner" : "requested",
-      `Quote request submitted to ${routeLabel}.`
-    );
 
     commit({
       ...data,
       quoteRequests: [normalizedRequest, ...quoteRequests],
-      savingsOpportunities: nextOpportunities,
+      savingsOpportunities: request.opportunityId
+        ? patchOpportunity(opportunities, request.opportunityId, {
+            status: request.routeType === "partner" ? "sent_to_partner" : "requested",
+            notes: `Quote request submitted to ${routeLabel}.`,
+          })
+        : opportunities,
       activity: prependActivity(
         data.activity,
         "Quote request submitted",
-        `${policy?.name || "Policy"} routed to ${routeLabel} for rate review.`
+        `${policy?.name || "Policy"} routed to ${routeLabel} for review.`
       ),
     });
 
@@ -443,44 +584,7 @@ export default function SubShieldComplete() {
     fireToast("Request submitted", `Coverage details sent to ${routeLabel}.`);
   }
 
-  function updateOpportunity(opportunity, status, notes, toastTitle, toastBody) {
-    const next = {
-      ...data,
-      savingsOpportunities: updateOpportunityStatus(
-        opportunities,
-        (item) => item.id === opportunity.id,
-        status,
-        notes
-      ),
-      activity: prependActivity(
-        data.activity,
-        `${opportunity.policyType} savings ${status.replace(/_/g, " ")}`,
-        notes
-      ),
-    };
-    commit(next);
-    fireToast(toastTitle, toastBody);
-  }
-
-  function dismissOpportunity(opportunity) {
-    updateOpportunity(
-      opportunity,
-      "dismissed",
-      "User marked this opportunity as not interested.",
-      "Opportunity dismissed",
-      "SubShield will stop prompting this item."
-    );
-  }
-
-  function remindLaterOpportunity(opportunity) {
-    updateOpportunity(
-      opportunity,
-      "remind_later",
-      "Reminder snoozed. SubShield will surface this again closer to renewal.",
-      "Reminder snoozed",
-      "This savings opportunity will reappear later."
-    );
-  }
+  /* ---------- Certificates ---------- */
 
   function sendPackage() {
     if (!selectedContractor) return;
@@ -502,6 +606,14 @@ export default function SubShieldComplete() {
       status: "delivered",
     };
 
+    const certificateDoc = normalizeDocument({
+      name: `COI — ${finalProject} (${selectedContractor.name})`,
+      docType: "certificate",
+      carrier: company.name,
+      status: "verified",
+      addedBy: firstName || "You",
+    });
+
     const contractors = data.contractors.map((contractor) => {
       if (contractor.id !== selectedContractor.id) {
         return { ...contractor, projects: normalizeProjects(contractor.projects) };
@@ -517,10 +629,11 @@ export default function SubShieldComplete() {
       ...data,
       contractors,
       coiSends: [sendRecord, ...(data.coiSends || [])].slice(0, 50),
+      documents: [certificateDoc, ...(data.documents || [])],
       activity: prependActivity(
         data.activity,
-        `COI sent to ${selectedContractor.name}`,
-        `${finalProject} - ${packageDocCount} verified files routed to ${selectedContractor.email}.`
+        `Certificate sent to ${selectedContractor.name}`,
+        `${finalProject} — ${packageDocCount} verified files to ${selectedContractor.email}.`
       ),
     });
 
@@ -536,10 +649,7 @@ export default function SubShieldComplete() {
       (existing) => existing.email.trim().toLowerCase() === email
     );
     if (emailExists) {
-      fireToast(
-        "Duplicate compliance email",
-        "A GC with that email already exists. Edit the existing entry instead."
-      );
+      fireToast("Duplicate email", "A holder with that email already exists. Edit it instead.");
       return;
     }
 
@@ -557,24 +667,23 @@ export default function SubShieldComplete() {
       contractors: [normalized, ...data.contractors],
       activity: prependActivity(
         data.activity,
-        `${normalized.name} added to directory`,
-        `${normalized.contact} - ${normalized.email}`
+        `${normalized.name} added`,
+        `${normalized.contact} — ${normalized.email}`
       ),
     });
     setContractorId(normalized.id);
     setProject(normalized.projects[0] || "");
     setModal(null);
-    fireToast("GC saved", `${normalized.name} added to your directory.`);
+    fireToast("Holder saved", `${normalized.name} added to your certificates.`);
   }
 
   function updateContractor(updated) {
     const email = updated.email.trim().toLowerCase();
     const emailConflict = data.contractors.some(
-      (existing) =>
-        existing.id !== updated.id && existing.email.trim().toLowerCase() === email
+      (existing) => existing.id !== updated.id && existing.email.trim().toLowerCase() === email
     );
     if (emailConflict) {
-      fireToast("Duplicate compliance email", "That email is already used by another GC.");
+      fireToast("Duplicate email", "That email is already used by another holder.");
       return;
     }
 
@@ -595,12 +704,12 @@ export default function SubShieldComplete() {
       activity: prependActivity(
         data.activity,
         `${normalized.name} updated`,
-        "Certificate holder and delivery details saved."
+        "Certificate holder details saved."
       ),
     });
     setEditingContractor(null);
     setModal(null);
-    fireToast("GC updated", `${normalized.name} details saved.`);
+    fireToast("Holder updated", `${normalized.name} details saved.`);
   }
 
   function deleteContractor(id) {
@@ -610,14 +719,16 @@ export default function SubShieldComplete() {
       contractors: data.contractors.filter((contractor) => contractor.id !== id),
       activity: prependActivity(
         data.activity,
-        `${removed?.name || "GC"} removed`,
-        "Contractor removed from directory."
+        `${removed?.name || "Holder"} removed`,
+        "Certificate holder removed."
       ),
     });
     setEditingContractor(null);
     setModal(null);
-    fireToast("GC removed", `${removed?.name || "Contractor"} removed.`);
+    fireToast("Holder removed", `${removed?.name || "Holder"} removed.`);
   }
+
+  /* ---------- Advisors ---------- */
 
   function addBroker(broker) {
     const email = broker.email.trim().toLowerCase();
@@ -625,7 +736,7 @@ export default function SubShieldComplete() {
       (item) => item.email.trim().toLowerCase() === email
     );
     if (exists) {
-      fireToast("Duplicate partner email", "A review partner with that email already exists.");
+      fireToast("Duplicate advisor", "An advisor with that email already exists.");
       return;
     }
 
@@ -635,19 +746,34 @@ export default function SubShieldComplete() {
       brokers: [normalized, ...(data.brokers || [])],
       activity: prependActivity(
         data.activity,
-        "Insurance review partner added",
-        `${normalized.name} (${normalized.company}) added to the coverage and savings network.`
+        "Advisor added",
+        `${normalized.name} (${normalized.company}) is ready for coverage reviews.`
       ),
     });
     setModal(null);
-    fireToast("Partner added", `${normalized.name} is ready for coverage review requests.`);
+    fireToast("Advisor added", `${normalized.name} saved.`);
   }
 
+  /* ---------- Documents ---------- */
+
+  function deleteDocument(id) {
+    const removed = documents.find((doc) => doc.id === id);
+    commit({
+      ...data,
+      documents: (data.documents || []).filter((doc) => doc.id !== id),
+      activity: prependActivity(
+        data.activity,
+        "Document removed",
+        `${removed?.name || "A document"} was deleted from the document center.`
+      ),
+    });
+    fireToast("Document removed", `${removed?.name || "Document"} deleted.`);
+  }
+
+  /* ---------- Settings ---------- */
+
   function saveSettingsSection(sectionKey, value, meta = {}) {
-    const mergedSettings = {
-      ...settings,
-      [sectionKey]: value,
-    };
+    const mergedSettings = { ...settings, [sectionKey]: value };
 
     const nextCompany =
       sectionKey === "companyProfile"
@@ -679,10 +805,7 @@ export default function SubShieldComplete() {
       ),
     });
 
-    fireToast(
-      meta.toastTitle || "Settings saved",
-      meta.toastBody || "Your changes are now live."
-    );
+    fireToast(meta.toastTitle || "Settings saved", meta.toastBody || "Your changes are live.");
   }
 
   function logoutUser() {
@@ -712,13 +835,14 @@ export default function SubShieldComplete() {
     fireToast("Demo reset", "Local data restored to the seed state.");
   }
 
+  /* ---------- Navigation helpers ---------- */
+
   function openSend(contractor) {
     if (!data.contractors.length) {
-      setView("contractors");
-      fireToast("No recipients saved", "Add a recipient before sending a COI package.");
+      setView("certificates");
+      fireToast("No holders saved", "Add a certificate holder before sending.");
       return;
     }
-
     if (contractor) {
       setContractorId(contractor.id);
       setProject(contractor.projects[0] || "");
@@ -735,8 +859,22 @@ export default function SubShieldComplete() {
     setModal("edit");
   }
 
+  function openAddPolicy(type) {
+    setAddPolicyType(type || null);
+    setModal("add-policy");
+  }
+
+  function findSavingsForPolicy(id) {
+    setView("savings");
+    const opportunity = opportunities.find(
+      (o) => o.policyId === id && ["available", "monitoring"].includes(o.status)
+    );
+    if (opportunity && opportunity.status === "available") {
+      findBetterRate(opportunity);
+    }
+  }
+
   const existingTypes = policies.map((policy) => policy.policyType || policy.type);
-  const availableSavingsCount = opportunities.filter((item) => item.status === "available").length;
 
   return (
     <div className="ss-app">
@@ -744,57 +882,59 @@ export default function SubShieldComplete() {
         <Sidebar
           view={view}
           setView={setView}
-          docCount={docs}
           upcoming={upcoming}
-          criticalCount={critical.length}
+          potentialSavings={potentialSavings}
           savingsCount={availableSavingsCount}
-          openQuoteCount={openQuoteRequests.length}
-          onSend={() => openSend()}
+          onReviewSavings={() => setView("savings")}
         />
 
         <main className="ss-main">
           <Header
             view={view}
-            onScan={() => setModal("scan")}
+            onUpload={() => setModal("scan")}
             onActivity={() => setView("activity")}
             unread={critical.length + reminders.length}
           />
 
           {view === "dashboard" && (
-            <CommandCenterView
-              score={score}
+            <DashboardView
+              firstName={firstName}
+              totalPremium={totalPremium}
+              potentialSavings={potentialSavings}
+              realizedSavings={realizedSavings}
               policies={policies}
-              docs={docs}
-              contractors={data.contractors}
+              docsCount={docs}
               upcoming={upcoming}
               reminders={reminders}
               opportunities={opportunities}
               openQuoteRequests={openQuoteRequests}
               coiSends={data.coiSends || []}
-              totalPremium={totalPremium}
+              coverageGaps={coverageGaps}
+              missingDocuments={missingDocuments}
               recommendedAction={recommendedAction}
-              onOpenSend={() => openSend()}
-              onOpenQuote={(opportunity, routeType) => openQuoteModal(opportunity, routeType)}
-              onOpenSavings={() => setView("savings")}
-              onOpenVault={() => setView("vault")}
+              onReviewSavings={() => setView("savings")}
+              onOpenPolicies={() => setView("policies")}
+              onAddCoverage={openAddPolicy}
+              onUpload={() => setModal("scan")}
+              onQueueAction={(target) => setView(target)}
             />
           )}
 
-          {view === "vault" && (
-            <VaultView
+          {view === "policies" && (
+            <PoliciesView
               score={score}
               docs={docs}
               critical={critical}
               policies={policies}
+              totalPremium={totalPremium}
               selectedPolicy={selectedPolicy}
               onSelectPolicy={setPolicyId}
               onRenew={renewPolicy}
-              onShop={shopPolicy}
               onSend={() => openSend()}
-              onScan={() => setModal("scan")}
-              onAddPolicy={() => setModal("add-policy")}
+              onUpload={() => setModal("scan")}
+              onAddPolicy={() => openAddPolicy()}
+              onFindSavings={findSavingsForPolicy}
               renewingId={renewingId}
-              shoppingId={shoppingId}
             />
           )}
 
@@ -805,41 +945,35 @@ export default function SubShieldComplete() {
               quoteRequests={quoteRequests}
               partners={data.partners || []}
               brokers={data.brokers || []}
-              onCompareRates={(opportunity) => openQuoteModal(opportunity, "partner")}
-              onSendToBroker={(opportunity) => openQuoteModal(opportunity, "broker")}
-              onDismiss={dismissOpportunity}
+              potentialSavings={potentialSavings}
+              realizedSavings={realizedSavings}
+              findingId={findingId}
+              onFindBetterRate={findBetterRate}
+              onAcceptQuote={acceptQuote}
+              onKeepCurrent={keepCurrentOpportunity}
+              onTalkToAdvisor={(opportunity) => openQuoteModal(opportunity, "broker")}
               onRemindLater={remindLaterOpportunity}
+              onReactivate={reactivateOpportunity}
+              onAddAdvisor={() => setModal("add-broker")}
             />
           )}
 
-          {view === "contractors" && (
-            <ContractorsView
+          {view === "certificates" && (
+            <CertificatesView
               contractors={data.contractors}
+              coiSends={data.coiSends || []}
               onSend={openSend}
               onAdd={() => setModal("add-gc")}
               onEdit={openEdit}
             />
           )}
 
-          {view === "brokers" && (
-            <BrokersView
-              brokers={data.brokers || []}
-              partners={data.partners || []}
-              onAddBroker={() => setModal("add-broker")}
-              onRequestBrokerQuote={(broker) =>
-                openQuoteModal(
-                  null,
-                  "broker",
-                  { defaultBrokerId: broker.id, defaultPolicyId: selectedPolicy?.id }
-                )
-              }
-              onRequestPartnerQuote={(partner) =>
-                openQuoteModal(
-                  null,
-                  "partner",
-                  { defaultPartnerId: partner.id, defaultPolicyId: selectedPolicy?.id }
-                )
-              }
+          {view === "documents" && (
+            <DocumentsView
+              documents={documents}
+              policies={policies}
+              onUpload={() => setModal("scan")}
+              onDelete={deleteDocument}
             />
           )}
 
@@ -870,7 +1004,11 @@ export default function SubShieldComplete() {
       {modal === "add-policy" && (
         <AddPolicyModal
           brokers={data.brokers || []}
-          onClose={() => setModal(null)}
+          defaultType={addPolicyType}
+          onClose={() => {
+            setModal(null);
+            setAddPolicyType(null);
+          }}
           onSave={addPolicy}
         />
       )}

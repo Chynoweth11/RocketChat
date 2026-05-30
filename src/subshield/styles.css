@@ -1788,6 +1788,410 @@ textarea {
 .ss-ring.warning .ss-ring-value { color: var(--warning); }
 .ss-ring.danger .ss-ring-value { color: var(--danger); }
 
+/* ---------- 15.5 Product surfaces ---------- */
+
+/* Nav savings badge */
+.ss-nav {
+  position: relative;
+}
+
+.ss-nav-badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--success-soft);
+  color: #1f7a57;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Info hint line */
+.ss-info-hint {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--brand);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Positive savings color */
+.ss-savings-pos {
+  color: var(--success) !important;
+}
+
+/* Dashboard insight amount cell */
+.ss-insight-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ss-insight-amount strong {
+  font-size: 15px;
+  font-weight: 820;
+  letter-spacing: -0.03em;
+}
+
+/* Sidebar savings stack inside command tip */
+.ss-savings-stack {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ss-savings-stack small {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.ss-savings-stack strong {
+  font-size: 20px;
+  font-weight: 820;
+  letter-spacing: -0.04em;
+}
+
+/* Trust strip */
+.ss-trust-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #d7e8de;
+  background: var(--success-soft);
+  color: #1f7a57;
+  font-size: 12px;
+  font-weight: 650;
+  max-width: 100%;
+}
+
+.ss-trust-strip svg {
+  flex-shrink: 0;
+}
+
+/* How-it-works steps */
+.ss-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ss-step {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  padding: 14px;
+}
+
+.ss-step-index {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--faint);
+}
+
+.ss-step-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-soft);
+  color: var(--brand);
+  margin-bottom: 8px;
+}
+
+.ss-step b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 760;
+}
+
+.ss-step small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Savings opportunity list + comparison */
+.ss-savings-list {
+  display: grid;
+  gap: 14px;
+}
+
+.ss-savings-card.accepted {
+  border-color: #cfe9dc;
+  background: linear-gradient(180deg, #f4fbf7 0%, #eef9f3 100%);
+}
+
+.ss-savings-card.muted {
+  background: var(--surface-soft);
+  opacity: 0.92;
+}
+
+.ss-compare {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.ss-compare-col {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  padding: 14px;
+}
+
+.ss-compare-col.recommended {
+  border-color: #bfe0cd;
+  background: linear-gradient(180deg, #f6fdf9 0%, #eef9f2 100%);
+  box-shadow: 0 12px 26px rgba(31, 138, 98, 0.12);
+}
+
+.ss-compare-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 760;
+  color: var(--muted);
+}
+
+.ss-compare-col.recommended .ss-compare-label {
+  color: #1f7a57;
+}
+
+.ss-compare-col b {
+  display: block;
+  margin: 6px 0 10px;
+  font-size: 15px;
+  font-weight: 780;
+}
+
+.ss-compare-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  align-items: baseline;
+}
+
+.ss-compare-rows span {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ss-compare-rows strong {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.ss-compare-arrow {
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+}
+
+.ss-quote-highlights {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.ss-quote-highlights li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1f7a57;
+}
+
+.ss-fine {
+  margin: 12px 0 0;
+  font-size: 11.5px;
+  color: var(--faint);
+  line-height: 1.5;
+}
+
+/* Partner network (background trust) */
+.ss-partner-network {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.ss-partner-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.ss-partner-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 680;
+}
+
+.ss-partner-chip svg {
+  color: var(--success);
+}
+
+/* Coverage gaps */
+.ss-gap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.ss-gap-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  padding: 14px;
+}
+
+.ss-gap-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--warning-soft);
+  color: #9a6116;
+  flex-shrink: 0;
+}
+
+.ss-gap-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-gap-body b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 760;
+}
+
+.ss-gap-body small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Document center rows */
+.ss-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  padding: 12px 13px;
+  margin-bottom: 9px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-doc-row:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.ss-doc-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+  border: 1px solid var(--line);
+  color: #2b4b82;
+  flex-shrink: 0;
+}
+
+.ss-doc-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-doc-row-body b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 730;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ss-doc-row-body small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ss-doc-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.ss-doc-size {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.ss-doc-date {
+  font-size: 11px;
+  color: var(--faint);
+}
+
 /* ---------- 16. Responsive ---------- */
 
 /* --- Tablet / collapsed sidebar (≤ 980px) --- */
@@ -1873,6 +2277,18 @@ textarea {
     width: 100%;
   }
 
+  .ss-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-compare-arrow {
+    transform: rotate(90deg);
+  }
+
   .ss-detected {
     grid-template-columns: 1fr;
     gap: 6px;
@@ -1941,6 +2357,18 @@ textarea {
     flex-wrap: wrap;
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .ss-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-doc-meta {
+    display: none;
+  }
+
+  .ss-doc-row-body b {
+    white-space: normal;
   }
 
   /* Insight rows: stack content and action vertically */

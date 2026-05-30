@@ -1,14 +1,15 @@
 # SubShield
 
-SubShield is a subcontractor-first insurance command center:
+**Rocket Money for business insurance.** SubShield reviews a company's commercial
+insurance, watches every renewal, finds lower-cost options from a licensed partner
+network, and handles the paperwork — so owners stay covered and stop overpaying.
 
-- insurance policy wallet
-- compliance vault
-- COI sending workflow
-- renewal tracker
-- savings and quote request assistant
+The core promise:
 
-Built with React 19 + Vite 6.
+> Upload your insurance → we review it → we look for savings → we show better
+> options → you choose if you want to switch → we help handle the paperwork.
+
+Built with React 19 + Vite 6. Frontend-only with local persistence.
 
 ## Quick start
 
@@ -27,28 +28,40 @@ npm run preview
 
 ## Product surfaces
 
-- Command center dashboard with compliance, premium, reminders, and recommended next action
-- Policy vault with renewal and lower-bill actions
-- Savings opportunities with compare/send-to-broker/dismiss/snooze actions
-- Quote request routing to partner marketplace or saved brokers
-- GC directory with holder details, portal instructions, and send history
-- Broker and partner workspace
-- Activity log with timestamp grouping
-- Profile and workflow settings
+- **Dashboard** — executive overview: potential & realized savings, tracked
+  premium, renewals, coverage gaps, missing documents, and a ranked priority queue.
+- **Policies** — every policy with premium, **deductible**, limits, renewal date,
+  documents, and renew / find-savings / send actions.
+- **Savings** — the core feature. Review opportunities, run an instant rate check,
+  compare **current vs. recommended** side by side, and accept & switch in one click.
+  Backed by a licensed partner network that stays in the background.
+- **Certificates** — send certificates of insurance, save certificate holders, and
+  keep a full delivery history.
+- **Documents** — a document center for declarations, certificates, endorsements,
+  quotes, and invoices with type filters and search.
+- **Activity** — a complete audit trail of every insurance action.
+- **Settings** — account, team, billing, security, notifications, and product controls.
+
+## Insurance types
+
+General Liability, Workers' Compensation, Commercial Auto, Umbrella / Excess,
+Commercial Property, Cyber, Equipment / Inland Marine, Tools, Builder's Risk,
+Professional, Pollution, Surety Bonding, and Trade License.
 
 ## Data model (frontend local persistence)
 
-The app now tracks production-style entities in local state and localStorage:
+Production-style entities tracked in state and `localStorage`:
 
 - `company`
-- `policies`
-- `contractors`
-- `brokers`
-- `partners`
-- `savingsOpportunities`
+- `policies` (premium, deductible, limits, renewal, documents)
+- `savingsOpportunities` (with `alternateQuote` comparisons)
 - `quoteRequests`
+- `documents` (declarations, certificates, endorsements, quotes, invoices)
+- `contractors` (certificate holders)
 - `coiSends`
+- `brokers` (advisors) and `partners` (licensed network)
 - `activity`
+- `settings`
 - `preferences`
 
-Storage key: `subshield.complete.v3`
+Storage key: `subshield.complete.v5`

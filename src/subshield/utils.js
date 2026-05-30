@@ -3,7 +3,7 @@
  * Pure functions only - no React, no DOM beyond localStorage / clipboard.
  */
 
-export const STORAGE_KEY = "subshield.complete.v4";
+export const STORAGE_KEY = "subshield.complete.v5";
 
 export const RENEWAL_REMINDER_DAYS = [90, 60, 30, 10, 0];
 
@@ -12,12 +12,15 @@ const POLICY_TYPE_NAMES = {
   workers: "Workers' Compensation",
   auto: "Commercial Auto",
   umbrella: "Umbrella / Excess Liability",
-  license: "Trade License",
-  pollution: "Pollution Liability",
-  professional: "Professional Liability",
+  property: "Commercial Property",
+  cyber: "Cyber Liability",
+  equipment: "Equipment / Inland Marine",
   tools: "Tools & Equipment",
   builders_risk: "Builder's Risk",
-  bonding: "Bonding",
+  pollution: "Pollution Liability",
+  professional: "Professional Liability",
+  bonding: "Surety Bonding",
+  license: "Trade License",
 };
 
 const DEFAULT_POLICY_LIMITS = {
@@ -25,12 +28,55 @@ const DEFAULT_POLICY_LIMITS = {
   workers: "Statutory / $1M employer liability",
   auto: "$1M combined single limit",
   umbrella: "$2M excess liability",
-  license: "Trade contractor license",
-  pollution: "$1M pollution liability",
-  professional: "$1M professional liability",
+  property: "$750k building / $250k contents",
+  cyber: "$1M cyber liability",
+  equipment: "$150k scheduled equipment",
   tools: "$150k scheduled tools",
   builders_risk: "$500k project limit",
+  pollution: "$1M pollution liability",
+  professional: "$1M professional liability",
   bonding: "$500k bond capacity",
+  license: "Trade contractor license",
+};
+
+/**
+ * Core coverages most commercial businesses should carry. Used to surface
+ * "missing coverage" gaps on the dashboard and savings views.
+ */
+const RECOMMENDED_COVERAGE = [
+  {
+    type: "liability",
+    reason: "Baseline protection nearly every client and contract requires.",
+  },
+  {
+    type: "workers",
+    reason: "Required in most states once you have employees.",
+  },
+  {
+    type: "auto",
+    reason: "Covers vehicles used for business — often required on job sites.",
+  },
+  {
+    type: "property",
+    reason: "Protects your building, tools, and contents from loss.",
+  },
+  {
+    type: "umbrella",
+    reason: "Extends your limits to meet larger contract requirements.",
+  },
+  {
+    type: "cyber",
+    reason: "Covers breaches, wire fraud, and downtime — increasingly required.",
+  },
+];
+
+const DOCUMENT_TYPE_LABELS = {
+  declaration: "Declarations Page",
+  certificate: "Certificate (COI)",
+  endorsement: "Endorsement",
+  quote: "Renewal Quote",
+  invoice: "Invoice",
+  policy: "Policy Document",
 };
 
 const DAY_BUCKETS = ["Today", "Yesterday"];
@@ -48,9 +94,14 @@ const MONTHS_SHORT = [
 const QUOTE_STATUS_LABELS = {
   draft: "Draft",
   submitted: "Submitted",
+  requested: "Requested",
   sent_to_partner: "Sent to partner",
-  quote_received: "Quote received",
-  accepted: "Accepted",
+  quote_received: "Quote ready",
+  available: "Savings available",
+  monitoring: "Monitoring",
+  accepted: "Switched & saving",
+  remind_later: "Snoozed",
+  dismissed: "Dismissed",
   declined: "Declined",
   closed: "Closed",
 };
@@ -129,6 +180,11 @@ export function normalizePolicy(rawPolicy, companyId = "subshield-tile-co") {
   const updatedAt = rawPolicy.updatedAt || createdAt;
   const coverageLimits = rawPolicy.coverageLimits || rawPolicy.limit || DEFAULT_POLICY_LIMITS[policyType] || "";
   const documents = normalizePolicyDocuments(rawPolicy.documents);
+  const rawDeductible = rawPolicy.deductible;
+  const deductible =
+    rawDeductible === null || rawDeductible === undefined || rawDeductible === ""
+      ? null
+      : toNumber(rawDeductible, 0);
 
   return {
     ...rawPolicy,
@@ -142,6 +198,7 @@ export function normalizePolicy(rawPolicy, companyId = "subshield-tile-co") {
     premiumAmount,
     premium: premiumAmount,
     premiumFrequency,
+    deductible,
     effectiveDate: rawPolicy.effectiveDate || dateFromToday(daysRemaining - 365),
     expirationDate,
     renewalDate,
@@ -173,6 +230,13 @@ export function normalizePolicies(policies = [], companyId) {
 
 export function formatMoney(value) {
   return `$${Number(value || 0).toLocaleString()}`;
+}
+
+export function formatDeductible(value) {
+  if (value === null || value === undefined || value === "") return "N/A";
+  const n = Number(value);
+  if (!Number.isFinite(n) || n === 0) return "$0";
+  return formatMoney(n);
 }
 
 export function getStatus(days) {
@@ -207,6 +271,49 @@ export function getComplianceScore(policies = []) {
 export function totalTrackedPremium(policies = []) {
   return policies.reduce((sum, policy) => sum + toNumber(policy.premiumAmount ?? policy.premium, 0), 0);
 }
+
+/**
+ * Coverages the business is recommended to carry but currently does not.
+ * Powers the "missing coverage" surface so users can close protection gaps.
+ */
+export function getCoverageGaps(policies = []) {
+  const existing = new Set(
+    policies.map((policy) => policy.policyType || policy.type)
+  );
+  return RECOMMENDED_COVERAGE.filter((item) => !existing.has(item.type)).map(
+    (item) => ({
+      type: item.type,
+      label: policyLabelFromType(item.type),
+      reason: item.reason,
+    })
+  );
+}
+
+/** Total annual savings still available from open opportunities. */
+export function getPotentialSavings(opportunities = []) {
+  return opportunities
+    .filter((item) => ["available", "quote_received"].includes(item.status))
+    .reduce((sum, item) => sum + savingsForOpportunity(item), 0);
+}
+
+/** Total annual savings already locked in by accepting better quotes. */
+export function getRealizedSavings(opportunities = []) {
+  return opportunities
+    .filter((item) => item.status === "accepted")
+    .reduce((sum, item) => sum + savingsForOpportunity(item), 0);
+}
+
+function savingsForOpportunity(opportunity) {
+  if (opportunity?.alternateQuote?.premium != null) {
+    const delta =
+      toNumber(opportunity.currentPremium, 0) -
+      toNumber(opportunity.alternateQuote.premium, 0);
+    return Math.max(0, delta);
+  }
+  return Math.max(0, toNumber(opportunity?.estimatedSavings, 0));
+}
+
+export { savingsForOpportunity };
 
 export function getUpcomingRenewals(policies = [], limit = 3) {
   return [...policies]
@@ -252,6 +359,49 @@ export function countDocuments(policies = []) {
   );
 }
 
+/* ---------- Documents ---------- */
+
+export function documentTypeLabel(docType) {
+  return DOCUMENT_TYPE_LABELS[docType] || "Document";
+}
+
+export function normalizeDocument(raw = {}) {
+  const docType = DOCUMENT_TYPE_LABELS[raw.docType] ? raw.docType : "policy";
+  return {
+    ...raw,
+    id: raw.id || makeId("doc"),
+    name: String(raw.name || documentTypeLabel(docType)).trim(),
+    docType,
+    policyId: raw.policyId || null,
+    policyType: raw.policyType || null,
+    carrier: raw.carrier || "",
+    fileType: raw.fileType || "PDF",
+    sizeKb: Math.max(1, toNumber(raw.sizeKb, 120)),
+    status: raw.status === "pending" ? "pending" : "verified",
+    addedBy: raw.addedBy || "You",
+    uploadedAt: raw.uploadedAt || new Date().toISOString(),
+  };
+}
+
+export function normalizeDocuments(documents = []) {
+  return (Array.isArray(documents) ? documents : []).map(normalizeDocument);
+}
+
+/**
+ * Non-license policies that do not yet have a stored document on file.
+ * Surfaces "upload your paperwork" nudges on the dashboard.
+ */
+export function getMissingDocuments(policies = [], documents = []) {
+  const documentedPolicyIds = new Set(
+    documents.map((doc) => doc.policyId).filter(Boolean)
+  );
+  return policies.filter((policy) => {
+    const type = policy.policyType || policy.type;
+    if (type === "license") return false;
+    return !documentedPolicyIds.has(policy.id);
+  });
+}
+
 /* ---------- Savings & quotes ---------- */
 
 export function normalizeSavingsOpportunity(raw, policies = [], companyId = "subshield-tile-co") {
@@ -275,6 +425,7 @@ export function normalizeSavingsOpportunity(raw, policies = [], companyId = "sub
     renewalDate,
     status: raw.status || "available",
     partnerId: raw.partnerId || null,
+    alternateQuote: raw.alternateQuote || null,
     createdAt: raw.createdAt || new Date().toISOString(),
     updatedAt: raw.updatedAt || raw.createdAt || new Date().toISOString(),
     notes: raw.notes || "",
@@ -866,6 +1017,9 @@ export function readStoredData(fallback) {
       companyId
     );
     const settings = normalizeSettings(parsed.settings, fallback.settings || {}, company);
+    const documents = normalizeDocuments(
+      parsed.documents?.length ? parsed.documents : fallback.documents || []
+    );
 
     return {
       ...fallback,
@@ -880,6 +1034,7 @@ export function readStoredData(fallback) {
       savingsOpportunities,
       quoteRequests,
       coiSends: Array.isArray(parsed.coiSends) ? parsed.coiSends : fallback.coiSends || [],
+      documents,
       settings,
     };
   } catch {
