@@ -1783,6 +1783,13 @@ textarea {
   font-weight: 700;
 }
 
+.ss-field.has-error input,
+.ss-field.has-error select,
+.ss-field.has-error textarea {
+  border-color: #e05c54 !important;
+  background: #fff8f7 !important;
+}
+
 .ss-option-stack {
   border: 1.5px solid #dce3ee;
   border-radius: 12px;
