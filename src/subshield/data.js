@@ -83,7 +83,7 @@ export const initialData = {
       brokerId: "brk-lighthouse",
       documents: ["GL declarations page", "Additional Insured", "Waiver of Subrogation"],
       status: "active",
-      statusNote: "Inside the renewal planning window — a good time to compare rates.",
+      statusNote: "Inside the renewal planning window  -  a good time to compare rates.",
       savingsStatus: "available",
       lastQuotedAt: isoDaysAgo(160),
       createdAt: isoDaysAgo(365),
@@ -413,7 +413,7 @@ export const initialData = {
       status: "quote_received",
       submittedAt: isoDaysAgo(2),
       respondedAt: isoDaysAgo(0),
-      notes: "Workers comp review before renewal — quote returned $540/yr lower.",
+      notes: "Workers comp review before renewal  -  quote returned $540/yr lower.",
     },
   ],
 
@@ -497,7 +497,7 @@ export const initialData = {
     },
     {
       id: "doc-wc-quote",
-      name: "Workers' Comp Renewal Quote — The Hartford",
+      name: "Workers' Comp Renewal Quote  -  The Hartford",
       docType: "quote",
       policyId: "wc",
       policyType: "workers",
@@ -523,7 +523,7 @@ export const initialData = {
     },
     {
       id: "doc-inv-growth",
-      name: "SubShield Invoice — INV-2026-004",
+      name: "SubShield Invoice  -  INV-2026-004",
       docType: "invoice",
       policyId: null,
       policyType: null,
@@ -802,3 +802,4 @@ export const initialData = {
     },
   ],
 };
+
