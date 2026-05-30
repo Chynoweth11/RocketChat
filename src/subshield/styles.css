@@ -1609,6 +1609,173 @@ textarea {
   font-size: 12px;
 }
 
+/* --- Quote wizard / stepper --- */
+.ss-stepper {
+  list-style: none;
+  margin: 18px 0 4px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ss-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-step:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.ss-step.done:not(:last-child)::after {
+  background: var(--brand);
+}
+
+.ss-step-dot {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  border: 2px solid var(--line);
+  background: #fff;
+  color: var(--faint);
+}
+
+.ss-step.current .ss-step-dot {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.ss-step.done .ss-step-dot {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+}
+
+.ss-step-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-step.current .ss-step-label,
+.ss-step.done .ss-step-label {
+  color: var(--text);
+}
+
+.ss-step-body {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.ss-step-intro {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ss-field-hint {
+  color: var(--faint);
+  font-size: 11px;
+}
+
+.ss-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ss-choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 13px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-choice-card:hover {
+  border-color: #c8d3e2;
+}
+
+.ss-choice-card.active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 1px var(--brand) inset;
+}
+
+.ss-choice-radio {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: #fff;
+  position: relative;
+}
+
+.ss-choice-card.active .ss-choice-radio {
+  border-color: var(--brand);
+}
+
+.ss-choice-card.active .ss-choice-radio::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+.ss-choice-text b {
+  display: block;
+  font-size: 14px;
+}
+
+.ss-choice-text small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ss-wizard-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .ss-step-label {
+    display: none;
+  }
+  .ss-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ss-spinner {
   width: 14px;
   height: 14px;
