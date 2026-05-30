@@ -21,7 +21,7 @@ renewal tracking, COI workflows, broker/partner routing, and savings actions.
 
 ## Local persistence
 
-Storage key: `subshield.complete.v3`
+Storage key: `subshield.complete.v4`
 
 Tracked entities:
 

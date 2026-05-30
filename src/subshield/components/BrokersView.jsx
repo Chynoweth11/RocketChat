@@ -7,6 +7,7 @@ import {
   Send,
 } from "lucide-react";
 import { Section } from "./Layout.jsx";
+import { deriveInitials } from "../utils.js";
 
 export default function BrokersView({
   brokers,
@@ -57,7 +58,7 @@ export default function BrokersView({
         {brokers.map((broker) => (
           <div className="ss-broker-card" key={broker.id}>
             <div className="ss-gc-avatar" aria-hidden="true">
-              {broker.name?.slice(0, 2).toUpperCase() || "BR"}
+              {deriveInitials(broker.name)}
             </div>
             <div className="ss-gc-copy">
               <b>{broker.name}</b>

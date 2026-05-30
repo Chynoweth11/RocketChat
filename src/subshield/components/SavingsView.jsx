@@ -186,7 +186,7 @@ export default function SavingsView({
                   Submitted {formatLongDate(request.submittedAt)}
                 </small>
               </div>
-              <em className="ss-status warning">{quoteStatusLabel(request.status)}</em>
+              <em className={`ss-status ${request.status === "accepted" ? "success" : request.status === "declined" ? "danger" : "warning"}`}>{quoteStatusLabel(request.status)}</em>
             </div>
           );
         })}
@@ -249,7 +249,7 @@ function OpportunityCard({
         </div>
         <div className="ss-info">
           <span>Status</span>
-          <b>{status.replace(/_/g, " ")}</b>
+          <b>{quoteStatusLabel(status)}</b>
         </div>
       </div>
 

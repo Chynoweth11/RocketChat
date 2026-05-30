@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Building2, Plus, Search, Send, SquarePen } from "lucide-react";
+import { Building2, CheckCircle2, Plus, Search, Send, SquarePen } from "lucide-react";
 import { Section } from "./Layout.jsx";
 import CopyButton from "./CopyButton.jsx";
 
@@ -108,8 +108,8 @@ export default function ContractorsView({
           instructions. That removes repetitive typing and reduces compliance mistakes.
         </p>
         <div className="ss-note success" style={{ marginTop: 14 }}>
-          Keep this page updated so your team can route COIs in a few clicks without
-          searching old emails.
+          <CheckCircle2 size={16} />
+          <span>Keep this page updated so your team can route COIs in a few clicks without searching old emails.</span>
         </div>
       </section>
     </div>

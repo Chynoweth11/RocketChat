@@ -189,7 +189,7 @@ function PolicyRow({ policy, selected, onClick }) {
 function PolicyDetail({ policy, onRenew, onShop, onSend, isRenewing, isShopping }) {
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
-  const width = `${Math.max(5, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
+  const width = `${Math.max(0, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
   const isCritical = status.className === "danger";
 
   return (
