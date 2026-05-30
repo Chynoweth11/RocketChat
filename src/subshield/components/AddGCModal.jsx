@@ -153,19 +153,20 @@ export default function AddGCModal({ onClose, onSave }) {
 
 function FormField({ label, value, onChange, placeholder, type = "text", error, multiline }) {
   return (
-    <label className="ss-field">
+    <label className={`ss-field${error ? " has-error" : ""}`}>
       <span className="ss-field-label">{label}</span>
       {multiline ? (
-        <textarea value={value} onChange={onChange} placeholder={placeholder} />
+        <textarea value={value} onChange={onChange} placeholder={placeholder} aria-invalid={!!error} />
       ) : (
         <input
           value={value}
           onChange={onChange}
           placeholder={placeholder}
           type={type}
+          aria-invalid={!!error}
         />
       )}
-      {error && <span className="ss-field-error">{error}</span>}
+      {error && <span className="ss-field-error" role="alert">{error}</span>}
     </label>
   );
 }
