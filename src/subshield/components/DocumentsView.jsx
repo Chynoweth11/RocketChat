@@ -3,6 +3,7 @@ import {
   FileBadge,
   FileCheck2,
   FileSignature,
+  FileSpreadsheet,
   FileText,
   Receipt,
   ScrollText,
@@ -12,6 +13,28 @@ import {
 } from "lucide-react";
 import { Section, Info } from "./Layout.jsx";
 import { documentTypeLabel, formatShortDate } from "../utils.js";
+
+function exportDocumentsCsv(documents) {
+  const header = ["Name","Type","Carrier","Status","Size (KB)","Uploaded"];
+  const rows = documents.map((doc) => [
+    doc.name,
+    documentTypeLabel(doc.docType),
+    doc.carrier || "",
+    doc.status,
+    doc.sizeKb || "",
+    formatShortDate(doc.uploadedAt),
+  ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`));
+  const csv = [header.join(","), ...rows.map((row) => row.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "documents.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 const TYPE_ICONS = {
   declaration: ScrollText,
@@ -68,9 +91,16 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
           title="Document Center"
           sub="Declarations, certificates, endorsements, quotes, and invoices in one organized place."
           extra={
-            <button type="button" className="ss-button" onClick={onUpload}>
-              <Upload size={15} /> Upload document
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              {documents.length > 0 && (
+                <button type="button" className="ss-button soft ss-button-sm" onClick={() => exportDocumentsCsv(documents)} title="Export document list as CSV">
+                  <FileSpreadsheet size={14} /> Export
+                </button>
+              )}
+              <button type="button" className="ss-button" onClick={onUpload}>
+                <Upload size={15} /> Upload document
+              </button>
+            </div>
           }
         />
         <div className="ss-command-metrics">

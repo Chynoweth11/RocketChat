@@ -5,6 +5,7 @@ import {
   Check,
   Download,
   FileCheck2,
+  FileSpreadsheet,
   LifeBuoy,
   Plus,
   Search,
@@ -20,6 +21,33 @@ import {
   formatMoney,
   getStatus,
 } from "../utils.js";
+
+function exportPoliciesCsv(policies) {
+  const header = ["Policy","Type","Carrier","Policy Number","Annual Premium","Deductible","Coverage Limit","Effective Date","Renewal Date","Days Remaining","Status"];
+  const rows = policies.map((policy) => [
+    policy.name,
+    policy.policyType || policy.type,
+    policy.carrier,
+    policy.policyNumber,
+    policy.premiumAmount ?? policy.premium ?? 0,
+    formatDeductible(policy.deductible),
+    policy.coverageLimits || policy.limit || "",
+    formatLongDate(policy.effectiveDate),
+    formatLongDate(policy.renewalDate || policy.expires),
+    policy.daysRemaining ?? "",
+    getStatus(policy.daysRemaining).label,
+  ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`));
+  const csv = [header.join(","), ...rows.map((row) => row.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "policies.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 import { Section, Info, Spinner } from "./Layout.jsx";
 import ScoreRing from "./ScoreRing.jsx";
 
@@ -93,6 +121,11 @@ export default function PoliciesView({
               <button type="button" className="ss-button soft" onClick={onSend}>
                 <Send size={16} /> Send certificate
               </button>
+              {policies.length > 0 && (
+                <button type="button" className="ss-button soft" onClick={() => exportPoliciesCsv(policies)} title="Export all policies as CSV">
+                  <FileSpreadsheet size={16} /> Export CSV
+                </button>
+              )}
             </div>
           </div>
           <ScoreRing value={score} />
