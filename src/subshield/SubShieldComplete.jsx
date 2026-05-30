@@ -92,6 +92,53 @@ function patchOpportunity(opportunities, id, patch) {
   );
 }
 
+const COVERAGE_APPLICATION_STAGES = ["start", "coverage", "application", "quote", "purchase"];
+
+function defaultCoverageApplication(company, partners = []) {
+  return {
+    status: "draft",
+    stage: "coverage",
+    policyType: "workers",
+    currentCarrier: "",
+    renewalMonth: "",
+    renewalYear: String(new Date().getFullYear()),
+    tradeType: company?.tradeType || "",
+    state: company?.state || "",
+    contactEmail: company?.contactEmail || "",
+    revenueRange: company?.revenueRange || "",
+    employees: company?.employees || "",
+    requestType: "renewal_review",
+    certificateSupportType: "none",
+    recurringCertificateEmails: true,
+    preferredPartnerId: partners.find((item) => item.active)?.id || "",
+    notes: "",
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function normalizeCoverageApplication(application, company, partners = []) {
+  const base = defaultCoverageApplication(company, partners);
+  const stage = COVERAGE_APPLICATION_STAGES.includes(application?.stage)
+    ? application.stage
+    : base.stage;
+  return {
+    ...base,
+    ...(application || {}),
+    stage,
+    renewalYear: String(application?.renewalYear || base.renewalYear),
+    recurringCertificateEmails:
+      application?.recurringCertificateEmails ?? base.recurringCertificateEmails,
+  };
+}
+
+function renewalDateFromMonthYear(monthName, yearValue) {
+  if (!monthName || !yearValue) return "";
+  const monthIndex = new Date(`${monthName} 1, ${yearValue}`).getMonth();
+  if (!Number.isFinite(monthIndex)) return "";
+  const renewal = new Date(Number(yearValue), monthIndex + 1, 0);
+  return renewal.toISOString().slice(0, 10);
+}
+
 export default function SubShieldComplete() {
   const [data, setData] = useState(() => readStoredData(initialData));
   const [view, setView] = useState("dashboard");
@@ -115,6 +162,10 @@ export default function SubShieldComplete() {
   const company = data.company || initialData.company;
   const settings = data.settings || initialData.settings;
   const firstName = settings.userProfile?.firstName || "";
+  const coverageApplication = useMemo(
+    () => normalizeCoverageApplication(data.coverageApplication, company, data.partners || []),
+    [data.coverageApplication, company, data.partners]
+  );
 
   const policies = useMemo(
     () => normalizePolicies(data.policies, company.id),
@@ -545,6 +596,143 @@ export default function SubShieldComplete() {
 
   /* ---------- Quote requests ---------- */
 
+  function saveCoverageApplication(nextDraft, options = {}) {
+    const normalizedDraft = normalizeCoverageApplication(
+      {
+        ...coverageApplication,
+        ...nextDraft,
+        status: "draft",
+        updatedAt: new Date().toISOString(),
+      },
+      company,
+      data.partners || []
+    );
+
+    const shouldLog = options.logActivity !== false;
+    commit({
+      ...data,
+      coverageApplication: normalizedDraft,
+      activity: shouldLog
+        ? prependActivity(
+            data.activity,
+            "Coverage application saved",
+            `${policyLabelFromType(normalizedDraft.policyType)} review draft updated.`
+          )
+        : data.activity,
+    });
+
+    if (options.toast !== false) {
+      fireToast("Draft saved", "Continue your coverage review anytime.");
+    }
+  }
+
+  function submitCoverageApplication(applicationDraft) {
+    const normalizedDraft = normalizeCoverageApplication(
+      {
+        ...coverageApplication,
+        ...applicationDraft,
+        status: "submitted",
+        stage: "quote",
+        updatedAt: new Date().toISOString(),
+      },
+      company,
+      data.partners || []
+    );
+
+    const policyMatch = policies.find(
+      (policy) => (policy.policyType || policy.type) === normalizedDraft.policyType
+    );
+    const preferredPartner =
+      (data.partners || []).find((item) => item.id === normalizedDraft.preferredPartnerId) ||
+      (data.partners || []).find((item) => item.active) ||
+      null;
+    const renewalDate =
+      renewalDateFromMonthYear(normalizedDraft.renewalMonth, normalizedDraft.renewalYear) ||
+      policyMatch?.renewalDate ||
+      dateFromToday(45);
+
+    const request = normalizeQuoteRequest(
+      {
+        policyId: policyMatch?.id || null,
+        policyType: normalizedDraft.policyType,
+        routeType: preferredPartner ? "partner" : "broker",
+        partnerId: preferredPartner?.id || null,
+        brokerId: null,
+        requestedBy: "owner",
+        status: preferredPartner ? "sent_to_partner" : "submitted",
+        businessInfo: {
+          companyName: company.name,
+          tradeType: normalizedDraft.tradeType,
+          state: normalizedDraft.state,
+          revenueRange: normalizedDraft.revenueRange,
+          employees: normalizedDraft.employees,
+          contactEmail: normalizedDraft.contactEmail,
+        },
+        currentCoverageInfo: {
+          currentCarrier: normalizedDraft.currentCarrier || policyMatch?.carrier || "",
+          currentPremium: policyMatch?.premiumAmount || 0,
+          renewalDate,
+        },
+        notes: normalizedDraft.notes || "Coverage review submitted from guided application.",
+      },
+      company.id
+    );
+
+    let nextOpportunities = opportunities;
+    if (policyMatch) {
+      const existingOpportunity = opportunities.find(
+        (item) => item.policyId === policyMatch.id
+      );
+      if (existingOpportunity) {
+        nextOpportunities = patchOpportunity(opportunities, existingOpportunity.id, {
+          status: preferredPartner ? "sent_to_partner" : "requested",
+          partnerId: preferredPartner?.id || existingOpportunity.partnerId,
+          currentCarrier: normalizedDraft.currentCarrier || existingOpportunity.currentCarrier,
+          renewalDate,
+          notes: "Submitted through guided coverage review workflow.",
+        });
+      } else if ((policyMatch.policyType || policyMatch.type) !== "license") {
+        nextOpportunities = [
+          normalizeSavingsOpportunity(
+            {
+              policyId: policyMatch.id,
+              policyType: policyMatch.policyType || policyMatch.type,
+              currentCarrier: normalizedDraft.currentCarrier || policyMatch.carrier,
+              currentPremium: policyMatch.premiumAmount || 0,
+              estimatedSavings: Math.round((policyMatch.premiumAmount || 0) * 0.1),
+              renewalDate,
+              status: "requested",
+              partnerId: preferredPartner?.id || null,
+              notes: "Created from guided coverage review workflow.",
+            },
+            policies,
+            company.id
+          ),
+          ...opportunities,
+        ];
+      }
+    }
+
+    commit({
+      ...data,
+      coverageApplication: normalizedDraft,
+      quoteRequests: [request, ...quoteRequests],
+      savingsOpportunities: nextOpportunities,
+      activity: prependActivity(
+        data.activity,
+        "Coverage review submitted",
+        `${policyLabelFromType(normalizedDraft.policyType)} routed to ${
+          preferredPartner?.name || "a licensed review partner"
+        }.`
+      ),
+    });
+
+    fireToast(
+      "Coverage review submitted",
+      `We'll notify you when partner quotes are ready.`
+    );
+  }
+
   function openQuoteModal(opportunity, defaultRouteType = "partner", extra = {}) {
     const defaultPolicyId = extra.defaultPolicyId || opportunity?.policyId || selectedPolicy?.id;
     setQuoteDefaults({
@@ -967,6 +1155,10 @@ export default function SubShieldComplete() {
               onRemindLater={remindLaterOpportunity}
               onReactivate={reactivateOpportunity}
               onAddAdvisor={() => setModal("add-broker")}
+              coverageApplication={coverageApplication}
+              onSaveCoverageApplication={saveCoverageApplication}
+              onSubmitCoverageApplication={submitCoverageApplication}
+              onNavigate={setView}
             />
           )}
 

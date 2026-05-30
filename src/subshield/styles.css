@@ -2382,6 +2382,139 @@ textarea {
   line-height: 1.45;
 }
 
+.ss-coverage-flow-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+  gap: 14px;
+}
+
+.ss-coverage-application-card,
+.ss-policy-services-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.ss-coverage-stepper {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ss-coverage-step {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #f8fbff;
+  padding: 7px 8px;
+  display: grid;
+  gap: 3px;
+}
+
+.ss-coverage-step span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #b7c5de;
+  color: #607290;
+  font-size: 11px;
+  font-weight: 760;
+  display: grid;
+  place-items: center;
+}
+
+.ss-coverage-step small {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6f809a;
+  font-weight: 700;
+}
+
+.ss-coverage-step.active {
+  border-color: #b8d0ff;
+  background: #f0f6ff;
+}
+
+.ss-coverage-step.active span {
+  border-color: #3f6adf;
+  color: #20439b;
+}
+
+.ss-option-stack {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fafcff;
+  padding: 10px;
+  display: grid;
+  gap: 7px;
+}
+
+.ss-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ss-policy-services-card .ss-note {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.ss-service-row {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 11px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-service-row:hover {
+  border-color: #c7d2e4;
+  box-shadow: var(--shadow-xs);
+}
+
+.ss-service-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+  color: #2b55b0;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ss-service-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-service-copy b {
+  display: block;
+  font-size: 13px;
+}
+
+.ss-service-copy small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 /* Savings opportunity list + comparison */
 .ss-savings-list {
   display: grid;
@@ -2761,6 +2894,10 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .ss-coverage-flow-grid {
+    grid-template-columns: 1fr;
+  }
+
   .ss-compare {
     grid-template-columns: 1fr;
   }
@@ -2849,6 +2986,10 @@ textarea {
 
   .ss-steps {
     grid-template-columns: 1fr;
+  }
+
+  .ss-coverage-stepper {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .ss-doc-meta {
@@ -2968,6 +3109,10 @@ textarea {
 
   .ss-command-metrics {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .ss-coverage-stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ss-dash-metrics,

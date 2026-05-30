@@ -1,10 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
   BadgeDollarSign,
   BellRing,
+  CalendarClock,
   CircleOff,
+  FileCheck2,
+  Handshake,
   History,
   Plus,
   Search,
@@ -20,7 +23,7 @@ import {
   quoteStatusLabel,
   savingsForOpportunity,
 } from "../utils.js";
-import { Section, Info, Spinner } from "./Layout.jsx";
+import { Info, Section, Spinner } from "./Layout.jsx";
 
 const FILTERS = [
   { id: "open", label: "Needs action" },
@@ -32,11 +35,38 @@ const FILTERS = [
   { id: "dismissed", label: "Dismissed" },
 ];
 
-const STEPS = [
-  { icon: ShieldCheck, title: "We review", text: "Your policies, premiums, and renewals are analyzed." },
-  { icon: Search, title: "We shop", text: "Licensed partners quote comparable coverage." },
-  { icon: TrendingDown, title: "You compare", text: "See current vs. better, side by side." },
-  { icon: BadgeCheck, title: "You switch", text: "Approve in a click — we handle the paperwork." },
+const WORKFLOW_STEPS = [
+  { id: "start", label: "Start" },
+  { id: "coverage", label: "Coverage" },
+  { id: "application", label: "Application" },
+  { id: "quote", label: "Quote" },
+  { id: "purchase", label: "Purchase" },
+];
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const REQUEST_TYPES = [
+  { value: "renewal_review", label: "Review this renewal for better options" },
+  { value: "compare_quotes", label: "Compare new quote options" },
+  { value: "missing_coverage", label: "Help me add missing coverage" },
+];
+
+const CERTIFICATE_SUPPORT = [
+  { value: "specific_holder", label: "Specific requester / certificate holder" },
+  { value: "none", label: "No certificate holder support needed" },
 ];
 
 export default function SavingsView({
@@ -55,6 +85,10 @@ export default function SavingsView({
   onRemindLater,
   onReactivate,
   onAddAdvisor,
+  coverageApplication,
+  onSaveCoverageApplication,
+  onSubmitCoverageApplication,
+  onNavigate,
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("open");
@@ -99,66 +133,38 @@ export default function SavingsView({
   return (
     <div className="ss-grid">
       <section className="ss-card ss-span">
-        <div className="ss-hero">
-          <div>
-            <span className="ss-eyebrow">Savings center</span>
-            <h2>{formatMoney(potentialSavings)}/yr in savings found</h2>
-            <p>
-              Like a money app for your business insurance — we review your coverage,
-              shop licensed partners, and show you better options. You decide what to
-              switch. No cost to compare.
-            </p>
-            <div className="ss-trust-strip">
-              <ShieldCheck size={14} />
-              <span>
-                Backed by a licensed partner network ·{" "}
-                {partners
-                  .filter((p) => p.active)
-                  .slice(0, 4)
-                  .map((p) => p.name)
-                  .join(", ")}
-              </span>
-            </div>
-          </div>
-          <div className="ss-command-tip">
-            <b>Your savings</b>
-            <div className="ss-savings-stack">
-              <div>
-                <small>Available now</small>
-                <strong className="ss-savings-pos">{formatMoney(potentialSavings)}/yr</strong>
-              </div>
-              <div>
-                <small>Locked in</small>
-                <strong>{formatMoney(realizedSavings)}/yr</strong>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Section
+          title="Coverage review workflow"
+          sub="Enter policy details, continue your application, and connect with licensed insurance partners."
+        />
 
-        <div className="ss-steps">
-          {STEPS.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div className="ss-step" key={step.title}>
-                <span className="ss-step-index">{index + 1}</span>
-                <span className="ss-step-icon" aria-hidden="true">
-                  <Icon size={16} />
-                </span>
-                <b>{step.title}</b>
-                <small>{step.text}</small>
-              </div>
-            );
-          })}
+        <div className="ss-coverage-flow-grid">
+          <CoverageApplicationCard
+            coverageApplication={coverageApplication}
+            policies={policies}
+            partners={partners}
+            onSaveCoverageApplication={onSaveCoverageApplication}
+            onSubmitCoverageApplication={onSubmitCoverageApplication}
+          />
+
+          <PolicyServicesCard
+            onNavigate={onNavigate}
+            partnerNames={partners
+              .filter((item) => item.active)
+              .slice(0, 4)
+              .map((item) => item.name)}
+            potentialSavings={potentialSavings}
+          />
         </div>
       </section>
 
       <section className="ss-card ss-span">
         <Section
           title="Savings opportunities"
-          sub="Comparable coverage at a lower cost, reviewed for you."
+          sub="Comparable coverage at lower cost, organized by priority."
           extra={
             <span className="ss-section-extra">
-              {availableCount} open · {switchedCount} switched
+              {availableCount} open - {switchedCount} switched
             </span>
           }
         />
@@ -194,14 +200,14 @@ export default function SavingsView({
           <div className="ss-empty">
             <BadgeDollarSign size={28} />
             <h2>No opportunities yet</h2>
-            <p>Add your policies and we'll surface savings as renewals approach.</p>
+            <p>Add or upload policies and SubShield will surface savings opportunities.</p>
           </div>
         )}
 
         {opportunities.length > 0 && filteredOpportunities.length === 0 && (
           <div className="ss-empty" style={{ minHeight: 160 }}>
             <Search size={28} />
-            <h2>Nothing here</h2>
+            <h2>No matches</h2>
             <p>Try a different filter or search term.</p>
           </div>
         )}
@@ -225,12 +231,12 @@ export default function SavingsView({
       </section>
 
       <section className="ss-card">
-        <Section title="Quote history" sub="Requests routed to licensed partners and advisors" />
+        <Section title="Quote history" sub="Submitted requests and partner responses" />
         {quoteRequests.length === 0 && (
           <div className="ss-empty" style={{ minHeight: 160 }}>
             <History size={28} />
             <h2>No quote requests yet</h2>
-            <p>Request a quote to start tracking partner responses here.</p>
+            <p>Start a coverage review workflow to create your first request.</p>
           </div>
         )}
         {quoteRequests.map((request) => {
@@ -262,8 +268,8 @@ export default function SavingsView({
 
       <section className="ss-card">
         <Section
-          title="Your advisors"
-          sub="Trusted contacts for renewals and coverage questions"
+          title="Insurance review partners"
+          sub="Licensed contacts for renewals, policy questions, and quote support"
           extra={
             <button type="button" className="ss-button soft ss-button-sm" onClick={onAddAdvisor}>
               <Plus size={14} /> Add
@@ -273,7 +279,7 @@ export default function SavingsView({
         {brokers.length === 0 && (
           <div className="ss-note">
             <Sparkles size={16} />
-            <span>No advisor saved. Add one for one-click coverage reviews.</span>
+            <span>No advisor saved. Add one for one-click renewal reviews.</span>
           </div>
         )}
         {brokers.map((broker) => (
@@ -290,10 +296,10 @@ export default function SavingsView({
         ))}
 
         <div className="ss-partner-network">
-          <span className="ss-eyebrow">Licensed partner network</span>
+          <span className="ss-eyebrow">Coverage and savings network</span>
           <div className="ss-partner-chips">
             {partners
-              .filter((p) => p.active)
+              .filter((partner) => partner.active)
               .map((partner) => (
                 <span className="ss-partner-chip" key={partner.id} title={partner.amRating || ""}>
                   <ShieldCheck size={12} /> {partner.name}
@@ -302,6 +308,394 @@ export default function SavingsView({
           </div>
         </div>
       </section>
+
+      <section className="ss-card">
+        <Section title="Savings summary" sub="How much has been found and realized" />
+        <div className="ss-info-grid">
+          <Info label="Potential savings" value={`${formatMoney(potentialSavings)}/yr`} />
+          <Info label="Realized savings" value={`${formatMoney(realizedSavings)}/yr`} />
+          <Info label="Open opportunities" value={availableCount} />
+          <Info label="Switched policies" value={switchedCount} />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function CoverageApplicationCard({
+  coverageApplication,
+  policies,
+  partners,
+  onSaveCoverageApplication,
+  onSubmitCoverageApplication,
+}) {
+  const [form, setForm] = useState(coverageApplication);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    setForm(coverageApplication);
+  }, [coverageApplication]);
+
+  const yearOptions = useMemo(() => {
+    const current = new Date().getFullYear();
+    return [current - 1, current, current + 1, current + 2].map((value) => String(value));
+  }, []);
+
+  const policyTypes = useMemo(() => {
+    const seen = new Set();
+    const options = [];
+    policies.forEach((policy) => {
+      const policyType = policy.policyType || policy.type;
+      if (!policyType || seen.has(policyType) || policyType === "license") return;
+      seen.add(policyType);
+      options.push({ value: policyType, label: policyLabelFromType(policyType) });
+    });
+    return options.length
+      ? options
+      : [{ value: "workers", label: policyLabelFromType("workers") }];
+  }, [policies]);
+
+  const stepIndex = Math.max(
+    0,
+    WORKFLOW_STEPS.findIndex((item) => item.id === form.stage)
+  );
+
+  function updateField(key, value) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function nextStep() {
+    const nextIndex = Math.min(stepIndex + 1, WORKFLOW_STEPS.length - 1);
+    const nextStage = WORKFLOW_STEPS[nextIndex].id;
+    const next = { ...form, stage: nextStage };
+    setForm(next);
+    onSaveCoverageApplication(next, { logActivity: false, toast: false });
+  }
+
+  function previousStep() {
+    const nextIndex = Math.max(stepIndex - 1, 0);
+    const nextStage = WORKFLOW_STEPS[nextIndex].id;
+    const next = { ...form, stage: nextStage };
+    setForm(next);
+    onSaveCoverageApplication(next, { logActivity: false, toast: false });
+  }
+
+  function validate() {
+    const nextErrors = {};
+    if (!form.policyType) nextErrors.policyType = "Select a policy type.";
+    if (!form.contactEmail?.trim()) nextErrors.contactEmail = "Contact email is required.";
+    if (!form.renewalMonth) nextErrors.renewalMonth = "Select a renewal month.";
+    if (!form.renewalYear) nextErrors.renewalYear = "Select a renewal year.";
+    if (!form.state?.trim()) nextErrors.state = "State is required.";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  function saveDraft() {
+    onSaveCoverageApplication(form, { logActivity: true, toast: true });
+  }
+
+  function submit() {
+    if (!validate()) return;
+    onSubmitCoverageApplication({ ...form, stage: "quote" });
+  }
+
+  return (
+    <div className="ss-coverage-application-card">
+      <div className="ss-coverage-stepper" aria-label="Coverage application progress">
+        {WORKFLOW_STEPS.map((step, index) => (
+          <div
+            key={step.id}
+            className={`ss-coverage-step ${index <= stepIndex ? "active" : ""}`}
+          >
+            <span>{index + 1}</span>
+            <small>{step.label}</small>
+          </div>
+        ))}
+      </div>
+
+      <div className="ss-note success" style={{ marginTop: 0 }}>
+        Enter your current insurance details and SubShield will route your request to licensed
+        partners for renewal help and savings quotes.
+      </div>
+
+      <div className="ss-field-grid">
+        <label className="ss-field">
+          <span className="ss-field-label">Policy type</span>
+          <select
+            value={form.policyType || ""}
+            onChange={(event) => updateField("policyType", event.target.value)}
+          >
+            {policyTypes.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          {errors.policyType && <span className="ss-field-error">{errors.policyType}</span>}
+        </label>
+
+        <label className="ss-field">
+          <span className="ss-field-label">Current insurance carrier (optional)</span>
+          <input
+            value={form.currentCarrier || ""}
+            onChange={(event) => updateField("currentCarrier", event.target.value)}
+            placeholder="StateFund West"
+          />
+        </label>
+      </div>
+
+      <div className="ss-field-grid">
+        <label className="ss-field">
+          <span className="ss-field-label">Policy renewal month</span>
+          <select
+            value={form.renewalMonth || ""}
+            onChange={(event) => updateField("renewalMonth", event.target.value)}
+          >
+            <option value="">Select month</option>
+            {MONTHS.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </select>
+          {errors.renewalMonth && <span className="ss-field-error">{errors.renewalMonth}</span>}
+        </label>
+
+        <label className="ss-field">
+          <span className="ss-field-label">Policy renewal year</span>
+          <select
+            value={form.renewalYear || ""}
+            onChange={(event) => updateField("renewalYear", event.target.value)}
+          >
+            <option value="">Select year</option>
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+          {errors.renewalYear && <span className="ss-field-error">{errors.renewalYear}</span>}
+        </label>
+      </div>
+
+      <div className="ss-field-grid">
+        <label className="ss-field">
+          <span className="ss-field-label">Trade type</span>
+          <input
+            value={form.tradeType || ""}
+            onChange={(event) => updateField("tradeType", event.target.value)}
+            placeholder="Tile and stone installation"
+          />
+        </label>
+
+        <label className="ss-field">
+          <span className="ss-field-label">State</span>
+          <input
+            value={form.state || ""}
+            onChange={(event) => updateField("state", event.target.value)}
+            placeholder="TX"
+          />
+          {errors.state && <span className="ss-field-error">{errors.state}</span>}
+        </label>
+      </div>
+
+      <div className="ss-field-grid">
+        <label className="ss-field">
+          <span className="ss-field-label">Contact email</span>
+          <input
+            type="email"
+            value={form.contactEmail || ""}
+            onChange={(event) => updateField("contactEmail", event.target.value)}
+            placeholder="owner@company.com"
+          />
+          {errors.contactEmail && <span className="ss-field-error">{errors.contactEmail}</span>}
+        </label>
+
+        <label className="ss-field">
+          <span className="ss-field-label">Preferred licensed partner</span>
+          <select
+            value={form.preferredPartnerId || ""}
+            onChange={(event) => updateField("preferredPartnerId", event.target.value)}
+          >
+            <option value="">Auto-route to best partner</option>
+            {partners
+              .filter((partner) => partner.active)
+              .map((partner) => (
+                <option key={partner.id} value={partner.id}>
+                  {partner.name}
+                </option>
+              ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="ss-field-grid">
+        <label className="ss-field">
+          <span className="ss-field-label">Revenue range</span>
+          <input
+            value={form.revenueRange || ""}
+            onChange={(event) => updateField("revenueRange", event.target.value)}
+            placeholder="$1M-$5M"
+          />
+        </label>
+        <label className="ss-field">
+          <span className="ss-field-label">Employees</span>
+          <input
+            value={form.employees || ""}
+            onChange={(event) => updateField("employees", event.target.value)}
+            placeholder="11-25"
+          />
+        </label>
+      </div>
+
+      <label className="ss-field">
+        <span className="ss-field-label">Request type</span>
+        <div className="ss-option-stack">
+          {REQUEST_TYPES.map((item) => (
+            <label key={item.value} className="ss-radio-row">
+              <input
+                type="radio"
+                name="request-type"
+                checked={form.requestType === item.value}
+                onChange={() => updateField("requestType", item.value)}
+              />
+              <span>{item.label}</span>
+            </label>
+          ))}
+        </div>
+      </label>
+
+      <label className="ss-field">
+        <span className="ss-field-label">Certificate support</span>
+        <div className="ss-option-stack">
+          {CERTIFICATE_SUPPORT.map((item) => (
+            <label key={item.value} className="ss-radio-row">
+              <input
+                type="radio"
+                name="certificate-support"
+                checked={form.certificateSupportType === item.value}
+                onChange={() => updateField("certificateSupportType", item.value)}
+              />
+              <span>{item.label}</span>
+            </label>
+          ))}
+          <label className="ss-radio-row">
+            <input
+              type="checkbox"
+              checked={Boolean(form.recurringCertificateEmails)}
+              onChange={(event) =>
+                updateField("recurringCertificateEmails", event.target.checked)
+              }
+            />
+            <span>Send this certificate reminder each policy term</span>
+          </label>
+        </div>
+      </label>
+
+      <label className="ss-field">
+        <span className="ss-field-label">Notes for the insurance partner</span>
+        <textarea
+          value={form.notes || ""}
+          onChange={(event) => updateField("notes", event.target.value)}
+          placeholder="Please review coverage gaps, renewal pricing, and quote alternatives."
+        />
+      </label>
+
+      <footer className="ss-footer">
+        <span className="ss-footer-info">
+          Last saved {form.updatedAt ? formatLongDate(form.updatedAt) : "today"}.
+        </span>
+        <div className="ss-row">
+          <button type="button" className="ss-button soft ss-button-sm" onClick={previousStep}>
+            Back
+          </button>
+          <button type="button" className="ss-button soft ss-button-sm" onClick={nextStep}>
+            Continue application
+          </button>
+          <button type="button" className="ss-button soft ss-button-sm" onClick={saveDraft}>
+            Save draft
+          </button>
+          <button type="button" className="ss-button ss-button-sm" onClick={submit}>
+            Submit request
+          </button>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function PolicyServicesCard({ onNavigate, partnerNames, potentialSavings }) {
+  const services = [
+    {
+      id: "policies",
+      title: "Manage my insurance",
+      detail: "Review policy details, limits, and documentation in one place.",
+      icon: ShieldCheck,
+    },
+    {
+      id: "certificates",
+      title: "Request certificate",
+      detail: "Send COI packages with saved holder wording and project context.",
+      icon: FileCheck2,
+    },
+    {
+      id: "renewals",
+      title: "Manage renewals",
+      detail: "Track deadlines and keep coverage active before policies lapse.",
+      icon: CalendarClock,
+    },
+    {
+      id: "settings",
+      title: "Manage billing and account",
+      detail: "Update billing contacts, payment methods, and workspace settings.",
+      icon: Handshake,
+    },
+  ];
+
+  return (
+    <div className="ss-policy-services-card">
+      <Section
+        title="Policy services"
+        sub="Quick actions modeled after carrier portals and insurance partner workflows."
+      />
+
+      <div className="ss-note">
+        <Sparkles size={16} />
+        <span>
+          Potential savings: {formatMoney(potentialSavings)}/yr across your open opportunities.
+        </span>
+      </div>
+
+      {services.map((service) => {
+        const Icon = service.icon;
+        return (
+          <button
+            type="button"
+            key={service.id}
+            className="ss-service-row"
+            onClick={() => onNavigate(service.id)}
+          >
+            <span className="ss-service-icon" aria-hidden="true">
+              <Icon size={15} />
+            </span>
+            <span className="ss-service-copy">
+              <b>{service.title}</b>
+              <small>{service.detail}</small>
+            </span>
+            <ArrowRight size={14} />
+          </button>
+        );
+      })}
+
+      <div className="ss-partner-network">
+        <span className="ss-eyebrow">Connected licensed partners</span>
+        <p className="ss-muted" style={{ marginTop: 6 }}>
+          {partnerNames.length
+            ? partnerNames.join(", ")
+            : "Partner network available after your first request."}
+        </p>
+      </div>
     </div>
   );
 }
@@ -327,20 +721,20 @@ function OpportunityCard({
       <article className="ss-savings-card accepted">
         <div className="ss-savings-head">
           <div>
-            <span className="ss-eyebrow">Switched & saving</span>
+            <span className="ss-eyebrow">Switched and saving</span>
             <h2>{name}</h2>
             <p className="ss-muted">
-              Now with {opportunity.alternateQuote?.carrier || opportunity.currentCarrier}.
+              Now with {quote?.carrier || opportunity.currentCarrier}.
             </p>
           </div>
           <div className="ss-savings-amount">
-            <small>You're saving</small>
+            <small>Annual savings</small>
             <strong className="ss-savings-pos">{formatMoney(saving)}/yr</strong>
           </div>
         </div>
         <div className="ss-note success">
           <BadgeCheck size={16} />
-          <span>Coverage switched and logged. We'll keep watching for future savings.</span>
+          <span>Coverage switched and logged. We will keep monitoring future renewals.</span>
         </div>
       </article>
     );
@@ -355,8 +749,8 @@ function OpportunityCard({
             <h2>{name}</h2>
             <p className="ss-muted">
               {status === "remind_later"
-                ? "Snoozed — we'll resurface this near renewal."
-                : "Dismissed. Reopen anytime to compare again."}
+                ? "Snoozed. This will return near renewal."
+                : "Dismissed. Reopen any time to compare again."}
             </p>
           </div>
           <button type="button" className="ss-button soft ss-button-sm" onClick={onReactivate}>
@@ -367,7 +761,6 @@ function OpportunityCard({
     );
   }
 
-  // available or quote_received
   return (
     <article className="ss-savings-card">
       <div className="ss-savings-head">
@@ -377,12 +770,12 @@ function OpportunityCard({
           </span>
           <h2>{name}</h2>
           <p className="ss-muted">
-            Current carrier {opportunity.currentCarrier} · Renews{" "}
+            Current carrier {opportunity.currentCarrier} - Renews{" "}
             {formatLongDate(opportunity.renewalDate)}
           </p>
         </div>
         <div className="ss-savings-amount">
-          <small>{status === "quote_received" ? "You save" : "Est. savings"}</small>
+          <small>{status === "quote_received" ? "You save" : "Estimated savings"}</small>
           <strong className="ss-savings-pos">{formatMoney(saving)}/yr</strong>
         </div>
       </div>
@@ -399,7 +792,7 @@ function OpportunityCard({
                 <span>Deductible</span>
                 <strong>{formatDeductible(policy?.deductible)}</strong>
                 <span>Limit</span>
-                <strong>{policy?.coverageLimits || "—"}</strong>
+                <strong>{policy?.coverageLimits || "N/A"}</strong>
               </div>
             </div>
             <div className="ss-compare-arrow" aria-hidden="true">
@@ -416,7 +809,7 @@ function OpportunityCard({
                 <span>Deductible</span>
                 <strong>{formatDeductible(quote.deductible)}</strong>
                 <span>Limit</span>
-                <strong>{quote.coverageLimits || "—"}</strong>
+                <strong>{quote.coverageLimits || "N/A"}</strong>
               </div>
             </div>
           </div>
@@ -433,7 +826,7 @@ function OpportunityCard({
 
           <div className="ss-row">
             <button type="button" className="ss-button" onClick={onAcceptQuote}>
-              <BadgeCheck size={16} /> Accept & switch
+              <BadgeCheck size={16} /> Accept and switch
             </button>
             <button type="button" className="ss-button soft" onClick={onKeepCurrent}>
               Keep current
@@ -444,7 +837,7 @@ function OpportunityCard({
           </div>
           {quote.amRating ? (
             <p className="ss-fine">
-              {quote.carrier} · AM Best rating {quote.amRating}. Quote valid through{" "}
+              {quote.carrier} - AM Best rating {quote.amRating}. Quote valid through{" "}
               {formatLongDate(quote.bindableUntil)}.
             </p>
           ) : null}
@@ -464,7 +857,7 @@ function OpportunityCard({
                 </>
               ) : (
                 <>
-                  <Search size={16} /> Find me a better rate
+                  <Search size={16} /> Find better rate
                 </>
               )}
             </button>
@@ -472,7 +865,7 @@ function OpportunityCard({
               Talk to advisor
             </button>
             <button type="button" className="ss-button soft" onClick={onRemindLater}>
-              <BellRing size={16} /> Snooze
+              <BellRing size={16} /> Remind me later
             </button>
             <button type="button" className="ss-button soft" onClick={onKeepCurrent}>
               <CircleOff size={16} /> Not interested

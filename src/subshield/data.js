@@ -542,6 +542,27 @@ export const initialData = {
     autoshop: false,
   },
 
+  coverageApplication: {
+    status: "draft",
+    stage: "coverage",
+    policyType: "workers",
+    currentCarrier: "StateFund West",
+    renewalMonth: "June",
+    renewalYear: String(new Date().getFullYear()),
+    tradeType: "Tile & stone installation",
+    state: "TX",
+    contactEmail: "owner@subshieldtile.com",
+    revenueRange: "$1M-$5M",
+    employees: "11-25",
+    requestType: "renewal_review",
+    certificateSupportType: "none",
+    recurringCertificateEmails: true,
+    preferredPartnerId: "partner-hartford",
+    notes:
+      "Review workers comp before renewal and confirm any coverage gaps.",
+    updatedAt: isoDaysAgo(1),
+  },
+
   settings: {
     userProfile: {
       firstName: "Jordan",
