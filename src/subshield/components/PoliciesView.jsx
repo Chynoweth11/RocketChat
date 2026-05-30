@@ -98,7 +98,7 @@ export default function PoliciesView({
     : filteredPolicies[0] || selectedPolicy;
 
   return (
-    <div className="ss-grid">
+    <div className="ss-grid ss-policies-grid">
       <section className="ss-card ss-span">
         <div className="ss-hero">
           <div>
@@ -139,7 +139,7 @@ export default function PoliciesView({
         </div>
       </section>
 
-      <section className="ss-card">
+      <section className="ss-card ss-policies-list">
         <Section
           title="Policy list"
           sub={`${filteredPolicies.length} ${filteredPolicies.length === 1 ? "policy" : "policies"} shown`}
@@ -191,7 +191,7 @@ export default function PoliciesView({
         ))}
       </section>
 
-      <section className="ss-card">
+      <section className="ss-card ss-policies-detail">
         {policyForDetail ? (
           <PolicyDetail
             policy={policyForDetail}
@@ -242,19 +242,22 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
   const width = `${Math.max(0, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
   const isCritical = status.className === "danger";
 
+  const notLicense = (policy.type || policy.policyType) !== "license";
+
   return (
-    <div>
+    <div className="ss-detail">
       <div className="ss-detail-head">
         <span className="ss-icon-tile" aria-hidden="true">
           <Icon size={22} />
         </span>
-        <div>
+        <div className="ss-detail-head-copy">
           <span className="ss-eyebrow">Policy detail</span>
           <h2>{policy.name}</h2>
           <p className="ss-muted">
             {policy.carrier} | {policy.policyNumber}
           </p>
         </div>
+        <em className={`ss-status ${status.className}`}>{status.label}</em>
       </div>
 
       <div className="ss-bar-top">
@@ -287,68 +290,69 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
         <span>{policy.statusNote}</span>
       </div>
 
-      <Section title="Policy services" sub="Manage this policy and its paperwork" />
-      <div className="ss-service-list">
-        <ServiceLink
-          icon={Shield}
-          title="Manage / renew policy"
-          detail="Renew coverage or compare a better rate before the deadline."
-          onClick={onRenew}
-        />
-        <ServiceLink
-          icon={FileCheck2}
-          title="Request certificate"
-          detail="Send a certificate of insurance to a holder or GC."
-          onClick={onSend}
-        />
-        {(policy.type || policy.policyType) !== "license" && (
-          <ServiceLink
-            icon={BadgeDollarSign}
-            title="Find savings"
-            detail="Route this policy to partners for lower-rate quotes."
-            onClick={onFindSavings}
+      <div className="ss-detail-body">
+        <div className="ss-detail-col">
+          <Section title="Policy services" sub="Manage this policy and its paperwork" />
+          <div className="ss-service-list">
+            <ServiceLink
+              icon={Shield}
+              title="Manage / renew policy"
+              detail="Renew coverage or compare a better rate before the deadline."
+              onClick={onRenew}
+            />
+            <ServiceLink
+              icon={FileCheck2}
+              title="Request certificate"
+              detail="Send a certificate of insurance to a holder or GC."
+              onClick={onSend}
+            />
+            {notLicense && (
+              <ServiceLink
+                icon={BadgeDollarSign}
+                title="Find savings"
+                detail="Route this policy to partners for lower-rate quotes."
+                onClick={onFindSavings}
+              />
+            )}
+            <ServiceLink
+              icon={Download}
+              title="Download client summary"
+              detail="Export a one-page coverage summary for this policy."
+              onClick={() => downloadPolicySummary(policy)}
+            />
+          </div>
+        </div>
+
+        <div className="ss-detail-col">
+          <Section
+            title="Documents on file"
+            sub={`${policy.documents.length} file${policy.documents.length === 1 ? "" : "s"}`}
           />
-        )}
-        <ServiceLink
-          icon={Download}
-          title="Download client summary"
-          detail="Export a one-page coverage summary for this policy."
-          onClick={() => downloadPolicySummary(policy)}
-        />
-      </div>
+          {policy.documents.length === 0 ? (
+            <div className="ss-note">
+              <AlertTriangle size={16} />
+              <span>No documents stored yet. Upload the declarations page to keep certificates ready.</span>
+            </div>
+          ) : (
+            policy.documents.map((doc) => <DocumentRow key={doc} name={doc} />)
+          )}
 
-      <Section title="Claims" sub="What you need if you have to file" />
-      <div className="ss-claims-card">
-        <p className="ss-muted">
-          File a claim through your carrier or advisor. Having these ready speeds up the process:
-        </p>
-        <ul className="ss-claims-list">
-          <li>Policy number ({policy.policyNumber})</li>
-          <li>Date, time, place, and description of the incident</li>
-          <li>Names and roles of anyone involved</li>
-        </ul>
-        <div className="ss-row">
-          <button type="button" className="ss-button soft" onClick={onSend}>
-            <LifeBuoy size={16} /> Contact advisor
-          </button>
+          <div className="ss-claims-card" style={{ marginTop: 12 }}>
+            <b className="ss-claims-title">Filing a claim</b>
+            <p className="ss-muted">Have these ready to speed up the process:</p>
+            <ul className="ss-claims-list">
+              <li>Policy number ({policy.policyNumber})</li>
+              <li>Date, time, place, and description of the incident</li>
+              <li>Names and roles of anyone involved</li>
+            </ul>
+            <button type="button" className="ss-button soft ss-button-sm" onClick={onSend}>
+              <LifeBuoy size={15} /> Contact advisor
+            </button>
+          </div>
         </div>
       </div>
 
-      <Section
-        title="Documents on file"
-        sub={`${policy.documents.length} file${policy.documents.length === 1 ? "" : "s"}`}
-      />
-      {policy.documents.length === 0 && (
-        <div className="ss-note">
-          <AlertTriangle size={16} />
-          <span>No documents stored yet. Upload the declarations page to keep certificates ready.</span>
-        </div>
-      )}
-      {policy.documents.map((doc) => (
-        <DocumentRow key={doc} name={doc} />
-      ))}
-
-      <div className="ss-row">
+      <div className="ss-detail-actions">
         <button type="button" className="ss-button" onClick={onRenew} disabled={isRenewing}>
           {isRenewing ? (
             <>
@@ -360,13 +364,13 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
             </>
           )}
         </button>
-        {(policy.type || policy.policyType) !== "license" && (
+        {notLicense && (
           <button type="button" className="ss-button soft" onClick={onFindSavings}>
             <BadgeDollarSign size={16} /> Find savings
           </button>
         )}
         <button type="button" className="ss-button soft" onClick={onSend}>
-          <Send size={16} /> Send
+          <Send size={16} /> Send certificate
         </button>
       </div>
     </div>

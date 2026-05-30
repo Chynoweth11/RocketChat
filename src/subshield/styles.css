@@ -83,6 +83,7 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 16px;
+  align-items: start;
 }
 
 .ss-dashboard-grid {
@@ -91,6 +92,84 @@ textarea {
 
 .ss-span {
   grid-column: 1 / -1;
+}
+
+/* ---------- Master-detail layout (My Insurance) ---------- */
+.ss-policies-grid {
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.ss-policies-list {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.ss-detail-head {
+  align-items: flex-start;
+}
+
+.ss-detail-head-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-policies-detail .ss-info-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ss-detail-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.ss-detail-col > .ss-section {
+  margin-top: 0;
+}
+
+.ss-claims-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.ss-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
+
+@media (max-width: 1240px) {
+  .ss-policies-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-policies-list {
+    position: relative;
+    top: 0;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 880px) {
+  .ss-detail-body {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .ss-policies-detail .ss-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .ss-sidebar {
@@ -2165,7 +2244,13 @@ textarea {
 .ss-coverage-flow-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr);
-  gap: 10px;
+  gap: 12px;
+  align-items: start;
+}
+
+.ss-policy-services-card {
+  position: sticky;
+  top: 20px;
 }
 
 .ss-coverage-application-card,
