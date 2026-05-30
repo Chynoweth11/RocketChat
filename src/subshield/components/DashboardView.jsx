@@ -7,8 +7,10 @@ import {
   FileCheck2,
   FileWarning,
   PiggyBank,
+  Plus,
   Shield,
   Sparkles,
+  Upload,
 } from "lucide-react";
 import {
   formatMoney,
@@ -93,6 +95,56 @@ export default function DashboardView({
     { label: "Missing documents", value: missingDocCount, action: "Upload", target: "upload" },
     { label: "Pending certificates", value: pendingCertificates, action: "Certificates", target: "certificates" },
   ];
+
+  if (policies.length === 0) {
+    return (
+      <div className="ss-grid ss-dashboard-grid">
+        <section className="ss-card ss-span">
+          <div className="ss-dash-onboard">
+            <div>
+              <span className="ss-eyebrow">{firstName ? `${greetingFor()}, ${firstName}` : "Welcome to SubShield"}</span>
+              <h2>Your insurance command center</h2>
+              <p className="ss-muted">
+                Upload your first policy document and SubShield will extract the details,
+                track your renewal dates, and start looking for savings.
+              </p>
+              <div className="ss-row" style={{ marginTop: 18 }}>
+                <button type="button" className="ss-button" onClick={onUpload}>
+                  <Upload size={16} /> Upload first policy
+                </button>
+                <button type="button" className="ss-button soft" onClick={onOpenPolicies}>
+                  <Plus size={16} /> Add manually
+                </button>
+              </div>
+            </div>
+            <div className="ss-dash-onboard-steps">
+              <div className="ss-dash-onboard-step">
+                <span className="ss-dash-onboard-num">1</span>
+                <div>
+                  <b>Upload a declarations page</b>
+                  <small>We extract policy, carrier, and renewal details automatically.</small>
+                </div>
+              </div>
+              <div className="ss-dash-onboard-step">
+                <span className="ss-dash-onboard-num">2</span>
+                <div>
+                  <b>Add your certificate holders</b>
+                  <small>Save GC contact info and send COIs in a few clicks.</small>
+                </div>
+              </div>
+              <div className="ss-dash-onboard-step">
+                <span className="ss-dash-onboard-num">3</span>
+                <div>
+                  <b>Let SubShield watch for savings</b>
+                  <small>We compare rates at renewal time and surface lower-cost options.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="ss-grid ss-dashboard-grid">

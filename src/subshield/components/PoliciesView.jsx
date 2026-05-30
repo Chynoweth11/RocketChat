@@ -84,13 +84,13 @@ export default function PoliciesView({
               through email.
             </p>
             <div className="ss-row">
-              <button className="ss-button" onClick={onAddPolicy}>
+              <button type="button" className="ss-button" onClick={onAddPolicy}>
                 <Plus size={16} /> Add policy
               </button>
-              <button className="ss-button soft" onClick={onUpload}>
+              <button type="button" className="ss-button soft" onClick={onUpload}>
                 <Upload size={16} /> Upload document
               </button>
-              <button className="ss-button soft" onClick={onSend}>
+              <button type="button" className="ss-button soft" onClick={onSend}>
                 <Send size={16} /> Send certificate
               </button>
             </div>
@@ -295,7 +295,7 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
           <li>Names and roles of anyone involved</li>
         </ul>
         <div className="ss-row">
-          <button className="ss-button soft" onClick={onSend}>
+          <button type="button" className="ss-button soft" onClick={onSend}>
             <LifeBuoy size={16} /> Contact advisor
           </button>
         </div>
@@ -316,7 +316,7 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
       ))}
 
       <div className="ss-row">
-        <button className="ss-button" onClick={onRenew} disabled={isRenewing}>
+        <button type="button" className="ss-button" onClick={onRenew} disabled={isRenewing}>
           {isRenewing ? (
             <>
               <Spinner /> Renewing...
@@ -328,11 +328,11 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
           )}
         </button>
         {(policy.type || policy.policyType) !== "license" && (
-          <button className="ss-button soft" onClick={onFindSavings}>
+          <button type="button" className="ss-button soft" onClick={onFindSavings}>
             <BadgeDollarSign size={16} /> Find savings
           </button>
         )}
-        <button className="ss-button soft" onClick={onSend}>
+        <button type="button" className="ss-button soft" onClick={onSend}>
           <Send size={16} /> Send
         </button>
       </div>

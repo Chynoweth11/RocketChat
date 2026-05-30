@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   ArrowRight,
   BadgeDollarSign,
@@ -51,12 +52,24 @@ export function Sidebar({
 }) {
   const soon = upcoming?.filter((policy) => (policy.daysRemaining ?? 999) <= 30).length || 0;
 
+  const handleNavKeyDown = useCallback((event) => {
+    const items = Array.from(event.currentTarget.querySelectorAll(".ss-nav"));
+    const idx = items.indexOf(document.activeElement);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[(idx + 1) % items.length]?.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(idx - 1 + items.length) % items.length]?.focus();
+    }
+  }, []);
+
   return (
     <aside className="ss-sidebar">
       <Brand />
 
       <div className="ss-sidebar-scroll">
-        <nav aria-label="Primary">
+        <nav aria-label="Primary" onKeyDown={handleNavKeyDown}>
           {NAV_ITEMS.map((item) => (
             <NavButton
               key={item.id}
@@ -109,7 +122,7 @@ export function Sidebar({
               <strong>{soon}</strong>
             </div>
           </div>
-          <button className="ss-button" onClick={onReviewSavings}>
+          <button type="button" className="ss-button" onClick={onReviewSavings}>
             {potentialSavings > 0 ? "Review savings" : "View savings"}
             <ArrowRight size={15} />
           </button>

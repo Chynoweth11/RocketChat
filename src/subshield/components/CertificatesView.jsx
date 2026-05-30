@@ -87,7 +87,7 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
               Add a certificate holder to save legal wording, delivery instructions,
               and project history for fast certificate sends.
             </p>
-            <button className="ss-button" onClick={onAdd}>
+            <button type="button" className="ss-button" onClick={onAdd}>
               <Plus size={15} /> Add first holder
             </button>
           </div>

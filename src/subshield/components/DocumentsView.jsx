@@ -114,7 +114,7 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
             <FileText size={32} />
             <h2>No documents yet</h2>
             <p>Upload your insurance paperwork and we'll keep it organized and searchable.</p>
-            <button className="ss-button" onClick={onUpload}>
+            <button type="button" className="ss-button" onClick={onUpload}>
               <Upload size={15} /> Upload first document
             </button>
           </div>
