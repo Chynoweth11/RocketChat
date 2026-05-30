@@ -5,3 +5,7 @@ dist/
 .env
 .env.*
 coverage/
+
+# Editor / harness temp artifacts
+ss-cphd.*
+*.tmp
