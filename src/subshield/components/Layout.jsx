@@ -46,6 +46,7 @@ export function Sidebar({
   potentialSavings,
   savingsCount,
   onReviewSavings,
+  account,
 }) {
   const soon = upcoming?.filter((policy) => (policy.daysRemaining ?? 999) <= 30).length || 0;
 
@@ -111,15 +112,27 @@ export function Sidebar({
         </button>
       </div>
 
-      <div className="ss-sidebar-footer">
-        <button type="button" className="ss-sidebar-link">
-          Product feedback
+      {account && (
+        <button
+          type="button"
+          className={`ss-account ${view === "settings" ? "active" : ""}`}
+          onClick={() => setView("settings")}
+          aria-label="Open account settings"
+        >
+          <span
+            className="ss-account-avatar"
+            style={account.avatarColor ? { background: account.avatarColor } : undefined}
+            aria-hidden="true"
+          >
+            {account.initials}
+          </span>
+          <span className="ss-account-copy">
+            <b>{account.name}</b>
+            <small>{account.workspace}</small>
+          </span>
+          {account.plan && <span className="ss-account-plan">{account.plan}</span>}
         </button>
-        <button type="button" className="ss-sidebar-link">
-          Contact support
-        </button>
-        <small>SubShield Insurance Workspace</small>
-      </div>
+      )}
     </aside>
   );
 }

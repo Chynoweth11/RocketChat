@@ -162,6 +162,25 @@ export default function SubShieldComplete() {
   const company = data.company || initialData.company;
   const settings = data.settings || initialData.settings;
   const firstName = settings.userProfile?.firstName || "";
+  const accountSummary = useMemo(() => {
+    const profile = settings.userProfile || {};
+    const fullName =
+      [profile.firstName, profile.lastName].filter(Boolean).join(" ") || company.name;
+    const initials =
+      [profile.firstName, profile.lastName]
+        .filter(Boolean)
+        .map((part) => part[0]?.toUpperCase())
+        .join("") ||
+      company.name?.slice(0, 2).toUpperCase() ||
+      "SS";
+    return {
+      name: fullName,
+      initials,
+      workspace: settings.account?.workspaceName || company.name,
+      plan: settings.billing?.planName || "",
+      avatarColor: profile.avatarColor || "",
+    };
+  }, [settings, company]);
   const coverageApplication = useMemo(
     () => normalizeCoverageApplication(data.coverageApplication, company, data.partners || []),
     [data.coverageApplication, company, data.partners]
@@ -1084,6 +1103,7 @@ export default function SubShieldComplete() {
           potentialSavings={potentialSavings}
           savingsCount={availableSavingsCount}
           onReviewSavings={() => setView("savings")}
+          account={accountSummary}
         />
 
         <main className="ss-main">
