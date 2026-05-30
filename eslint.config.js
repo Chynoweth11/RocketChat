@@ -23,6 +23,7 @@ export default [
         cancelAnimationFrame: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        console: "readonly",
         Blob: "readonly",
         URL: "readonly",
       },
