@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowRight,
+  BadgeDollarSign,
   CalendarClock,
   CheckCircle2,
   Clock3,
@@ -8,10 +9,32 @@ import {
   FileWarning,
   PiggyBank,
   Plus,
+  Send,
+  Settings,
   Shield,
   Sparkles,
   Upload,
+  UserPlus,
 } from "lucide-react";
+
+function activityIcon(title = "") {
+  const t = title.toLowerCase();
+  if (t.includes("certificate") || t.includes("sent to")) return <Send size={14} />;
+  if (t.includes("upload") || t.includes("document")) return <Upload size={14} />;
+  if (t.includes("sav") || t.includes("quote") || t.includes("coverage review")) return <BadgeDollarSign size={14} />;
+  if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return <Settings size={14} />;
+  if (t.includes("holder") || t.includes("advisor")) return <UserPlus size={14} />;
+  return <Shield size={14} />;
+}
+
+function activityColor(title = "") {
+  const t = title.toLowerCase();
+  if (t.includes("certificate") || t.includes("sent to")) return "#2f63e9";
+  if (t.includes("upload") || t.includes("document")) return "#7c3aed";
+  if (t.includes("sav") || t.includes("quote")) return "#0b7f5d";
+  if (t.includes("setting") || t.includes("logout")) return "#64748b";
+  return "#0284c7";
+}
 import {
   formatMoney,
   formatShortDate,
@@ -313,7 +336,13 @@ export default function DashboardView({
 
         {recentActivity.map((item) => (
           <div className="ss-dash-activity-row" key={item.id}>
-            <Clock3 size={15} />
+            <span
+              className="ss-dash-activity-icon"
+              style={{ color: activityColor(item.title) }}
+              aria-hidden="true"
+            >
+              {activityIcon(item.title)}
+            </span>
             <div>
               <b>{item.title}</b>
               <small>{item.body}</small>

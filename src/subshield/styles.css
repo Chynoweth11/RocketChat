@@ -1070,8 +1070,19 @@ textarea {
   padding: 9px 0;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   color: #607087;
+}
+
+.ss-dash-activity-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #f4f6fa;
+  display: grid;
+  place-items: center;
 }
 
 .ss-dash-activity-row:first-of-type {
