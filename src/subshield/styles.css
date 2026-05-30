@@ -2712,6 +2712,11 @@ textarea {
   font-size: 14px;
 }
 
+@keyframes ss-modal-in {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .ss-modal-bg {
   position: fixed;
   inset: 0;
@@ -2721,6 +2726,7 @@ textarea {
   display: grid;
   place-items: center;
   padding: 14px;
+  animation: ss-modal-in 0.18s ease-out;
 }
 
 .ss-modal {
@@ -2732,6 +2738,7 @@ textarea {
   background: rgba(255, 255, 255, 0.97);
   box-shadow: var(--shadow-md);
   padding: 18px;
+  position: relative;
 }
 
 .ss-modal h2 {

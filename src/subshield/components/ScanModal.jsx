@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Building2,
+  CheckCircle2,
   FileText,
   HardHat,
   Lock,
@@ -156,6 +157,7 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
       <button
         type="button"
         className="ss-button"
+        style={{ marginTop: 4 }}
         onClick={() =>
           onVault({
             ...selected,
@@ -170,7 +172,7 @@ export default function ScanModal({ onClose, onVault, existingTypes = [] }) {
           })
         }
       >
-        <Lock size={16} />
+        <CheckCircle2 size={16} />
         {alreadyVaulted ? "Update policy on file" : "Save policy & document"}
       </button>
     </Modal>
