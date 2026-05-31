@@ -3687,3 +3687,50 @@ a:focus-visible {
   background: var(--brand-soft);
   color: var(--brand);
 }
+
+/* --- Typography scale refinement --- */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
+}
+
+h1, h2, h3 {
+  font-feature-settings: "ss01" 1, "cv01" 1;
+}
+
+.ss-section h2 {
+  font-size: 15px;
+  letter-spacing: -0.015em;
+}
+
+.ss-info b,
+.ss-dash-metric b,
+.ss-dash-spend-value,
+.ss-savings-amount strong,
+.ss-side-card strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Mobile: neutralize desktop-only sidebar accent bar --- */
+@media (max-width: 980px) {
+  .ss-nav.active::before {
+    display: none;
+  }
+
+  .ss-account-plan {
+    margin-left: auto;
+  }
+}
+
+/* --- Mobile: premium-trend rows stay readable --- */
+@media (max-width: 560px) {
+  .ss-dash-trend-row {
+    grid-template-columns: minmax(90px, 1fr) auto;
+    grid-template-areas: "name val" "bar bar";
+    row-gap: 5px;
+  }
+  .ss-dash-trend-name { grid-area: name; }
+  .ss-dash-trend-val { grid-area: val; }
+  .ss-dash-trend-track { grid-area: bar; }
+}
