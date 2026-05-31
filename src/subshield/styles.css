@@ -3602,3 +3602,47 @@ a:focus-visible {
     border: 1px solid #ccc;
   }
 }
+
+/* --- Premium polish pass: sidebar, nav, account --- */
+.ss-nav {
+  position: relative;
+}
+
+.ss-nav.active::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand);
+}
+
+.ss-account {
+  transition: border-color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+
+.ss-account:hover {
+  border-color: var(--brand-line);
+  background: var(--surface-soft);
+}
+
+.ss-account.active {
+  border-color: var(--brand-line);
+  background: var(--brand-soft);
+}
+
+.ss-account-plan {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand-strong);
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-line);
+  padding: 3px 7px;
+  border-radius: 999px;
+}
