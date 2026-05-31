@@ -3699,11 +3699,6 @@ h1, h2, h3 {
   font-feature-settings: "ss01" 1, "cv01" 1;
 }
 
-.ss-section h2 {
-  font-size: 15px;
-  letter-spacing: -0.015em;
-}
-
 .ss-info b,
 .ss-dash-metric b,
 .ss-dash-spend-value,
