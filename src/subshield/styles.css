@@ -991,6 +991,7 @@ textarea {
 }
 
 .ss-spend-point {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1004,13 +1005,34 @@ textarea {
   width: 100%;
   max-width: 28px;
   border-radius: 6px 6px 3px 3px;
-  background: var(--brand);
-  opacity: 0.75;
+  background: linear-gradient(180deg, #9db4f5, #c5d2f7);
   flex-shrink: 0;
+  transition: background 0.16s ease, transform 0.16s ease;
 }
 
-.ss-spend-point:last-child span {
+.ss-spend-point.is-current span {
+  background: linear-gradient(180deg, var(--brand), #6a8bf0);
+}
+
+.ss-spend-point:hover span {
+  transform: scaleY(1.03);
+}
+
+.ss-spend-val {
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  color: #1f2d44;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.ss-spend-point:hover .ss-spend-val,
+.ss-spend-point.is-current .ss-spend-val {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .ss-spend-point small {

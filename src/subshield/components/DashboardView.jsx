@@ -182,8 +182,12 @@ export default function DashboardView({
             </p>
 
             <div className="ss-spend-chart" aria-label="Insurance spend trend">
-              {monthlySeries.map((point) => (
-                <div key={point.label} className="ss-spend-point">
+              {monthlySeries.map((point, idx) => (
+                <div
+                  key={point.label}
+                  className={`ss-spend-point${idx === monthlySeries.length - 1 ? " is-current" : ""}`}
+                >
+                  <em className="ss-spend-val">{formatMoney(point.value)}</em>
                   <span style={{ height: `${Math.max(12, Math.round((point.value / monthlyPeak) * 70))}px` }} />
                   <small>{point.label}</small>
                 </div>
