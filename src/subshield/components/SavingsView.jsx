@@ -360,8 +360,36 @@ function CoverageApplicationCard({
     WORKFLOW_STEPS.findIndex((item) => item.id === form.stage)
   );
 
+  const selectedPolicy = useMemo(
+    () =>
+      policies.find(
+        (policy) => (policy.policyType || policy.type) === form.policyType
+      ) || null,
+    [policies, form.policyType]
+  );
+
   function updateField(key, value) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      // Autofill from the matching vault policy when the user picks a policy type
+      if (key === "policyType") {
+        const match = policies.find(
+          (policy) => (policy.policyType || policy.type) === value
+        );
+        if (match) {
+          if (!prev.currentCarrier) next.currentCarrier = match.carrier || "";
+          const renewal = match.renewalDate || match.expirationDate || match.expires;
+          if (renewal) {
+            const date = new Date(renewal);
+            if (!Number.isNaN(date.getTime())) {
+              if (!prev.renewalMonth) next.renewalMonth = MONTHS[date.getMonth()];
+              if (!prev.renewalYear) next.renewalYear = String(date.getFullYear());
+            }
+          }
+        }
+      }
+      return next;
+    });
   }
 
   function nextStep() {
@@ -601,6 +629,34 @@ function CoverageApplicationCard({
           placeholder="Please review coverage gaps, renewal pricing, and quote alternatives."
         />
       </label>
+
+      {selectedPolicy && (
+        <div className="ss-coverage-estimate">
+          <div className="ss-coverage-estimate-row">
+            <span>Current premium</span>
+            <strong>{formatMoney(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0)}/yr</strong>
+          </div>
+          <div className="ss-coverage-estimate-row">
+            <span>Estimated with a better rate</span>
+            <strong>
+              {formatMoney(
+                Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.88)
+              )}/yr
+            </strong>
+          </div>
+          <div className="ss-coverage-estimate-row total">
+            <span>Potential annual savings</span>
+            <strong className="ss-savings-pos">
+              {formatMoney(
+                Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.12)
+              )}/yr
+            </strong>
+          </div>
+          <p className="ss-fine">
+            Estimate based on your current premium. Licensed partners confirm the exact figure after review.
+          </p>
+        </div>
+      )}
 
       <footer className="ss-footer">
         <span className="ss-footer-info">

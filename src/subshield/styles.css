@@ -3729,3 +3729,40 @@ h1, h2, h3 {
   .ss-dash-trend-val { grid-area: val; }
   .ss-dash-trend-track { grid-area: bar; }
 }
+
+/* --- Coverage application live estimate --- */
+.ss-coverage-estimate {
+  margin-top: 16px;
+  border: 1px solid var(--brand-line);
+  background: var(--brand-soft);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.ss-coverage-estimate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ss-coverage-estimate-row strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.ss-coverage-estimate-row.total {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--brand-line);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ss-coverage-estimate .ss-fine {
+  margin: 8px 0 0;
+}
