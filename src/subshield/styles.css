@@ -3646,3 +3646,42 @@ a:focus-visible {
   padding: 3px 7px;
   border-radius: 999px;
 }
+
+/* --- Activity timeline connectors + Documents row hover --- */
+.ss-activity {
+  position: relative;
+}
+
+.ss-activity::after {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 49px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--line-soft);
+}
+
+.ss-activity:last-child::after {
+  display: none;
+}
+
+.ss-activity:hover .ss-activity-body b {
+  color: var(--brand);
+}
+
+.ss-doc-row {
+  padding: 13px 12px;
+  margin: 0 -12px;
+  border-radius: 12px;
+  transition: background 0.14s ease;
+}
+
+.ss-doc-row:hover {
+  background: var(--surface-soft);
+}
+
+.ss-doc-row:hover .ss-doc-icon {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
