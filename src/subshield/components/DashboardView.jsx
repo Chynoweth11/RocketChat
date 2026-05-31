@@ -51,12 +51,12 @@ function buildSpendBars(policies = []) {
     .slice(0, 6)
     .map((policy) => ({
       id: policy.id,
-      label: policyLabelFromType(policy.policyType || policy.type).slice(0, 3).toUpperCase(),
+      name: policyLabelFromType(policy.policyType || policy.type),
       value: Math.round((policy.premiumAmount ?? policy.premium ?? 0) / 12),
     }));
 
   const peak = Math.max(1, ...top.map((item) => item.value));
-  return top.map((item) => ({ ...item, percent: Math.max(18, Math.round((item.value / peak) * 100)) }));
+  return top.map((item) => ({ ...item, percent: Math.max(8, Math.round((item.value / peak) * 100)) }));
 }
 
 function greetingFor(date = new Date()) {
@@ -237,17 +237,25 @@ export default function DashboardView({
         </div>
 
         <div className="ss-dash-trend">
-          <div>
+          <div className="ss-dash-trend-head">
             <b>Premium trend by policy group</b>
             <small>Monthly-equivalent spend across your highest-cost policies</small>
           </div>
           <div className="ss-dash-trend-bars">
             {spendBars.map((item) => (
-              <div className="ss-dash-trend-item" key={item.id}>
-                <span style={{ height: `${Math.max(8, Math.round(item.percent * 0.55))}px` }} />
-                <small>{item.label}</small>
+              <div className="ss-dash-trend-row" key={item.id}>
+                <span className="ss-dash-trend-name" title={item.name}>{item.name}</span>
+                <span className="ss-dash-trend-track">
+                  <span className="ss-dash-trend-fill" style={{ width: `${item.percent}%` }} />
+                </span>
+                <span className="ss-dash-trend-val">{formatMoney(item.value)}/mo</span>
               </div>
             ))}
+            {spendBars.length === 0 && (
+              <p className="ss-muted" style={{ margin: 0, fontSize: 13 }}>
+                Add a policy to see your premium breakdown.
+              </p>
+            )}
           </div>
         </div>
 

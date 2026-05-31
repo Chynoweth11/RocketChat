@@ -55,7 +55,7 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
         </div>
       </section>
 
-      <section className="ss-card">
+      <section className="ss-card ss-cert-holders">
         <Section
           title="Certificate holders"
           sub="Saved recipients with holder wording and delivery rules"
@@ -111,7 +111,7 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
         ))}
       </section>
 
-      <section className="ss-card">
+      <section className="ss-card ss-cert-recent">
         <Section title="Recent sends" sub="Proof of certificate delivery" />
         {recentSends.length === 0 ? (
           <div className="ss-empty" style={{ minHeight: 160 }}>
