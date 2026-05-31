@@ -690,11 +690,19 @@ function PolicyServicesCard({ onNavigate, partnerNames, potentialSavings }) {
 
       <div className="ss-partner-network">
         <span className="ss-eyebrow">Connected licensed partners</span>
-        <p className="ss-muted" style={{ marginTop: 6 }}>
-          {partnerNames.length
-            ? partnerNames.join(", ")
-            : "Partner network available after your first request."}
-        </p>
+        {partnerNames.length ? (
+          <div className="ss-partner-chips" style={{ marginTop: 8 }}>
+            {partnerNames.map((name) => (
+              <span className="ss-partner-chip" key={name}>
+                <ShieldCheck size={12} /> {name}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="ss-muted" style={{ marginTop: 6 }}>
+            Partner network available after your first request.
+          </p>
+        )}
       </div>
     </div>
   );
