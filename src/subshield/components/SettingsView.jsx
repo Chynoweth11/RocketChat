@@ -1232,6 +1232,30 @@ function RoleSettings({ initial, onSave }) {
   );
 }
 
+function downloadInvoice(invoice, billing) {
+  const lines = [
+    "SubShield Invoice",
+    "===================",
+    `Invoice:  ${invoice.id}`,
+    `Date:     ${formatLongDate(invoice.date)}`,
+    `Plan:     ${billing.planName || "Subscription"}`,
+    `Status:   ${invoice.status}`,
+    "",
+    `Amount due: ${formatMoney(invoice.amount)}`,
+    "",
+    `Billed to: ${billing.billingEmail || ""}`,
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `subshield-invoice-${invoice.id}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSavePayment }) {
   const [billingForm, setBillingForm] = useState(billing);
   const [paymentForm, setPaymentForm] = useState(paymentMethod);
@@ -1428,8 +1452,12 @@ function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSa
                     </span>
                   </td>
                   <td className="ss-settings-table-actions">
-                    <button type="button" className="ss-button soft ss-button-sm">
-                      Download PDF
+                    <button
+                      type="button"
+                      className="ss-button soft ss-button-sm"
+                      onClick={() => downloadInvoice(invoice, billingForm)}
+                    >
+                      Download
                     </button>
                   </td>
                 </tr>
