@@ -194,6 +194,7 @@ export default function SettingsView({
   totalPremium,
   onSaveSection,
   onReset,
+  onLoadSample,
   onLogout,
 }) {
   const [activeTab, setActiveTab] = useState("profile");
@@ -400,7 +401,9 @@ export default function SettingsView({
           />
         )}
 
-        {activeTab === "logout" && <LogoutSettings onLogout={onLogout} onReset={onReset} />}
+        {activeTab === "logout" && (
+          <LogoutSettings onLogout={onLogout} onReset={onReset} onLoadSample={onLoadSample} />
+        )}
       </div>
     </div>
   );
@@ -1870,7 +1873,7 @@ function SupportSettings({ initial, onSave }) {
   );
 }
 
-function LogoutSettings({ onLogout, onReset }) {
+function LogoutSettings({ onLogout, onReset, onLoadSample }) {
   return (
     <div className="ss-settings-stack">
       <section className="ss-card">
@@ -1887,15 +1890,25 @@ function LogoutSettings({ onLogout, onReset }) {
       </section>
 
       <section className="ss-card">
-        <Section title="Support Actions" sub="Use with caution in demo or sandbox environments." />
+        <Section title="Demo & sample data" sub="Populate or clear the local sandbox for reviews and demos." />
         <p className="ss-muted">
-          Reset clears local demo data including policies, settings, team members, and activity history.
+          Load sample data fills the app with a realistic example account (policies,
+          carriers, renewals, savings opportunities, documents, and activity) so you can
+          review how everything looks with data in it. Reset clears the account back to
+          empty.
         </p>
         <div className="ss-footer">
-          <span className="ss-footer-info">This action is irreversible for local demo storage.</span>
-          <button type="button" className="ss-button soft" onClick={onReset}>
-            Reset local data
-          </button>
+          <span className="ss-footer-info">Both actions only affect local browser storage.</span>
+          <div className="ss-row">
+            {onLoadSample && (
+              <button type="button" className="ss-button soft" onClick={onLoadSample}>
+                <Database size={16} /> Load sample data
+              </button>
+            )}
+            <button type="button" className="ss-button soft" onClick={onReset}>
+              Reset to empty
+            </button>
+          </div>
         </div>
       </section>
     </div>

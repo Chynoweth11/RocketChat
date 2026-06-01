@@ -27,6 +27,7 @@ import {
   writeStoredData,
 } from "./utils.js";
 import { initialData } from "./data.js";
+import { sampleData } from "./sampleData.js";
 import { Header, Sidebar } from "./components/Layout.jsx";
 import DashboardView from "./components/DashboardView.jsx";
 import PoliciesView from "./components/PoliciesView.jsx";
@@ -1069,17 +1070,29 @@ export default function SubShieldComplete() {
     fireToast("Logged out", "Current session closed successfully.");
   }
 
-  function resetDemo() {
-    commit(initialData);
+  // Applies a fresh dataset (empty or sample) and resets all transient UI
+  // state. Selection state is guarded so it works whether or not the dataset
+  // contains policies/contractors.
+  function applyDataset(dataset) {
+    commit(dataset);
     setView("dashboard");
-    setPolicyId(initialData.policies[0].id);
-    setContractorId(initialData.contractors[0].id);
-    setProject(initialData.contractors[0].projects[0]);
+    setPolicyId(dataset.policies[0]?.id || null);
+    setContractorId(dataset.contractors[0]?.id || null);
+    setProject(dataset.contractors[0]?.projects?.[0] || "");
     setNewProject("");
     setModal(null);
     setEditingContractor(null);
     setQuoteDefaults({});
-    fireToast("Demo reset", "Local data restored to the seed state.");
+  }
+
+  function resetDemo() {
+    applyDataset(initialData);
+    fireToast("Account reset", "Local data cleared back to an empty account.");
+  }
+
+  function loadSampleData() {
+    applyDataset(sampleData);
+    fireToast("Sample data loaded", "A realistic example account is ready to explore.");
   }
 
   /* ---------- Navigation helpers ---------- */
@@ -1283,6 +1296,7 @@ export default function SubShieldComplete() {
               totalPremium={totalPremium}
               onSaveSection={saveSettingsSection}
               onReset={resetDemo}
+              onLoadSample={loadSampleData}
               onLogout={logoutUser}
             />
           )}
