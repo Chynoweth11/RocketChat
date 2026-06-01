@@ -2364,6 +2364,17 @@ textarea {
   color: #2248a9;
 }
 
+.ss-coverage-step.done {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.ss-coverage-step.done span {
+  border-color: #16a34a;
+  color: #15803d;
+  background: #dcfce7;
+}
+
 .ss-service-row {
   width: 100%;
   border: 1px solid var(--line);

@@ -392,7 +392,21 @@ function CoverageApplicationCard({
     });
   }
 
+  function validateStep() {
+    const nextErrors = {};
+    if (stepIndex === 0 && !form.policyType) nextErrors.policyType = "Select a policy type.";
+    if (stepIndex === 1) {
+      if (!form.renewalMonth) nextErrors.renewalMonth = "Select a renewal month.";
+      if (!form.renewalYear) nextErrors.renewalYear = "Select a renewal year.";
+      if (!form.state?.trim()) nextErrors.state = "State is required.";
+    }
+    if (stepIndex === 2 && !form.contactEmail?.trim()) nextErrors.contactEmail = "Contact email is required.";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
   function nextStep() {
+    if (!validateStep()) return;
     const nextIndex = Math.min(stepIndex + 1, WORKFLOW_STEPS.length - 1);
     const nextStage = WORKFLOW_STEPS[nextIndex].id;
     const next = { ...form, stage: nextStage };
@@ -401,6 +415,7 @@ function CoverageApplicationCard({
   }
 
   function previousStep() {
+    setErrors({});
     const nextIndex = Math.max(stepIndex - 1, 0);
     const nextStage = WORKFLOW_STEPS[nextIndex].id;
     const next = { ...form, stage: nextStage };
@@ -408,25 +423,19 @@ function CoverageApplicationCard({
     onSaveCoverageApplication(next, { logActivity: false, toast: false });
   }
 
-  function validate() {
-    const nextErrors = {};
-    if (!form.policyType) nextErrors.policyType = "Select a policy type.";
-    if (!form.contactEmail?.trim()) nextErrors.contactEmail = "Contact email is required.";
-    if (!form.renewalMonth) nextErrors.renewalMonth = "Select a renewal month.";
-    if (!form.renewalYear) nextErrors.renewalYear = "Select a renewal year.";
-    if (!form.state?.trim()) nextErrors.state = "State is required.";
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  }
-
   function saveDraft() {
     onSaveCoverageApplication(form, { logActivity: true, toast: true });
   }
 
   function submit() {
-    if (!validate()) return;
+    const nextErrors = {};
+    if (!form.contactEmail?.trim()) nextErrors.contactEmail = "Contact email is required.";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     onSubmitCoverageApplication({ ...form, stage: "quote" });
   }
+
+  const isLastStep = stepIndex === WORKFLOW_STEPS.length - 1;
 
   return (
     <div className="ss-coverage-application-card">
@@ -434,7 +443,7 @@ function CoverageApplicationCard({
         {WORKFLOW_STEPS.map((step, index) => (
           <div
             key={step.id}
-            className={`ss-coverage-step ${index <= stepIndex ? "active" : ""}`}
+            className={`ss-coverage-step ${index < stepIndex ? "done" : ""} ${index === stepIndex ? "active" : ""}`}
           >
             <span>{index + 1}</span>
             <small>{step.label}</small>
@@ -442,219 +451,243 @@ function CoverageApplicationCard({
         ))}
       </div>
 
-      <div className="ss-note success" style={{ marginTop: 0 }}>
-        Enter your current insurance details and SubShield will route your request to licensed
-        partners for renewal help and savings quotes.
-      </div>
+      {/* Step 0 — Start: policy type + carrier */}
+      {stepIndex === 0 && (
+        <>
+          <div className="ss-note success" style={{ marginTop: 0 }}>
+            Tell us which policy you want help with. SubShield will autofill details from your vault.
+          </div>
+          <div className="ss-field-grid">
+            <label className="ss-field">
+              <span className="ss-field-label">Policy type</span>
+              <select
+                value={form.policyType || ""}
+                onChange={(event) => updateField("policyType", event.target.value)}
+              >
+                {policyTypes.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+              {errors.policyType && <span className="ss-field-error">{errors.policyType}</span>}
+            </label>
+            <label className="ss-field">
+              <span className="ss-field-label">Current insurance carrier (optional)</span>
+              <input
+                value={form.currentCarrier || ""}
+                onChange={(event) => updateField("currentCarrier", event.target.value)}
+                placeholder="StateFund West"
+              />
+            </label>
+          </div>
+          {selectedPolicy && (
+            <div className="ss-coverage-estimate">
+              <div className="ss-coverage-estimate-row">
+                <span>Current premium</span>
+                <strong>{formatMoney(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0)}/yr</strong>
+              </div>
+              <div className="ss-coverage-estimate-row">
+                <span>Estimated with a better rate</span>
+                <strong>
+                  {formatMoney(Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.88))}/yr
+                </strong>
+              </div>
+              <div className="ss-coverage-estimate-row total">
+                <span>Potential annual savings</span>
+                <strong className="ss-savings-pos">
+                  {formatMoney(Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.12))}/yr
+                </strong>
+              </div>
+              <p className="ss-fine">Estimate based on your current premium. Partners confirm the exact figure after review.</p>
+            </div>
+          )}
+        </>
+      )}
 
-      <div className="ss-field-grid">
-        <label className="ss-field">
-          <span className="ss-field-label">Policy type</span>
-          <select
-            value={form.policyType || ""}
-            onChange={(event) => updateField("policyType", event.target.value)}
-          >
-            {policyTypes.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-          {errors.policyType && <span className="ss-field-error">{errors.policyType}</span>}
-        </label>
+      {/* Step 1 — Coverage: renewal dates, trade, state */}
+      {stepIndex === 1 && (
+        <>
+          <div className="ss-note success" style={{ marginTop: 0 }}>
+            When does this policy renew? This helps partners contact you at the right time.
+          </div>
+          <div className="ss-field-grid">
+            <label className="ss-field">
+              <span className="ss-field-label">Policy renewal month</span>
+              <select
+                value={form.renewalMonth || ""}
+                onChange={(event) => updateField("renewalMonth", event.target.value)}
+              >
+                <option value="">Select month</option>
+                {MONTHS.map((month) => (
+                  <option key={month} value={month}>{month}</option>
+                ))}
+              </select>
+              {errors.renewalMonth && <span className="ss-field-error">{errors.renewalMonth}</span>}
+            </label>
+            <label className="ss-field">
+              <span className="ss-field-label">Policy renewal year</span>
+              <select
+                value={form.renewalYear || ""}
+                onChange={(event) => updateField("renewalYear", event.target.value)}
+              >
+                <option value="">Select year</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+              {errors.renewalYear && <span className="ss-field-error">{errors.renewalYear}</span>}
+            </label>
+          </div>
+          <div className="ss-field-grid">
+            <label className="ss-field">
+              <span className="ss-field-label">Trade type</span>
+              <input
+                value={form.tradeType || ""}
+                onChange={(event) => updateField("tradeType", event.target.value)}
+                placeholder="Tile and stone installation"
+              />
+            </label>
+            <label className="ss-field">
+              <span className="ss-field-label">State</span>
+              <input
+                value={form.state || ""}
+                onChange={(event) => updateField("state", event.target.value)}
+                placeholder="TX"
+              />
+              {errors.state && <span className="ss-field-error">{errors.state}</span>}
+            </label>
+          </div>
+          <div className="ss-field-grid">
+            <label className="ss-field">
+              <span className="ss-field-label">Revenue range</span>
+              <input
+                value={form.revenueRange || ""}
+                onChange={(event) => updateField("revenueRange", event.target.value)}
+                placeholder="$1M-$5M"
+              />
+            </label>
+            <label className="ss-field">
+              <span className="ss-field-label">Employees</span>
+              <input
+                value={form.employees || ""}
+                onChange={(event) => updateField("employees", event.target.value)}
+                placeholder="11-25"
+              />
+            </label>
+          </div>
+        </>
+      )}
 
-        <label className="ss-field">
-          <span className="ss-field-label">Current insurance carrier (optional)</span>
-          <input
-            value={form.currentCarrier || ""}
-            onChange={(event) => updateField("currentCarrier", event.target.value)}
-            placeholder="StateFund West"
-          />
-        </label>
-      </div>
-
-      <div className="ss-field-grid">
-        <label className="ss-field">
-          <span className="ss-field-label">Policy renewal month</span>
-          <select
-            value={form.renewalMonth || ""}
-            onChange={(event) => updateField("renewalMonth", event.target.value)}
-          >
-            <option value="">Select month</option>
-            {MONTHS.map((month) => (
-              <option key={month} value={month}>
-                {month}
-              </option>
-            ))}
-          </select>
-          {errors.renewalMonth && <span className="ss-field-error">{errors.renewalMonth}</span>}
-        </label>
-
-        <label className="ss-field">
-          <span className="ss-field-label">Policy renewal year</span>
-          <select
-            value={form.renewalYear || ""}
-            onChange={(event) => updateField("renewalYear", event.target.value)}
-          >
-            <option value="">Select year</option>
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-          {errors.renewalYear && <span className="ss-field-error">{errors.renewalYear}</span>}
-        </label>
-      </div>
-
-      <div className="ss-field-grid">
-        <label className="ss-field">
-          <span className="ss-field-label">Trade type</span>
-          <input
-            value={form.tradeType || ""}
-            onChange={(event) => updateField("tradeType", event.target.value)}
-            placeholder="Tile and stone installation"
-          />
-        </label>
-
-        <label className="ss-field">
-          <span className="ss-field-label">State</span>
-          <input
-            value={form.state || ""}
-            onChange={(event) => updateField("state", event.target.value)}
-            placeholder="TX"
-          />
-          {errors.state && <span className="ss-field-error">{errors.state}</span>}
-        </label>
-      </div>
-
-      <div className="ss-field-grid">
-        <label className="ss-field">
-          <span className="ss-field-label">Contact email</span>
-          <input
-            type="email"
-            value={form.contactEmail || ""}
-            onChange={(event) => updateField("contactEmail", event.target.value)}
-            placeholder="owner@company.com"
-          />
-          {errors.contactEmail && <span className="ss-field-error">{errors.contactEmail}</span>}
-        </label>
-
-        <label className="ss-field">
-          <span className="ss-field-label">Preferred licensed partner</span>
-          <select
-            value={form.preferredPartnerId || ""}
-            onChange={(event) => updateField("preferredPartnerId", event.target.value)}
-          >
-            <option value="">Auto-route to best partner</option>
-            {partners
-              .filter((partner) => partner.active)
-              .map((partner) => (
-                <option key={partner.id} value={partner.id}>
-                  {partner.name}
-                </option>
+      {/* Step 2 — Application: contact, partner, request type */}
+      {stepIndex === 2 && (
+        <>
+          <div className="ss-note success" style={{ marginTop: 0 }}>
+            How should a licensed partner reach you? We&apos;ll route to the best match for your trade and state.
+          </div>
+          <div className="ss-field-grid">
+            <label className="ss-field">
+              <span className="ss-field-label">Contact email</span>
+              <input
+                type="email"
+                value={form.contactEmail || ""}
+                onChange={(event) => updateField("contactEmail", event.target.value)}
+                placeholder="owner@company.com"
+              />
+              {errors.contactEmail && <span className="ss-field-error">{errors.contactEmail}</span>}
+            </label>
+            <label className="ss-field">
+              <span className="ss-field-label">Preferred licensed partner</span>
+              <select
+                value={form.preferredPartnerId || ""}
+                onChange={(event) => updateField("preferredPartnerId", event.target.value)}
+              >
+                <option value="">Auto-route to best partner</option>
+                {partners
+                  .filter((partner) => partner.active)
+                  .map((partner) => (
+                    <option key={partner.id} value={partner.id}>{partner.name}</option>
+                  ))}
+              </select>
+            </label>
+          </div>
+          <label className="ss-field">
+            <span className="ss-field-label">Request type</span>
+            <div className="ss-option-stack">
+              {REQUEST_TYPES.map((item) => (
+                <label key={item.value} className="ss-radio-row">
+                  <input
+                    type="radio"
+                    name="request-type"
+                    checked={form.requestType === item.value}
+                    onChange={() => updateField("requestType", item.value)}
+                  />
+                  <span>{item.label}</span>
+                </label>
               ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="ss-field-grid">
-        <label className="ss-field">
-          <span className="ss-field-label">Revenue range</span>
-          <input
-            value={form.revenueRange || ""}
-            onChange={(event) => updateField("revenueRange", event.target.value)}
-            placeholder="$1M-$5M"
-          />
-        </label>
-        <label className="ss-field">
-          <span className="ss-field-label">Employees</span>
-          <input
-            value={form.employees || ""}
-            onChange={(event) => updateField("employees", event.target.value)}
-            placeholder="11-25"
-          />
-        </label>
-      </div>
-
-      <label className="ss-field">
-        <span className="ss-field-label">Request type</span>
-        <div className="ss-option-stack">
-          {REQUEST_TYPES.map((item) => (
-            <label key={item.value} className="ss-radio-row">
-              <input
-                type="radio"
-                name="request-type"
-                checked={form.requestType === item.value}
-                onChange={() => updateField("requestType", item.value)}
-              />
-              <span>{item.label}</span>
-            </label>
-          ))}
-        </div>
-      </label>
-
-      <label className="ss-field">
-        <span className="ss-field-label">Certificate support</span>
-        <div className="ss-option-stack">
-          {CERTIFICATE_SUPPORT.map((item) => (
-            <label key={item.value} className="ss-radio-row">
-              <input
-                type="radio"
-                name="certificate-support"
-                checked={form.certificateSupportType === item.value}
-                onChange={() => updateField("certificateSupportType", item.value)}
-              />
-              <span>{item.label}</span>
-            </label>
-          ))}
-          <label className="ss-radio-row">
-            <input
-              type="checkbox"
-              checked={Boolean(form.recurringCertificateEmails)}
-              onChange={(event) =>
-                updateField("recurringCertificateEmails", event.target.checked)
-              }
-            />
-            <span>Send this certificate reminder each policy term</span>
+            </div>
           </label>
-        </div>
-      </label>
+        </>
+      )}
 
-      <label className="ss-field">
-        <span className="ss-field-label">Notes for the insurance partner</span>
-        <textarea
-          value={form.notes || ""}
-          onChange={(event) => updateField("notes", event.target.value)}
-          placeholder="Please review coverage gaps, renewal pricing, and quote alternatives."
-        />
-      </label>
+      {/* Step 3 — Quote: certificate support + notes */}
+      {stepIndex === 3 && (
+        <>
+          <div className="ss-note success" style={{ marginTop: 0 }}>
+            Do you need a certificate of insurance sent alongside the quote?
+          </div>
+          <label className="ss-field">
+            <span className="ss-field-label">Certificate support</span>
+            <div className="ss-option-stack">
+              {CERTIFICATE_SUPPORT.map((item) => (
+                <label key={item.value} className="ss-radio-row">
+                  <input
+                    type="radio"
+                    name="certificate-support"
+                    checked={form.certificateSupportType === item.value}
+                    onChange={() => updateField("certificateSupportType", item.value)}
+                  />
+                  <span>{item.label}</span>
+                </label>
+              ))}
+              <label className="ss-radio-row">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.recurringCertificateEmails)}
+                  onChange={(event) => updateField("recurringCertificateEmails", event.target.checked)}
+                />
+                <span>Send this certificate reminder each policy term</span>
+              </label>
+            </div>
+          </label>
+          <label className="ss-field">
+            <span className="ss-field-label">Notes for the insurance partner</span>
+            <textarea
+              value={form.notes || ""}
+              onChange={(event) => updateField("notes", event.target.value)}
+              placeholder="Please review coverage gaps, renewal pricing, and quote alternatives."
+            />
+          </label>
+        </>
+      )}
 
-      {selectedPolicy && (
-        <div className="ss-coverage-estimate">
-          <div className="ss-coverage-estimate-row">
-            <span>Current premium</span>
-            <strong>{formatMoney(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0)}/yr</strong>
-          </div>
-          <div className="ss-coverage-estimate-row">
-            <span>Estimated with a better rate</span>
-            <strong>
-              {formatMoney(
-                Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.88)
-              )}/yr
-            </strong>
-          </div>
-          <div className="ss-coverage-estimate-row total">
-            <span>Potential annual savings</span>
-            <strong className="ss-savings-pos">
-              {formatMoney(
-                Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.12)
-              )}/yr
-            </strong>
-          </div>
-          <p className="ss-fine">
-            Estimate based on your current premium. Licensed partners confirm the exact figure after review.
-          </p>
+      {/* Step 4 — Purchase: review summary before submit */}
+      {stepIndex === 4 && (
+        <div className="ss-coverage-estimate" style={{ marginTop: 8 }}>
+          <div className="ss-coverage-estimate-row"><span>Policy type</span><strong>{form.policyType ? policyLabelFromType(form.policyType) : "—"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Current carrier</span><strong>{form.currentCarrier || "—"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Renewal</span><strong>{form.renewalMonth && form.renewalYear ? `${form.renewalMonth} ${form.renewalYear}` : "—"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>State</span><strong>{form.state || "—"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Contact email</span><strong>{form.contactEmail || "—"}</strong></div>
+          {selectedPolicy && (
+            <div className="ss-coverage-estimate-row total">
+              <span>Est. annual savings</span>
+              <strong className="ss-savings-pos">
+                {formatMoney(Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.12))}/yr
+              </strong>
+            </div>
+          )}
+          <p className="ss-fine">Review your details above, then click Submit to route this to a licensed partner.</p>
         </div>
       )}
 
@@ -663,18 +696,24 @@ function CoverageApplicationCard({
           Last saved {form.updatedAt ? formatLongDate(form.updatedAt) : "today"}.
         </span>
         <div className="ss-row">
-          <button type="button" className="ss-button soft ss-button-sm" onClick={previousStep}>
-            Back
-          </button>
-          <button type="button" className="ss-button soft ss-button-sm" onClick={nextStep}>
-            Continue application
-          </button>
+          {stepIndex > 0 && (
+            <button type="button" className="ss-button soft ss-button-sm" onClick={previousStep}>
+              Back
+            </button>
+          )}
           <button type="button" className="ss-button soft ss-button-sm" onClick={saveDraft}>
             Save draft
           </button>
-          <button type="button" className="ss-button ss-button-sm" onClick={submit}>
-            Submit request
-          </button>
+          {!isLastStep && (
+            <button type="button" className="ss-button ss-button-sm" onClick={nextStep}>
+              Continue
+            </button>
+          )}
+          {isLastStep && (
+            <button type="button" className="ss-button ss-button-sm" onClick={submit}>
+              Submit request
+            </button>
+          )}
         </div>
       </footer>
     </div>
