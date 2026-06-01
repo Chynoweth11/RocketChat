@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   countDocuments,
   dateFromToday,
@@ -29,24 +29,37 @@ import {
 import { initialData } from "./data.js";
 import { sampleData } from "./sampleData.js";
 import { Header, Sidebar } from "./components/Layout.jsx";
+// Dashboard is the initial view, so it loads eagerly. Every other view and
+// all modals are code-split with React.lazy so they download only when first
+// opened — keeping the initial bundle small.
 import DashboardView from "./components/DashboardView.jsx";
-import PoliciesView from "./components/PoliciesView.jsx";
-import SavingsView from "./components/SavingsView.jsx";
-import RenewalsView from "./components/RenewalsView.jsx";
-import CertificatesView from "./components/CertificatesView.jsx";
-import DocumentsView from "./components/DocumentsView.jsx";
-import ActivityView from "./components/ActivityView.jsx";
-import SettingsView from "./components/SettingsView.jsx";
-import SendModal from "./components/SendModal.jsx";
-import ScanModal from "./components/ScanModal.jsx";
-import SuccessModal from "./components/SuccessModal.jsx";
-import AddGCModal from "./components/AddGCModal.jsx";
-import EditHolderModal from "./components/EditHolderModal.jsx";
-import AddPolicyModal from "./components/AddPolicyModal.jsx";
-import AddBrokerModal from "./components/AddBrokerModal.jsx";
-import QuoteRequestModal from "./components/QuoteRequestModal.jsx";
-import CommandPalette from "./components/CommandPalette.jsx";
+const PoliciesView = lazy(() => import("./components/PoliciesView.jsx"));
+const SavingsView = lazy(() => import("./components/SavingsView.jsx"));
+const RenewalsView = lazy(() => import("./components/RenewalsView.jsx"));
+const CertificatesView = lazy(() => import("./components/CertificatesView.jsx"));
+const DocumentsView = lazy(() => import("./components/DocumentsView.jsx"));
+const ActivityView = lazy(() => import("./components/ActivityView.jsx"));
+const SettingsView = lazy(() => import("./components/SettingsView.jsx"));
+const SendModal = lazy(() => import("./components/SendModal.jsx"));
+const ScanModal = lazy(() => import("./components/ScanModal.jsx"));
+const SuccessModal = lazy(() => import("./components/SuccessModal.jsx"));
+const AddGCModal = lazy(() => import("./components/AddGCModal.jsx"));
+const EditHolderModal = lazy(() => import("./components/EditHolderModal.jsx"));
+const AddPolicyModal = lazy(() => import("./components/AddPolicyModal.jsx"));
+const AddBrokerModal = lazy(() => import("./components/AddBrokerModal.jsx"));
+const QuoteRequestModal = lazy(() => import("./components/QuoteRequestModal.jsx"));
+const CommandPalette = lazy(() => import("./components/CommandPalette.jsx"));
 import "./styles.css";
+
+// Lightweight placeholder shown while a lazily-loaded view chunk downloads.
+function ViewLoading() {
+  return (
+    <div className="ss-view-loading" role="status" aria-live="polite">
+      <span className="ss-view-spinner" aria-hidden="true" />
+      <span>Loading…</span>
+    </div>
+  );
+}
 
 function prependActivity(activity, title, body) {
   return [
@@ -1194,6 +1207,7 @@ export default function SubShieldComplete() {
             onClearDemo={resetDemo}
           />
 
+          <Suspense fallback={<ViewLoading />}>
           {view === "dashboard" && (
             <DashboardView
               firstName={firstName}
@@ -1305,9 +1319,11 @@ export default function SubShieldComplete() {
               onLogout={logoutUser}
             />
           )}
+          </Suspense>
         </main>
       </div>
 
+      <Suspense fallback={null}>
       {modal === "scan" && (
         <ScanModal
           onClose={() => setModal(null)}
@@ -1404,6 +1420,7 @@ export default function SubShieldComplete() {
           documents={documents}
         />
       )}
+      </Suspense>
 
       {toast && (
         <div className={`ss-toast${toast.type && toast.type !== "default" ? ` ${toast.type}` : ""}`} role="status" aria-live="polite">

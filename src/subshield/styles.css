@@ -2348,6 +2348,32 @@ textarea {
   }
 }
 
+.ss-view-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 220px;
+  color: var(--muted, #55657e);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ss-view-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(17, 24, 39, 0.15);
+  border-top-color: var(--brand, #2563eb);
+  animation: ss-spin 0.75s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-view-spinner {
+    animation: none;
+  }
+}
+
 .ss-coverage-flow-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr);
