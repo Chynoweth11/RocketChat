@@ -3857,3 +3857,233 @@ h1, h2, h3 {
 .ss-coverage-estimate .ss-fine {
   margin: 8px 0 0;
 }
+
+/* =====================================================
+   Action Center
+   ===================================================== */
+.ss-action-center {
+  border-left: 3px solid var(--brand);
+}
+
+.ss-action-center-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ss-action-center-head b { font-size: 15px; }
+.ss-action-center-head small { color: var(--muted); }
+
+.ss-action-center-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ss-action-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ss-action-item:hover { background: #f8faff; border-color: var(--brand-line); }
+.ss-action-item--danger { border-left: 3px solid #ef4444; }
+.ss-action-item--warning { border-left: 3px solid #f59e0b; }
+.ss-action-item--info { border-left: 3px solid var(--brand); }
+
+.ss-action-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ss-action-dot.danger { background: #fee2e2; color: #ef4444; }
+.ss-action-dot.warning { background: #fef3c7; color: #d97706; }
+.ss-action-dot.info { background: var(--brand-soft); color: var(--brand); }
+
+.ss-action-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ss-action-text b { font-size: 13.5px; font-weight: 600; }
+.ss-action-text small { color: var(--muted); font-size: 12px; }
+
+.ss-action-cta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand);
+  white-space: nowrap;
+}
+
+/* =====================================================
+   Alert chip in header
+   ===================================================== */
+.ss-alert-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+/* =====================================================
+   Policy health score
+   ===================================================== */
+.ss-health-card {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: var(--surface);
+}
+
+.ss-health-score-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.ss-health-number {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ss-health-val {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-health-val.success { color: #16a34a; }
+.ss-health-val.warning { color: #d97706; }
+.ss-health-val.danger { color: #dc2626; }
+
+.ss-health-denom {
+  font-size: 16px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.ss-health-grade {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-left: 8px;
+}
+
+.ss-health-grade--success { background: #dcfce7; color: #15803d; }
+.ss-health-grade--warning { background: #fef3c7; color: #92400e; }
+.ss-health-grade--danger { background: #fee2e2; color: #991b1b; }
+
+.ss-health-bar-wrap { flex: 1; }
+
+.ss-health-bar {
+  height: 8px;
+  background: var(--line);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.ss-health-fill {
+  display: block;
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.5s ease;
+}
+
+.ss-health-fill.success { background: #16a34a; }
+.ss-health-fill.warning { background: #f59e0b; }
+.ss-health-fill.danger { background: #dc2626; }
+
+.ss-health-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ss-health-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+}
+
+.ss-health-item.good { color: #15803d; }
+.ss-health-item.issue { color: #b45309; }
+
+/* =====================================================
+   Renewal grid (in Policies view)
+   ===================================================== */
+.ss-renewal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ss-renewal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ss-renewal-card:hover {
+  border-color: var(--brand-line);
+  box-shadow: 0 2px 8px rgba(47,99,233,.07);
+}
+
+.ss-renewal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.ss-renewal-days {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-renewal-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+}

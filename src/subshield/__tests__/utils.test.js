@@ -21,6 +21,7 @@ import {
   writeStoredData,
   readStoredData,
   clearStoredData,
+  policyHealthScore,
 } from "../utils.js";
 
 describe("formatMoney", () => {
@@ -180,6 +181,29 @@ describe("storage helpers", () => {
     clearStoredData();
     const fallback = { policies: [], contractors: [], activity: [], from: "fallback" };
     expect(readStoredData(fallback)).toBe(fallback);
+  });
+});
+
+describe("policyHealthScore", () => {
+  it("returns 0 and Critical for null policy", () => {
+    const h = policyHealthScore(null);
+    expect(h.score).toBe(0);
+    expect(h.grade).toBe("Critical");
+  });
+  it("penalizes critical renewal window", () => {
+    const h = policyHealthScore({ daysRemaining: 5, documents: ["dec.pdf"], coverageLimits: "1M", deductible: 1000, effectiveDate: "2024-01-01" });
+    expect(h.score).toBeLessThan(70);
+    expect(h.issues.some((i) => /critical/i.test(i))).toBe(true);
+  });
+  it("penalizes missing documents", () => {
+    const h = policyHealthScore({ daysRemaining: 200, documents: [], coverageLimits: "1M", deductible: 1000, effectiveDate: "2024-01-01" });
+    expect(h.score).toBeLessThan(100);
+    expect(h.issues.some((i) => /declaration/i.test(i))).toBe(true);
+  });
+  it("gives 100 for a fully complete policy", () => {
+    const h = policyHealthScore({ daysRemaining: 200, documents: ["dec.pdf"], coverageLimits: "2M", deductible: 500, effectiveDate: "2024-01-01" });
+    expect(h.score).toBe(100);
+    expect(h.grade).toBe("Good");
   });
 });
 

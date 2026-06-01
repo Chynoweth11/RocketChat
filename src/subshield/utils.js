@@ -273,6 +273,68 @@ export function scoreClass(score) {
   return "danger";
 }
 
+/**
+ * Compute a 0–100 health score for a single policy and a list of what's
+ * bringing the score down so the UI can show a Good / Needs Work breakdown.
+ */
+export function policyHealthScore(policy) {
+  if (!policy) return { score: 0, grade: "Critical", issues: [] };
+
+  let score = 100;
+  const issues = [];
+  const good = [];
+
+  const days = policy.daysRemaining ?? 999;
+  if (days <= 10) {
+    score -= 40;
+    issues.push("Policy is in the critical renewal window");
+  } else if (days <= 30) {
+    score -= 20;
+    issues.push("Policy renews within 30 days");
+  } else if (days <= 90) {
+    score -= 5;
+    issues.push("Policy renews within 90 days");
+  } else {
+    good.push("Renewal date is well ahead");
+  }
+
+  const hasDocs = (policy.documents?.length ?? 0) > 0;
+  if (!hasDocs) {
+    score -= 18;
+    issues.push("No declaration documents on file");
+  } else {
+    good.push("Declaration page on file");
+  }
+
+  const hasLimits = Boolean(policy.coverageLimits || policy.limit);
+  if (!hasLimits) {
+    score -= 8;
+    issues.push("Coverage limits not recorded");
+  } else {
+    good.push("Coverage limits documented");
+  }
+
+  const hasDeductible = policy.deductible !== null && policy.deductible !== undefined && policy.deductible !== "";
+  if (!hasDeductible) {
+    score -= 5;
+    issues.push("Deductible not recorded");
+  } else {
+    good.push("Deductible on file");
+  }
+
+  const hasEffective = Boolean(policy.effectiveDate);
+  if (!hasEffective) {
+    score -= 5;
+    issues.push("Effective date missing");
+  } else {
+    good.push("Policy term dates complete");
+  }
+
+  const finalScore = Math.max(0, Math.min(100, score));
+  const grade = finalScore >= 80 ? "Good" : finalScore >= 55 ? "Needs Work" : "Critical";
+  return { score: finalScore, grade, issues, good };
+}
+
 export function getComplianceScore(policies = []) {
   if (!policies.length) return 0;
 

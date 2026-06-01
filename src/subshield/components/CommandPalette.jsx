@@ -5,10 +5,8 @@ import {
   LayoutDashboard,
   ShieldCheck,
   BadgeDollarSign,
-  CalendarClock,
   FileCheck2,
   FolderOpen,
-  History,
   Settings,
   Upload,
   Plus,
@@ -18,10 +16,8 @@ const VIEW_ICONS = {
   dashboard: LayoutDashboard,
   policies: ShieldCheck,
   savings: BadgeDollarSign,
-  renewals: CalendarClock,
   certificates: FileCheck2,
   documents: FolderOpen,
-  activity: History,
   settings: Settings,
 };
 
@@ -48,12 +44,10 @@ export default function CommandPalette({
   const commands = useMemo(() => {
     const navItems = [
       { id: "nav-dashboard", group: "Go to", label: "Dashboard", view: "dashboard" },
-      { id: "nav-policies", group: "Go to", label: "My Insurance", view: "policies" },
-      { id: "nav-savings", group: "Go to", label: "Lower My Insurance", view: "savings" },
-      { id: "nav-renewals", group: "Go to", label: "Renewals", view: "renewals" },
+      { id: "nav-policies", group: "Go to", label: "Policies", view: "policies" },
+      { id: "nav-savings", group: "Go to", label: "Savings", view: "savings" },
       { id: "nav-certificates", group: "Go to", label: "Certificates", view: "certificates" },
       { id: "nav-documents", group: "Go to", label: "Documents", view: "documents" },
-      { id: "nav-activity", group: "Go to", label: "Activity", view: "activity" },
       { id: "nav-settings", group: "Go to", label: "Settings", view: "settings" },
     ].map((item) => ({
       ...item,

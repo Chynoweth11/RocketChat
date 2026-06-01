@@ -2,7 +2,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeDollarSign,
-  CalendarClock,
   CheckCircle2,
   Clock3,
   FileCheck2,
@@ -98,8 +97,8 @@ export default function DashboardView({
   recommendedAction,
   onReviewSavings,
   onOpenPolicies,
+  onOpenCertificates,
   onUpload,
-  onQueueAction,
   activity = [],
   pendingCertificates = 0,
 }) {
@@ -292,13 +291,25 @@ export default function DashboardView({
         </div>
       </section>
 
+      <ActionCenter
+        upcoming={upcoming}
+        missingDocCount={missingDocCount}
+        coverageGaps={coverageGaps}
+        openSavings={openSavings}
+        onUpload={onUpload}
+        onOpenPolicies={onOpenPolicies}
+        onReviewSavings={onReviewSavings}
+        onOpenCertificates={onOpenCertificates}
+        pendingCertificates={pendingCertificates}
+      />
+
       <section className="ss-card">
         <Section
           title="Upcoming renewals"
           sub="Deadlines needing action first"
           extra={
-            <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("renewals")}>
-              See all <ArrowRight size={13} />
+            <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
+              View policies <ArrowRight size={13} />
             </button>
           }
         />
@@ -306,7 +317,7 @@ export default function DashboardView({
         {upcoming.length === 0 && (
           <div className="ss-note success">
             <CheckCircle2 size={16} />
-            <span>No upcoming renewals in your current timeline.</span>
+            <span>No upcoming renewals. Your coverage is in good shape.</span>
           </div>
         )}
 
@@ -337,19 +348,14 @@ export default function DashboardView({
 
       <section className="ss-card">
         <Section
-          title="Recent insurance activity"
+          title="Recent activity"
           sub="Latest policy, certificate, and quote events"
-          extra={
-            <button type="button" className="ss-copy-btn" onClick={() => onQueueAction("activity")}>
-              Open activity <ArrowRight size={13} />
-            </button>
-          }
         />
 
         {recentActivity.length === 0 && (
-          <div className="ss-note success">
+          <div className="ss-note">
             <CheckCircle2 size={16} />
-            <span>No recent activity yet. New actions will appear here.</span>
+            <span>No activity yet. Actions like uploads, certificate sends, and savings will appear here.</span>
           </div>
         )}
 
@@ -372,8 +378,13 @@ export default function DashboardView({
 
       <section className="ss-card ss-span">
         <Section
-          title="Ways to save"
-          sub="Lower premium spend before renewal by comparing partner-backed options"
+          title="Savings opportunities"
+          sub="Lower your premium spend before renewal by comparing partner-backed options"
+          extra={
+            <button type="button" className="ss-copy-btn" onClick={onReviewSavings}>
+              Review all <ArrowRight size={13} />
+            </button>
+          }
         />
 
         <div className="ss-dash-save-grid">
@@ -381,7 +392,7 @@ export default function DashboardView({
             <b>{recommendedAction.label}</b>
             <p>{recommendedAction.detail}</p>
             <button type="button" className="ss-button" onClick={onReviewSavings}>
-              Open Lower My Insurance
+              Open Savings
             </button>
           </div>
 
@@ -389,7 +400,7 @@ export default function DashboardView({
             {openSavings.length === 0 && (
               <div className="ss-note success">
                 <Sparkles size={16} />
-                <span>No open savings opportunities right now. We keep monitoring renewal timing and rates.</span>
+                <span>No open savings right now. We keep monitoring renewal timing and market rates.</span>
               </div>
             )}
 
@@ -427,39 +438,125 @@ export default function DashboardView({
                 <small>Verified files</small>
                 <b>{docsCount}</b>
               </div>
-              <button type="button" className="ss-copy-btn" onClick={onReviewSavings}>
-                Review all <ArrowRight size={13} />
-              </button>
             </div>
           </div>
         </div>
       </section>
-
-      {(missingDocCount > 0 || coverageGaps.length > 0) && (
-        <section className="ss-card ss-span ss-action-row-card">
-          {missingDocCount > 0 && (
-            <button type="button" className="ss-action-item" onClick={onUpload}>
-              <span className="ss-action-dot warning" aria-hidden="true" />
-              <span className="ss-action-text">
-                <b>{missingDocCount} {missingDocCount === 1 ? "policy" : "policies"} missing documents</b>
-                <small>Upload declarations pages to keep certificates ready</small>
-              </span>
-              <span className="ss-action-cta">Upload now</span>
-            </button>
-          )}
-          {coverageGaps.length > 0 && (
-            <button type="button" className="ss-action-item" onClick={() => onQueueAction("renewals")}>
-              <span className="ss-action-dot danger" aria-hidden="true" />
-              <span className="ss-action-text">
-                <b>{coverageGaps.length} coverage {coverageGaps.length === 1 ? "gap" : "gaps"} need review</b>
-                <small>Check renewal dates and coverage continuity</small>
-              </span>
-              <span className="ss-action-cta">Review</span>
-            </button>
-          )}
-        </section>
-      )}
     </div>
+  );
+}
+
+function ActionCenter({ upcoming, missingDocCount, coverageGaps, openSavings, onUpload, onOpenPolicies, onReviewSavings, onOpenCertificates, pendingCertificates }) {
+  const actions = [];
+
+  const criticalPolicies = upcoming.filter((p) => (p.daysRemaining ?? 999) <= 30);
+  if (criticalPolicies.length > 0) {
+    actions.push({
+      key: "renew",
+      priority: criticalPolicies.some((p) => p.daysRemaining <= 10) ? "danger" : "warning",
+      icon: <Clock3 size={16} />,
+      title: `${criticalPolicies.length} ${criticalPolicies.length === 1 ? "policy renews" : "policies renew"} within 30 days`,
+      detail: criticalPolicies.map((p) => p.name).join(", "),
+      cta: "View policies",
+      onClick: onOpenPolicies,
+    });
+  }
+
+  if (missingDocCount > 0) {
+    actions.push({
+      key: "docs",
+      priority: "warning",
+      icon: <FileWarning size={16} />,
+      title: `${missingDocCount} ${missingDocCount === 1 ? "policy is" : "policies are"} missing declaration pages`,
+      detail: "Upload declarations pages to keep certificates ready for GCs.",
+      cta: "Upload now",
+      onClick: onUpload,
+    });
+  }
+
+  const quoteReadySavings = openSavings.filter((o) => o.status === "quote_received");
+  if (quoteReadySavings.length > 0) {
+    actions.push({
+      key: "quote",
+      priority: "info",
+      icon: <BadgeDollarSign size={16} />,
+      title: `${quoteReadySavings.length} quote${quoteReadySavings.length > 1 ? "s" : ""} ready to review`,
+      detail: "A licensed partner found a lower rate. Review before it expires.",
+      cta: "Review quotes",
+      onClick: onReviewSavings,
+    });
+  } else if (openSavings.length > 0) {
+    actions.push({
+      key: "savings",
+      priority: "info",
+      icon: <BadgeDollarSign size={16} />,
+      title: `${openSavings.length} savings ${openSavings.length === 1 ? "opportunity" : "opportunities"} available`,
+      detail: "Compare rates and find lower-cost coverage before renewal.",
+      cta: "Compare rates",
+      onClick: onReviewSavings,
+    });
+  }
+
+  if (pendingCertificates > 0 && actions.length < 3) {
+    actions.push({
+      key: "certs",
+      priority: "info",
+      icon: <FileCheck2 size={16} />,
+      title: `${pendingCertificates} certificate ${pendingCertificates === 1 ? "holder" : "holders"} haven't received a COI recently`,
+      detail: "Send a fresh certificate of insurance to keep your GCs current.",
+      cta: "Send COI",
+      onClick: onOpenCertificates,
+    });
+  }
+
+  if (coverageGaps.length > 0 && actions.length < 3) {
+    actions.push({
+      key: "gaps",
+      priority: "warning",
+      icon: <AlertTriangle size={16} />,
+      title: `${coverageGaps.length} coverage ${coverageGaps.length === 1 ? "gap" : "gaps"} detected`,
+      detail: coverageGaps.slice(0, 2).map((g) => g.label).join(", "),
+      cta: "Add coverage",
+      onClick: onOpenPolicies,
+    });
+  }
+
+  const topActions = actions.slice(0, 3);
+
+  if (topActions.length === 0) {
+    return (
+      <section className="ss-card ss-span ss-action-center">
+        <div className="ss-action-center-head">
+          <b>Action Center</b>
+          <small>Things that need your attention right now</small>
+        </div>
+        <div className="ss-note success">
+          <CheckCircle2 size={16} />
+          <span>Everything looks good. No urgent actions needed.</span>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="ss-card ss-span ss-action-center">
+      <div className="ss-action-center-head">
+        <b>Action Center</b>
+        <small>{topActions.length} thing{topActions.length > 1 ? "s" : ""} to do right now</small>
+      </div>
+      <div className="ss-action-center-list">
+        {topActions.map((action) => (
+          <button key={action.key} type="button" className={`ss-action-item ss-action-item--${action.priority}`} onClick={action.onClick}>
+            <span className={`ss-action-dot ${action.priority}`} aria-hidden="true">{action.icon}</span>
+            <span className="ss-action-text">
+              <b>{action.title}</b>
+              <small>{action.detail}</small>
+            </span>
+            <span className="ss-action-cta">{action.cta} <ArrowRight size={12} /></span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 

@@ -35,10 +35,8 @@ import { Header, Sidebar } from "./components/Layout.jsx";
 import DashboardView from "./components/DashboardView.jsx";
 const PoliciesView = lazy(() => import("./components/PoliciesView.jsx"));
 const SavingsView = lazy(() => import("./components/SavingsView.jsx"));
-const RenewalsView = lazy(() => import("./components/RenewalsView.jsx"));
 const CertificatesView = lazy(() => import("./components/CertificatesView.jsx"));
 const DocumentsView = lazy(() => import("./components/DocumentsView.jsx"));
-const ActivityView = lazy(() => import("./components/ActivityView.jsx"));
 const SettingsView = lazy(() => import("./components/SettingsView.jsx"));
 const SendModal = lazy(() => import("./components/SendModal.jsx"));
 const ScanModal = lazy(() => import("./components/ScanModal.jsx"));
@@ -303,12 +301,10 @@ export default function SubShieldComplete() {
   useEffect(() => {
     const titles = {
       dashboard: "Dashboard",
-      policies: "My Insurance",
-      savings: "Lower My Insurance",
-      renewals: "Renewals",
-      certificates: "Certificates of Insurance",
+      policies: "Policies",
+      savings: "Savings",
+      certificates: "Certificates",
       documents: "Documents",
-      activity: "Activity",
       settings: "Settings",
     };
     const label = titles[view] || "SubShield";
@@ -1199,7 +1195,6 @@ export default function SubShieldComplete() {
           <Header
             view={view}
             onUpload={() => setModal("scan")}
-            onActivity={() => setView("activity")}
             onSearch={() => setPaletteOpen(true)}
             unread={critical.length + reminders.length}
             demoMode={Boolean(data.demoMode)}
@@ -1217,7 +1212,6 @@ export default function SubShieldComplete() {
               policies={policies}
               docsCount={docs}
               upcoming={upcoming}
-              reminders={reminders}
               opportunities={opportunities}
               openQuoteRequests={openQuoteRequests}
               coiSends={data.coiSends || []}
@@ -1226,9 +1220,8 @@ export default function SubShieldComplete() {
               recommendedAction={recommendedAction}
               onReviewSavings={() => setView("savings")}
               onOpenPolicies={() => setView("policies")}
-              onAddCoverage={openAddPolicy}
+              onOpenCertificates={() => setView("certificates")}
               onUpload={() => setModal("scan")}
-              onQueueAction={(target) => setView(target)}
               activity={data.activity}
               pendingCertificates={pendingCertificates}
             />
@@ -1241,6 +1234,8 @@ export default function SubShieldComplete() {
               critical={critical}
               policies={policies}
               totalPremium={totalPremium}
+              upcoming={upcoming}
+              reminders={reminders}
               selectedPolicy={selectedPolicy}
               onSelectPolicy={setPolicyId}
               onRenew={renewPolicy}
@@ -1276,16 +1271,6 @@ export default function SubShieldComplete() {
             />
           )}
 
-          {view === "renewals" && (
-            <RenewalsView
-              policies={policies}
-              reminders={reminders}
-              totalPremium={totalPremium}
-              onOpenPolicies={() => setView("policies")}
-              onReviewSavings={() => setView("savings")}
-            />
-          )}
-
           {view === "certificates" && (
             <CertificatesView
               contractors={data.contractors}
@@ -1304,8 +1289,6 @@ export default function SubShieldComplete() {
               onDelete={deleteDocument}
             />
           )}
-
-          {view === "activity" && <ActivityView activity={data.activity} />}
 
           {view === "settings" && (
             <SettingsView

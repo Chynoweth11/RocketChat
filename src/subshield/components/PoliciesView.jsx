@@ -2,7 +2,9 @@ import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   BadgeDollarSign,
+  CalendarClock,
   Check,
+  CheckCircle2,
   Download,
   FileCheck2,
   FileSpreadsheet,
@@ -19,7 +21,10 @@ import {
   formatDeductible,
   formatLongDate,
   formatMoney,
+  formatShortDate,
   getStatus,
+  policyHealthScore,
+  scoreClass,
 } from "../utils.js";
 
 function exportPoliciesCsv(policies) {
@@ -64,6 +69,8 @@ export default function PoliciesView({
   critical,
   policies,
   totalPremium,
+  upcoming = [],
+  reminders = [],
   selectedPolicy,
   onSelectPolicy,
   onRenew,
@@ -209,6 +216,40 @@ export default function PoliciesView({
           </div>
         )}
       </section>
+
+      {upcoming.length > 0 && (
+        <section className="ss-card ss-span">
+          <Section
+            title="Renewal timeline"
+            sub="Policies ordered by urgency — take action before the critical window"
+            extra={<CalendarClock size={16} style={{ color: "var(--muted)" }} />}
+          />
+          <div className="ss-renewal-grid">
+            {upcoming.map((policy) => {
+              const status = getStatus(policy.daysRemaining);
+              return (
+                <button
+                  key={policy.id}
+                  type="button"
+                  className="ss-renewal-card"
+                  onClick={() => onSelectPolicy(policy.id)}
+                >
+                  <div className="ss-renewal-header">
+                    <span className={`ss-status ${status.className}`}>{status.label}</span>
+                    <b className="ss-renewal-days">{policy.daysRemaining}d</b>
+                  </div>
+                  <b>{policy.name}</b>
+                  <small>{policy.carrier}</small>
+                  <div className="ss-renewal-meta">
+                    <span>{formatShortDate(policy.renewalDate || policy.expires)}</span>
+                    <span>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -242,8 +283,8 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
   const status = getStatus(policy.daysRemaining);
   const width = `${Math.max(0, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
   const isCritical = status.className === "danger";
-
   const notLicense = (policy.type || policy.policyType) !== "license";
+  const health = policyHealthScore(policy);
 
   return (
     <div className="ss-detail">
@@ -286,9 +327,41 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
         <Info label="Advisor" value={policy.brokerId ? "Assigned" : "Not assigned"} />
       </div>
 
-      <div className={`ss-note ${isCritical ? "danger" : ""}`}>
-        <AlertTriangle size={16} />
-        <span>{policy.statusNote}</span>
+      {policy.statusNote && (
+        <div className={`ss-note ${isCritical ? "danger" : ""}`}>
+          <AlertTriangle size={16} />
+          <span>{policy.statusNote}</span>
+        </div>
+      )}
+
+      <div className="ss-health-card">
+        <div className="ss-health-score-row">
+          <div>
+            <span className="ss-eyebrow">Policy health score</span>
+            <div className="ss-health-number">
+              <span className={`ss-health-val ${scoreClass(health.score)}`}>{health.score}</span>
+              <span className="ss-health-denom">/100</span>
+              <span className={`ss-health-grade ss-health-grade--${scoreClass(health.score)}`}>{health.grade}</span>
+            </div>
+          </div>
+          <div className="ss-health-bar-wrap">
+            <div className="ss-health-bar">
+              <span className={`ss-health-fill ${scoreClass(health.score)}`} style={{ width: `${health.score}%` }} />
+            </div>
+          </div>
+        </div>
+        <div className="ss-health-breakdown">
+          {health.good.map((item) => (
+            <div key={item} className="ss-health-item good">
+              <CheckCircle2 size={13} /> <span>{item}</span>
+            </div>
+          ))}
+          {health.issues.map((item) => (
+            <div key={item} className="ss-health-item issue">
+              <AlertTriangle size={13} /> <span>{item}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="ss-detail-body">

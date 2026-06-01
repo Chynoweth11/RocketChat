@@ -1,14 +1,13 @@
 import { useCallback } from "react";
 import {
+  AlertTriangle,
   ArrowRight,
   BadgeDollarSign,
   Bell,
-  CalendarClock,
   Database,
   FileCheck2,
   FlaskConical,
   FolderOpen,
-  History,
   LayoutDashboard,
   Search,
   Settings,
@@ -17,16 +16,13 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { formatMoney, getStatus } from "../utils.js";
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "policies", label: "My Insurance", icon: ShieldCheck },
-  { id: "savings", label: "Lower My Insurance", icon: BadgeDollarSign },
-  { id: "renewals", label: "Renewals", icon: CalendarClock },
+  { id: "policies", label: "Policies", icon: ShieldCheck },
+  { id: "savings", label: "Savings", icon: BadgeDollarSign },
   { id: "certificates", label: "Certificates", icon: FileCheck2 },
   { id: "documents", label: "Documents", icon: FolderOpen },
-  { id: "activity", label: "Activity", icon: History },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -84,26 +80,6 @@ export function Sidebar({
             />
           ))}
         </nav>
-
-        {upcoming && upcoming.length > 0 && (
-          <div className="ss-upcoming">
-            <div className="ss-upcoming-title">
-              <b>Upcoming renewals</b>
-              <small>Next {upcoming.length}</small>
-            </div>
-            {upcoming.slice(0, 4).map((policy) => {
-              const status = getStatus(policy.daysRemaining);
-              return (
-                <div key={policy.id} className="ss-upcoming-row">
-                  <span className="ss-upcoming-name">{policy.name}</span>
-                  <span className={`ss-upcoming-days ${status.className}`}>
-                    {policy.daysRemaining}d
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
 
         <div className="ss-side-card">
           <span className="ss-eyebrow">{potentialSavings > 0 ? "Savings found" : "Coverage healthy"}</span>
@@ -179,7 +155,6 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
 export function Header({
   view,
   onUpload,
-  onActivity,
   onSearch,
   unread,
   demoMode = false,
@@ -194,22 +169,18 @@ export function Header({
 
   const titles = {
     dashboard: "Dashboard",
-    policies: "My Insurance",
-    savings: "Lower My Insurance",
-    renewals: "Renewals",
-    certificates: "Certificates of Insurance",
+    policies: "Policies",
+    savings: "Savings",
+    certificates: "Certificates",
     documents: "Documents",
-    activity: "Activity",
     settings: "Settings",
   };
   const eyebrow = {
-    dashboard: "Insurance command center",
-    policies: "Coverage, premiums, deductibles, and renewals",
+    dashboard: "Your insurance command center",
+    policies: "Coverage, premiums, renewals, and health scores",
     savings: "Find better rates through licensed coverage partners",
-    renewals: "Never miss a renewal deadline",
     certificates: "Send and track certificates of insurance",
     documents: "Declarations, certificates, endorsements, and quotes",
-    activity: "A complete record of every insurance action",
     settings: "Account, team, billing, and product controls",
   };
 
@@ -267,15 +238,12 @@ export function Header({
         >
           <Upload size={16} /> Upload insurance
         </button>
-        <button
-          type="button"
-          className="ss-icon-button"
-          onClick={onActivity}
-          aria-label={unread > 0 ? `View activity, ${unread} need attention` : "View activity"}
-        >
-          <Bell size={18} aria-hidden="true" />
-          {unread > 0 && <span className="ss-dot" aria-hidden="true" />}
-        </button>
+        {unread > 0 && (
+          <span className="ss-alert-chip" role="status" aria-label={`${unread} policies need attention`}>
+            <Bell size={13} aria-hidden="true" />
+            {unread} need attention
+          </span>
+        )}
       </div>
     </header>
   );

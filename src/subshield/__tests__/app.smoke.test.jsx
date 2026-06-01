@@ -14,7 +14,7 @@ describe("SubShieldComplete (empty-by-default app)", () => {
     render(<SubShieldComplete />);
     // The empty-state onboarding headline should be present since there are
     // no policies in the default data.
-    expect(screen.getByText(/Your insurance command center/i)).toBeTruthy();
+    expect(screen.getAllByText(/Your insurance command center/i).length).toBeGreaterThan(0);
   });
 
   it("exposes a global Load demo data control when demo is off", () => {
