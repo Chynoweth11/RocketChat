@@ -10,6 +10,9 @@ import {
   getPotentialSavings,
   getRealizedSavings,
   savingsForOpportunity,
+  estimateSavings,
+  estimateLowerPremium,
+  ESTIMATED_SAVINGS_RATE,
   policyLabelFromType,
   deriveInitials,
   makeId,
@@ -100,6 +103,26 @@ describe("savingsForOpportunity", () => {
   });
   it("returns 0 for null input", () => {
     expect(savingsForOpportunity(null)).toBe(0);
+  });
+});
+
+describe("estimateSavings / estimateLowerPremium", () => {
+  it("uses the shared rate", () => {
+    expect(estimateSavings(10000)).toBe(Math.round(10000 * ESTIMATED_SAVINGS_RATE));
+  });
+  it("lower premium is the complement of savings", () => {
+    const premium = 10000;
+    expect(estimateLowerPremium(premium)).toBe(
+      Math.round(premium * (1 - ESTIMATED_SAVINGS_RATE))
+    );
+  });
+  it("savings + lower premium reconstructs the original within rounding", () => {
+    const premium = 8543;
+    expect(Math.abs(estimateSavings(premium) + estimateLowerPremium(premium) - premium)).toBeLessThanOrEqual(1);
+  });
+  it("handles non-numeric input as zero", () => {
+    expect(estimateSavings(undefined)).toBe(0);
+    expect(estimateLowerPremium(null)).toBe(0);
   });
 });
 

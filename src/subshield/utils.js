@@ -7,6 +7,25 @@ export const STORAGE_KEY = "subshield.complete.v5";
 
 export const RENEWAL_REMINDER_DAYS = [90, 60, 30, 10, 0];
 
+/**
+ * Illustrative annual savings rate applied when an opportunity has no
+ * confirmed alternate quote yet. Centralized so every entry point (vault,
+ * coverage review, savings view UI) shows a consistent estimate. This is a
+ * placeholder figure shown to users until a licensed partner confirms the
+ * real number; keep it in one place so it stays consistent.
+ */
+export const ESTIMATED_SAVINGS_RATE = 0.12;
+
+/** Helper: estimated annual savings for a premium at the illustrative rate. */
+export function estimateSavings(premium) {
+  return Math.round(toNumber(premium, 0) * ESTIMATED_SAVINGS_RATE);
+}
+
+/** Helper: estimated premium after applying the illustrative savings rate. */
+export function estimateLowerPremium(premium) {
+  return Math.round(toNumber(premium, 0) * (1 - ESTIMATED_SAVINGS_RATE));
+}
+
 const POLICY_TYPE_NAMES = {
   liability: "General Liability",
   workers: "Workers' Compensation",
@@ -412,7 +431,7 @@ export function normalizeSavingsOpportunity(raw, policies = [], companyId = "sub
     raw.currentPremium ?? policy?.premiumAmount ?? policy?.premium,
     0
   );
-  const estimatedSavings = toNumber(raw.estimatedSavings, Math.round(currentPremium * 0.12));
+  const estimatedSavings = toNumber(raw.estimatedSavings, estimateSavings(currentPremium));
   return {
     ...raw,
     id: raw.id || makeId("sav"),

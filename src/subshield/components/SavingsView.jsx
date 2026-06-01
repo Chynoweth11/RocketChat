@@ -16,6 +16,8 @@ import {
   TrendingDown,
 } from "lucide-react";
 import {
+  estimateLowerPremium,
+  estimateSavings,
   formatDeductible,
   formatLongDate,
   formatMoney,
@@ -428,10 +430,32 @@ function CoverageApplicationCard({
   }
 
   function submit() {
-    const nextErrors = {};
-    if (!form.contactEmail?.trim()) nextErrors.contactEmail = "Contact email is required.";
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
+    // Validate every required field across the whole wizard, not just the
+    // final step — a user can reach the last step without completing an
+    // earlier one (e.g. by navigating back). Jump to the first step with an
+    // error so the user can see and fix it.
+    const stepErrors = [
+      { step: 0, errors: form.policyType ? {} : { policyType: "Select a policy type." } },
+      {
+        step: 1,
+        errors: {
+          ...(form.renewalMonth ? {} : { renewalMonth: "Select a renewal month." }),
+          ...(form.renewalYear ? {} : { renewalYear: "Select a renewal year." }),
+          ...(form.state?.trim() ? {} : { state: "State is required." }),
+        },
+      },
+      {
+        step: 2,
+        errors: form.contactEmail?.trim() ? {} : { contactEmail: "Contact email is required." },
+      },
+    ];
+    const firstBad = stepErrors.find((entry) => Object.keys(entry.errors).length > 0);
+    if (firstBad) {
+      setErrors(firstBad.errors);
+      setForm((prev) => ({ ...prev, stage: WORKFLOW_STEPS[firstBad.step].id }));
+      return;
+    }
+    setErrors({});
     onSubmitCoverageApplication({ ...form, stage: "quote" });
   }
 
@@ -439,17 +463,19 @@ function CoverageApplicationCard({
 
   return (
     <div className="ss-coverage-application-card">
-      <div className="ss-coverage-stepper" aria-label="Coverage application progress">
+      <ol className="ss-coverage-stepper" aria-label="Coverage application progress">
         {WORKFLOW_STEPS.map((step, index) => (
-          <div
+          <li
             key={step.id}
             className={`ss-coverage-step ${index < stepIndex ? "done" : ""} ${index === stepIndex ? "active" : ""}`}
+            aria-current={index === stepIndex ? "step" : undefined}
+            aria-label={`Step ${index + 1} of ${WORKFLOW_STEPS.length}: ${step.label}${index < stepIndex ? " (completed)" : index === stepIndex ? " (current)" : ""}`}
           >
             <span>{index + 1}</span>
             <small>{step.label}</small>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
 
       {/* Step 0 — Start: policy type + carrier */}
       {stepIndex === 0 && (
@@ -490,13 +516,13 @@ function CoverageApplicationCard({
               <div className="ss-coverage-estimate-row">
                 <span>Estimated with a better rate</span>
                 <strong>
-                  {formatMoney(Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.88))}/yr
+                  {formatMoney(estimateLowerPremium(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0))}/yr
                 </strong>
               </div>
               <div className="ss-coverage-estimate-row total">
                 <span>Potential annual savings</span>
                 <strong className="ss-savings-pos">
-                  {formatMoney(Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.12))}/yr
+                  {formatMoney(estimateSavings(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0))}/yr
                 </strong>
               </div>
               <p className="ss-fine">Estimate based on your current premium. Partners confirm the exact figure after review.</p>
@@ -683,7 +709,7 @@ function CoverageApplicationCard({
             <div className="ss-coverage-estimate-row total">
               <span>Est. annual savings</span>
               <strong className="ss-savings-pos">
-                {formatMoney(Math.round((selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0) * 0.12))}/yr
+                {formatMoney(estimateSavings(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0))}/yr
               </strong>
             </div>
           )}

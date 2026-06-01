@@ -66,14 +66,20 @@ function greetingFor(date = new Date()) {
   return "Good evening";
 }
 
-function buildMonthlySpend(totalPremium) {
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Projected monthly pace: we only know the annual premium until a backend
+// supplies real billing history, so this charts an even 1/12 distribution
+// across the trailing six months ending with the current month. Labels are
+// derived from today's date so they never go stale.
+function buildMonthlySpend(totalPremium, now = new Date()) {
   const monthly = Math.round(totalPremium / 12);
-  const variance = [0.78, 0.84, 0.91, 0.96, 1.04, 1.08];
-  const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-  return monthLabels.map((label, idx) => ({
-    label,
-    value: Math.round(monthly * variance[idx]),
-  }));
+  const points = [];
+  for (let offset = 5; offset >= 0; offset -= 1) {
+    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    points.push({ label: MONTH_ABBR[date.getMonth()], value: monthly });
+  }
+  return points;
 }
 
 export default function DashboardView({
@@ -181,7 +187,7 @@ export default function DashboardView({
               About {formatMoney(monthlySpend)}/month across {activePolicies.length} active policies.
             </p>
 
-            <div className="ss-spend-chart" aria-label="Insurance spend trend">
+            <div className="ss-spend-chart" aria-label="Projected monthly insurance spend, even pace across the trailing six months">
               {monthlySeries.map((point, idx) => (
                 <div
                   key={point.label}
@@ -193,6 +199,7 @@ export default function DashboardView({
                 </div>
               ))}
             </div>
+            <p className="ss-fine">Projected at an even monthly pace from your annual premium.</p>
 
             <div className="ss-row">
               <button type="button" className="ss-button" onClick={onReviewSavings}>

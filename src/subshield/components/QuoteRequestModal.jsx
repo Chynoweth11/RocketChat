@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, BadgeDollarSign, Check } from "lucide-react";
 import Modal from "./Modal.jsx";
-import { formatMoney, policyLabelFromType } from "../utils.js";
+import { formatLongDate, formatMoney, policyLabelFromType } from "../utils.js";
 
 const STEPS = [
   { id: "start", label: "Start" },
@@ -256,7 +256,7 @@ export default function QuoteRequestModal({
                       <br />
                       Premium: {formatMoney(selectedPolicy.premiumAmount)}/{selectedPolicy.premiumFrequency}
                       <br />
-                      Renewal: {selectedPolicy.renewalDate || selectedPolicy.expirationDate}
+                      Renewal: {formatLongDate(selectedPolicy.renewalDate || selectedPolicy.expirationDate)}
                     </>
                   ) : (
                     "No policy selected."

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   countDocuments,
   dateFromToday,
+  estimateSavings,
   formatMoney,
   getComplianceScore,
   getCoverageGaps,
@@ -369,7 +370,7 @@ export default function SubShieldComplete() {
               policyType: normalized.policyType,
               currentCarrier: normalized.carrier,
               currentPremium: normalized.premiumAmount,
-              estimatedSavings: Math.round(normalized.premiumAmount * 0.12),
+              estimatedSavings: estimateSavings(normalized.premiumAmount),
               renewalDate: normalized.renewalDate,
               status: normalized.daysRemaining <= 90 ? "available" : "monitoring",
             },
@@ -457,7 +458,7 @@ export default function SubShieldComplete() {
                   policyType: policy.policyType,
                   currentCarrier: policy.carrier,
                   currentPremium: policy.premiumAmount,
-                  estimatedSavings: Math.round(policy.premiumAmount * 0.12),
+                  estimatedSavings: estimateSavings(policy.premiumAmount),
                   renewalDate: policy.renewalDate,
                   status: policy.daysRemaining <= 90 ? "available" : "monitoring",
                 },
@@ -492,7 +493,7 @@ export default function SubShieldComplete() {
     setTimeout(() => {
       const policy = policies.find((item) => item.id === opportunity.policyId);
       const base = opportunity.currentPremium || policy?.premiumAmount || 0;
-      const est = opportunity.estimatedSavings || Math.round(base * 0.12);
+      const est = opportunity.estimatedSavings || estimateSavings(base);
       const newPremium = Math.max(200, base - est);
       const savings = base - newPremium;
       const partner =
@@ -747,7 +748,7 @@ export default function SubShieldComplete() {
               policyType: policyMatch.policyType || policyMatch.type,
               currentCarrier: normalizedDraft.currentCarrier || policyMatch.carrier,
               currentPremium: policyMatch.premiumAmount || 0,
-              estimatedSavings: Math.round((policyMatch.premiumAmount || 0) * 0.1),
+              estimatedSavings: estimateSavings(policyMatch.premiumAmount || 0),
               renewalDate,
               status: "requested",
               partnerId: preferredPartner?.id || null,

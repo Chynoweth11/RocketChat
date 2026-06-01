@@ -2323,6 +2323,8 @@ textarea {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
   margin-bottom: 10px;
+  list-style: none;
+  padding: 0;
 }
 
 .ss-coverage-step {
