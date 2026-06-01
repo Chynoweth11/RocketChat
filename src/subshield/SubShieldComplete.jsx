@@ -1073,8 +1073,10 @@ export default function SubShieldComplete() {
   // Applies a fresh dataset (empty or sample) and resets all transient UI
   // state. Selection state is guarded so it works whether or not the dataset
   // contains policies/contractors.
-  function applyDataset(dataset) {
-    commit(dataset);
+  function applyDataset(dataset, { demoMode = false } = {}) {
+    // `demoMode` is persisted so the app can show a global "demo data" banner
+    // and offer a one-click toggle anywhere. Real accounts never set it.
+    commit({ ...dataset, demoMode });
     setView("dashboard");
     setPolicyId(dataset.policies[0]?.id || null);
     setContractorId(dataset.contractors[0]?.id || null);
@@ -1086,12 +1088,12 @@ export default function SubShieldComplete() {
   }
 
   function resetDemo() {
-    applyDataset(initialData);
+    applyDataset(initialData, { demoMode: false });
     fireToast("Account reset", "Local data cleared back to an empty account.");
   }
 
   function loadSampleData() {
-    applyDataset(sampleData);
+    applyDataset(sampleData, { demoMode: true });
     fireToast("Sample data loaded", "A realistic example account is ready to explore.");
   }
 
@@ -1187,6 +1189,9 @@ export default function SubShieldComplete() {
             onActivity={() => setView("activity")}
             onSearch={() => setPaletteOpen(true)}
             unread={critical.length + reminders.length}
+            demoMode={Boolean(data.demoMode)}
+            onLoadSample={loadSampleData}
+            onClearDemo={resetDemo}
           />
 
           {view === "dashboard" && (

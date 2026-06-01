@@ -533,6 +533,57 @@ textarea {
   white-space: nowrap;
 }
 
+/* Demo-data controls in the header */
+.ss-demo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 6px 11px;
+  border-radius: 999px;
+  border: 1px solid #f5c884;
+  background: #fff7ea;
+  color: #9a5b09;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ss-demo-pill-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(154, 91, 9, 0.12);
+  color: #9a5b09;
+  cursor: pointer;
+}
+
+.ss-demo-pill-clear:hover {
+  background: rgba(154, 91, 9, 0.22);
+}
+
+.ss-demo-load {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--brand-line, #c7d6fb);
+  background: var(--brand-soft, #eef4ff);
+  color: var(--brand-strong, #1d49c4);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ss-demo-load:hover {
+  border-style: solid;
+}
+
 .ss-icon-button {
   position: relative;
   width: 42px;
@@ -3128,6 +3179,7 @@ textarea {
 
   .ss-top-actions {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .ss-top-date {

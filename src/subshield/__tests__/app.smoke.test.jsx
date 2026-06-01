@@ -17,6 +17,15 @@ describe("SubShieldComplete (empty-by-default app)", () => {
     expect(screen.getByText(/Your insurance command center/i)).toBeTruthy();
   });
 
+  it("exposes a global Load demo data control when demo is off", () => {
+    render(<SubShieldComplete />);
+    expect(screen.getByText(/Load demo data/i)).toBeTruthy();
+  });
+
+  it("default account is not flagged as demo", () => {
+    expect(initialData.demoMode).toBeFalsy();
+  });
+
   it("ships with no fabricated user content", () => {
     expect(initialData.policies).toHaveLength(0);
     expect(initialData.contractors).toHaveLength(0);

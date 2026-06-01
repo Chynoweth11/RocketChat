@@ -4,7 +4,9 @@ import {
   BadgeDollarSign,
   Bell,
   CalendarClock,
+  Database,
   FileCheck2,
+  FlaskConical,
   FolderOpen,
   History,
   LayoutDashboard,
@@ -13,6 +15,7 @@ import {
   Shield,
   ShieldCheck,
   Upload,
+  X,
 } from "lucide-react";
 import { formatMoney, getStatus } from "../utils.js";
 
@@ -173,7 +176,16 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
   );
 }
 
-export function Header({ view, onUpload, onActivity, onSearch, unread }) {
+export function Header({
+  view,
+  onUpload,
+  onActivity,
+  onSearch,
+  unread,
+  demoMode = false,
+  onLoadSample,
+  onClearDemo,
+}) {
   const todayLabel = new Date().toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -208,6 +220,33 @@ export function Header({ view, onUpload, onActivity, onSearch, unread }) {
         <h1>{titles[view]}</h1>
       </div>
       <div className="ss-top-actions">
+        {demoMode ? (
+          <span className="ss-demo-pill" role="status">
+            <FlaskConical size={13} aria-hidden="true" />
+            Demo data
+            {onClearDemo && (
+              <button
+                type="button"
+                className="ss-demo-pill-clear"
+                onClick={onClearDemo}
+                aria-label="Clear demo data and return to an empty account"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </span>
+        ) : (
+          onLoadSample && (
+            <button
+              type="button"
+              className="ss-demo-load"
+              onClick={onLoadSample}
+              title="Fill the app with a realistic example account"
+            >
+              <Database size={14} aria-hidden="true" /> Load demo data
+            </button>
+          )
+        )}
         <small className="ss-top-date">Synced {todayLabel}</small>
         {onSearch && (
           <button
