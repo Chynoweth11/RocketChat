@@ -3,7 +3,10 @@
  * Pure functions only - no React, no DOM beyond localStorage / clipboard.
  */
 
-export const STORAGE_KEY = "subshield.complete.v5";
+// Bumped to v6 when the app switched from seeded demo data to an empty-by-
+// default account. The version suffix invalidates any cached demo data from
+// earlier builds so existing browsers also start clean.
+export const STORAGE_KEY = "subshield.complete.v6";
 
 export const RENEWAL_REMINDER_DAYS = [90, 60, 30, 10, 0];
 
