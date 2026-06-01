@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { clearStoredData } from "../utils.js";
 
 /**
  * App-wide error boundary. Prevents a single render error from white-screening
@@ -26,11 +27,9 @@ export default class ErrorBoundary extends Component {
   };
 
   handleRestore = () => {
-    try {
-      window.localStorage.removeItem("subshield.complete.v5");
-    } catch {
-      // ignore storage access failures
-    }
+    // Use the shared helper so this always targets the current storage key
+    // (rather than a hard-coded version that can drift out of sync).
+    clearStoredData();
     window.location.reload();
   };
 

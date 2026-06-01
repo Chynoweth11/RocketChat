@@ -17,6 +17,10 @@ import {
   deriveInitials,
   makeId,
   daysUntil,
+  STORAGE_KEY,
+  writeStoredData,
+  readStoredData,
+  clearStoredData,
 } from "../utils.js";
 
 describe("formatMoney", () => {
@@ -161,6 +165,22 @@ describe("deriveInitials", () => {
 describe("makeId", () => {
   it("includes prefix", () => expect(makeId("pol")).toMatch(/^pol-/));
   it("is unique each call", () => expect(makeId()).not.toBe(makeId()));
+});
+
+describe("storage helpers", () => {
+  it("clearStoredData removes the current storage key", () => {
+    const shape = { policies: [], contractors: [], activity: [], marker: 1 };
+    writeStoredData(shape);
+    expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+    clearStoredData();
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it("readStoredData returns the fallback when nothing is stored", () => {
+    clearStoredData();
+    const fallback = { policies: [], contractors: [], activity: [], from: "fallback" };
+    expect(readStoredData(fallback)).toBe(fallback);
+  });
 });
 
 describe("daysUntil", () => {
