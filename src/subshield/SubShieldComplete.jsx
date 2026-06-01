@@ -568,7 +568,7 @@ export default function SubShieldComplete() {
         ),
       });
       setFindingId(null);
-      fireToast("Better rate found", `Save ${formatMoney(savings)}/yr | review the comparison.`);
+      fireToast("Partner quote received", `${alternateQuote.carrier} returned a quote | est. ${formatMoney(savings)}/yr lower.`);
     }, 1100);
   }
 
@@ -604,11 +604,11 @@ export default function SubShieldComplete() {
       }),
       activity: prependActivity(
         data.activity,
-        `Switched ${policy?.name || "policy"} to ${quote.carrier}`,
-        `Now saving ${formatMoney(savings)}/yr. SubShield is handling the paperwork.`
+        `Proceeding with ${quote.carrier} for ${policy?.name || "policy"}`,
+        `Routed to the licensed partner to finalize. Estimated savings ${formatMoney(savings)}/yr.`
       ),
     });
-    fireToast("Coverage switched", `You're saving ${formatMoney(savings)}/yr.`);
+    fireToast("Sent to partner", `${quote.carrier} will finalize your coverage. Est. ${formatMoney(savings)}/yr saved.`);
   }
 
   function keepCurrentOpportunity(opportunity) {

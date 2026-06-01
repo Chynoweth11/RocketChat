@@ -202,7 +202,7 @@ export default function DashboardView({
 
             <div className="ss-row">
               <button type="button" className="ss-button" onClick={onReviewSavings}>
-                <PiggyBank size={16} /> Lower My Insurance
+                <PiggyBank size={16} /> Review savings with partners
               </button>
               <button type="button" className="ss-button soft" onClick={onOpenPolicies}>
                 <Shield size={16} /> View policies

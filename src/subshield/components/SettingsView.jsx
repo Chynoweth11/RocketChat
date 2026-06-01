@@ -16,7 +16,7 @@ import {
   UserCircle2,
 } from "lucide-react";
 import { formatLongDate, formatMoney, makeId } from "../utils.js";
-import { Section } from "./Layout.jsx";
+import { PartnerDisclaimer, Section } from "./Layout.jsx";
 
 const SETTINGS_GROUPS = [
   {
@@ -1887,6 +1887,20 @@ function LogoutSettings({ onLogout, onReset, onLoadSample }) {
             <LogOut size={16} /> Logout
           </button>
         </div>
+      </section>
+
+      <section className="ss-card">
+        <Section
+          title="Legal & disclosures"
+          sub="How SubShield works and our role in the insurance process."
+        />
+        <PartnerDisclaimer />
+        <p className="ss-muted" style={{ marginTop: 4 }}>
+          SubShield earns revenue through partner arrangements — such as referral
+          fees, affiliate commissions, or revenue share — when you connect with a
+          licensed insurance partner. This never changes the price you pay. You are
+          always free to purchase coverage from any provider you choose.
+        </p>
       </section>
 
       <section className="ss-card">

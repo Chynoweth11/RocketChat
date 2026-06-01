@@ -25,7 +25,7 @@ import {
   quoteStatusLabel,
   savingsForOpportunity,
 } from "../utils.js";
-import { Info, Section, Spinner } from "./Layout.jsx";
+import { Info, PartnerDisclaimer, PartnerJourney, Section, Spinner } from "./Layout.jsx";
 
 const FILTERS = [
   { id: "open", label: "Needs action" },
@@ -37,12 +37,15 @@ const FILTERS = [
   { id: "dismissed", label: "Dismissed" },
 ];
 
+// Internal stage IDs are unchanged (persisted in saved drafts), but the
+// labels reflect the partner-routed model: the user prepares and submits
+// their information; a licensed partner handles review, quotes, and issuance.
 const WORKFLOW_STEPS = [
-  { id: "start", label: "Start" },
-  { id: "coverage", label: "Coverage" },
-  { id: "application", label: "Application" },
-  { id: "quote", label: "Quote" },
-  { id: "purchase", label: "Purchase" },
+  { id: "start", label: "Start", journey: "start" },
+  { id: "coverage", label: "Coverage info", journey: "coverage" },
+  { id: "application", label: "Partner match", journey: "coverage" },
+  { id: "quote", label: "Request details", journey: "coverage" },
+  { id: "purchase", label: "Review & submit", journey: "review" },
 ];
 
 const MONTHS = [
@@ -61,9 +64,11 @@ const MONTHS = [
 ];
 
 const REQUEST_TYPES = [
-  { value: "renewal_review", label: "Review this renewal for better options" },
-  { value: "compare_quotes", label: "Compare new quote options" },
-  { value: "missing_coverage", label: "Help me add missing coverage" },
+  { value: "renewal_review", label: "Renewal review — check this renewal for better options" },
+  { value: "compare_quotes", label: "Better quote options — compare new quotes" },
+  { value: "savings_review", label: "Savings review — look for lower-cost coverage" },
+  { value: "missing_coverage", label: "Missing coverage — add a coverage type I don't have" },
+  { value: "certificate_need", label: "Certificate need — I need a COI for a project" },
 ];
 
 const CERTIFICATE_SUPPORT = [
@@ -132,13 +137,32 @@ export default function SavingsView({
   ).length;
   const switchedCount = opportunities.filter((item) => item.status === "accepted").length;
 
+  // Drive the top-level partner journey strip from the user's real state:
+  // once a request is submitted we advance past "coverage info"; a returned
+  // quote moves to "quote options"; a switched policy means it was purchased
+  // through the partner and the documents are saved back into SubShield.
+  const journeyActiveId = useMemo(() => {
+    if (switchedCount > 0) return "documents";
+    const hasQuote = opportunities.some((item) => item.status === "quote_received");
+    if (hasQuote) return "quotes";
+    const hasSubmitted = (quoteRequests || []).length > 0;
+    if (hasSubmitted) return "review";
+    const stage = coverageApplication?.stage;
+    if (stage === "purchase") return "review";
+    if (stage && stage !== "start") return "coverage";
+    return "start";
+  }, [switchedCount, opportunities, quoteRequests, coverageApplication]);
+
   return (
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <Section
-          title="Coverage review workflow"
-          sub="Enter policy details, continue your application, and connect with licensed insurance partners."
+          title="Coverage review — powered by licensed partners"
+          sub="Prepare your business and policy details in SubShield, then submit them to licensed insurance partners for review, quotes, and issuance."
         />
+
+        <PartnerJourney activeId={journeyActiveId} />
+        <PartnerDisclaimer />
 
         <div className="ss-coverage-flow-grid">
           <CoverageApplicationCard
@@ -163,7 +187,7 @@ export default function SavingsView({
       <section className="ss-card ss-span">
         <Section
           title="Savings opportunities"
-          sub="Comparable coverage at lower cost, organized by priority."
+          sub="Where licensed partners may find comparable coverage at lower cost, organized by priority."
           extra={
             <span className="ss-section-extra">
               {availableCount} open | {switchedCount} switched
@@ -203,7 +227,7 @@ export default function SavingsView({
           <div className="ss-empty">
             <BadgeDollarSign size={28} />
             <h2>No opportunities yet</h2>
-            <p>Add or upload policies and SubShield will surface savings opportunities.</p>
+            <p>Add or upload policies and SubShield will flag where licensed partners may be able to find lower-cost coverage.</p>
           </div>
         )}
 
@@ -234,12 +258,12 @@ export default function SavingsView({
       </section>
 
       <section className="ss-card">
-        <Section title="Quote history" sub="Submitted requests and partner responses" />
+        <Section title="Quote requests & partner status" sub="What you submitted, when, and which licensed partner it routed to" />
         {quoteRequests.length === 0 && (
           <div className="ss-empty" style={{ minHeight: 160 }}>
             <History size={28} />
             <h2>No quote requests yet</h2>
-            <p>Start a coverage review workflow to create your first request.</p>
+            <p>Complete the coverage review above to submit your first request to a licensed partner.</p>
           </div>
         )}
         {quoteRequests.map((request) => {
@@ -318,8 +342,9 @@ export default function SavingsView({
           <Info label="Potential savings" value={`${formatMoney(potentialSavings)}/yr`} />
           <Info label="Realized savings" value={`${formatMoney(realizedSavings)}/yr`} />
           <Info label="Open opportunities" value={availableCount} />
-          <Info label="Switched policies" value={switchedCount} />
+          <Info label="Purchased via partner" value={switchedCount} />
         </div>
+        <PartnerDisclaimer compact />
       </section>
     </div>
   );
@@ -708,13 +733,18 @@ function CoverageApplicationCard({
           <div className="ss-coverage-estimate-row"><span>Contact email</span><strong>{form.contactEmail || "—"}</strong></div>
           {selectedPolicy && (
             <div className="ss-coverage-estimate-row total">
-              <span>Est. annual savings</span>
+              <span>Est. savings to confirm with partner</span>
               <strong className="ss-savings-pos">
                 {formatMoney(estimateSavings(selectedPolicy.premiumAmount ?? selectedPolicy.premium ?? 0))}/yr
               </strong>
             </div>
           )}
-          <p className="ss-fine">Review your details above, then click Submit to route this to a licensed partner.</p>
+          <p className="ss-fine">
+            When you submit, SubShield sends these details to a licensed insurance
+            partner for review. The partner — not SubShield — provides any quotes,
+            handles the application, and issues coverage. Returned documents are
+            saved back into your SubShield account.
+          </p>
         </div>
       )}
 
@@ -738,7 +768,7 @@ function CoverageApplicationCard({
           )}
           {isLastStep && (
             <button type="button" className="ss-button ss-button-sm" onClick={submit}>
-              Submit request
+              Submit to licensed partner
             </button>
           )}
         </div>
@@ -750,25 +780,29 @@ function CoverageApplicationCard({
 function PolicyServicesCard({ onNavigate, partnerNames, potentialSavings }) {
   const services = [
     {
-      id: "policies",
+      key: "manage",
+      nav: "policies",
       title: "Manage my insurance",
       detail: "Review policy details, limits, and documentation in one place.",
       icon: ShieldCheck,
     },
     {
-      id: "certificates",
+      key: "certificate",
+      nav: "certificates",
       title: "Request certificate",
       detail: "Send COI packages with saved holder wording and project context.",
       icon: FileCheck2,
     },
     {
-      id: "renewals",
+      key: "renewals",
+      nav: "policies",
       title: "Manage renewals",
       detail: "Track deadlines and keep coverage active before policies lapse.",
       icon: CalendarClock,
     },
     {
-      id: "settings",
+      key: "billing",
+      nav: "settings",
       title: "Manage billing and account",
       detail: "Update billing contacts, payment methods, and workspace settings.",
       icon: Handshake,
@@ -794,9 +828,9 @@ function PolicyServicesCard({ onNavigate, partnerNames, potentialSavings }) {
         return (
           <button
             type="button"
-            key={service.id}
+            key={service.key}
             className="ss-service-row"
-            onClick={() => onNavigate(service.id)}
+            onClick={() => onNavigate(service.nav)}
           >
             <span className="ss-service-icon" aria-hidden="true">
               <Icon size={15} />
@@ -851,10 +885,10 @@ function OpportunityCard({
       <article className="ss-savings-card accepted">
         <div className="ss-savings-head">
           <div>
-            <span className="ss-eyebrow">Switched and saving</span>
+            <span className="ss-eyebrow">Purchased through partner</span>
             <h2>{name}</h2>
             <p className="ss-muted">
-              Now with {quote?.carrier || opportunity.currentCarrier}.
+              Issued by {quote?.carrier || opportunity.currentCarrier} (licensed partner).
             </p>
           </div>
           <div className="ss-savings-amount">
@@ -864,7 +898,7 @@ function OpportunityCard({
         </div>
         <div className="ss-note success">
           <BadgeCheck size={16} />
-          <span>Coverage switched and logged. We will keep monitoring future renewals.</span>
+          <span>Coverage purchased through the partner and documents saved in SubShield. We'll keep monitoring future renewals.</span>
         </div>
       </article>
     );
@@ -956,19 +990,20 @@ function OpportunityCard({
 
           <div className="ss-row">
             <button type="button" className="ss-button" onClick={onAcceptQuote}>
-              <BadgeCheck size={16} /> Accept and switch
+              <BadgeCheck size={16} /> Proceed with this partner
             </button>
             <button type="button" className="ss-button soft" onClick={onKeepCurrent}>
               Keep current
             </button>
             <button type="button" className="ss-button soft" onClick={onTalkToAdvisor}>
-              Talk to advisor
+              Talk to a licensed partner
             </button>
           </div>
           {quote.amRating ? (
             <p className="ss-fine">
-              {quote.carrier} | AM Best rating {quote.amRating}. Quote valid through{" "}
-              {formatLongDate(quote.bindableUntil)}.
+              Quote provided by {quote.carrier} (licensed partner) | AM Best rating{" "}
+              {quote.amRating}. Valid through {formatLongDate(quote.bindableUntil)}.
+              Coverage is purchased and issued through the partner.
             </p>
           ) : null}
         </>
@@ -983,16 +1018,16 @@ function OpportunityCard({
             <button type="button" className="ss-button" onClick={onFindBetterRate} disabled={busy}>
               {busy ? (
                 <>
-                  <Spinner /> Shopping rates...
+                  <Spinner /> Submitting to partners...
                 </>
               ) : (
                 <>
-                  <Search size={16} /> Find better rate
+                  <Search size={16} /> Request quote options
                 </>
               )}
             </button>
             <button type="button" className="ss-button soft" onClick={onTalkToAdvisor}>
-              Talk to advisor
+              Talk to a licensed partner
             </button>
             <button type="button" className="ss-button soft" onClick={onRemindLater}>
               <BellRing size={16} /> Remind me later

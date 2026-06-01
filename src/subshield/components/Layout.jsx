@@ -274,3 +274,74 @@ export function Info({ label, value, hint }) {
 export function Spinner() {
   return <span className="ss-spinner" aria-hidden="true" />;
 }
+
+/**
+ * Compliance disclaimer. SubShield is a workflow/platform layer — it does not
+ * sell, bind, or underwrite insurance. Coverage is quoted and issued by
+ * licensed insurance partners. Shown anywhere the user is reviewing coverage
+ * or savings so the business model is unambiguous and legally safer.
+ */
+export function PartnerDisclaimer({ compact = false }) {
+  if (compact) {
+    return (
+      <p className="ss-partner-disclaimer compact">
+        <ShieldCheck size={12} aria-hidden="true" />
+        SubShield is not an insurance company, agency, or broker. Quotes and
+        policies are provided by licensed insurance partners.
+      </p>
+    );
+  }
+  return (
+    <div className="ss-partner-disclaimer" role="note">
+      <ShieldCheck size={15} aria-hidden="true" />
+      <span>
+        <b>How SubShield works.</b> SubShield is a platform that helps you
+        organize your insurance information and connect with licensed insurance
+        partners. SubShield is not an insurance company, agency, or broker and
+        does not sell, recommend, or bind coverage. All quotes, applications,
+        underwriting, and policy issuance are handled by licensed insurance
+        partners.
+      </span>
+    </div>
+  );
+}
+
+const PARTNER_JOURNEY_STEPS = [
+  { id: "start", label: "Start", detail: "Tell us what you need" },
+  { id: "coverage", label: "Coverage info", detail: "Enter business & policy details" },
+  { id: "review", label: "Partner review", detail: "Licensed partners review your info" },
+  { id: "quotes", label: "Quote options", detail: "Compare returned quotes" },
+  { id: "purchase", label: "Purchase", detail: "Buy directly through the partner" },
+  { id: "documents", label: "Documents saved", detail: "Stored in SubShield after issuance" },
+];
+
+/**
+ * Read-only journey strip that frames the end-to-end partner-routed flow so
+ * users always understand SubShield prepares and organizes, while a licensed
+ * partner handles the actual transaction.
+ */
+export function PartnerJourney({ activeId = "coverage" }) {
+  const activeIndex = Math.max(
+    0,
+    PARTNER_JOURNEY_STEPS.findIndex((step) => step.id === activeId)
+  );
+  return (
+    <ol className="ss-partner-journey" aria-label="How coverage review works">
+      {PARTNER_JOURNEY_STEPS.map((step, index) => (
+        <li
+          key={step.id}
+          className={`ss-journey-step ${index < activeIndex ? "done" : ""} ${
+            index === activeIndex ? "active" : ""
+          }`}
+          aria-current={index === activeIndex ? "step" : undefined}
+        >
+          <span className="ss-journey-num">{index + 1}</span>
+          <span className="ss-journey-copy">
+            <b>{step.label}</b>
+            <small>{step.detail}</small>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}

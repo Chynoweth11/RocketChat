@@ -4087,3 +4087,89 @@ h1, h2, h3 {
   font-size: 11.5px;
   color: var(--muted);
 }
+
+/* =====================================================
+   Partner journey strip + compliance disclaimer
+   ===================================================== */
+.ss-partner-journey {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 14px;
+}
+
+.ss-journey-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  position: relative;
+}
+
+.ss-journey-step.active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 1px var(--brand-line) inset;
+}
+
+.ss-journey-step.done { border-color: var(--brand-line); }
+
+.ss-journey-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--line);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.ss-journey-step.active .ss-journey-num { background: var(--brand); color: #fff; }
+.ss-journey-step.done .ss-journey-num { background: #16a34a; color: #fff; }
+
+.ss-journey-copy { display: flex; flex-direction: column; gap: 2px; }
+.ss-journey-copy b { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+.ss-journey-copy small { font-size: 11px; color: var(--muted); line-height: 1.3; }
+
+.ss-partner-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--brand-line);
+  background: var(--brand-soft);
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.ss-partner-disclaimer svg { flex-shrink: 0; margin-top: 2px; color: var(--brand); }
+.ss-partner-disclaimer b { color: var(--text); }
+
+.ss-partner-disclaimer.compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 11.5px;
+}
+
+@media (max-width: 900px) {
+  .ss-partner-journey {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
