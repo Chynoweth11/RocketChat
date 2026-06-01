@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Building2, Plus } from "lucide-react";
 import Modal from "./Modal.jsx";
 import { deriveInitials, makeId } from "../utils.js";
@@ -152,11 +152,19 @@ export default function AddGCModal({ onClose, onSave }) {
 }
 
 function FormField({ label, value, onChange, placeholder, type = "text", error, multiline }) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <label className={`ss-field${error ? " has-error" : ""}`}>
       <span className="ss-field-label">{label}</span>
       {multiline ? (
-        <textarea value={value} onChange={onChange} placeholder={placeholder} aria-invalid={!!error} />
+        <textarea
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          aria-invalid={!!error}
+          aria-describedby={describedBy}
+        />
       ) : (
         <input
           value={value}
@@ -164,9 +172,14 @@ function FormField({ label, value, onChange, placeholder, type = "text", error, 
           placeholder={placeholder}
           type={type}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       )}
-      {error && <span className="ss-field-error" role="alert">{error}</span>}
+      {error && (
+        <span className="ss-field-error" id={errorId} role="alert">
+          {error}
+        </span>
+      )}
     </label>
   );
 }

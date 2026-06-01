@@ -13,6 +13,7 @@ export default function Modal({ title, subtitle, children, onClose }) {
   const modalRef = useRef(null);
   const previousFocusRef = useRef(null);
   const titleId = useId();
+  const subtitleId = useId();
 
   useEffect(() => {
     const onKey = (event) => {
@@ -65,6 +66,7 @@ export default function Modal({ title, subtitle, children, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
+      aria-describedby={subtitle ? subtitleId : undefined}
       onClick={onBackdropClick}
     >
       <section className="ss-modal" ref={modalRef}>
@@ -77,7 +79,7 @@ export default function Modal({ title, subtitle, children, onClose }) {
           <X size={18} />
         </button>
         <h2 id={titleId}>{title}</h2>
-        {subtitle && <p className="ss-muted">{subtitle}</p>}
+        {subtitle && <p className="ss-muted" id={subtitleId}>{subtitle}</p>}
         {children}
       </section>
     </div>

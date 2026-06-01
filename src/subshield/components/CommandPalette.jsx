@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Search,
   CornerDownLeft,
@@ -42,6 +42,8 @@ export default function CommandPalette({
   const [active, setActive] = useState(0);
   const inputRef = useRef(null);
   const listRef = useRef(null);
+  const listboxId = useId();
+  const optionId = (index) => `${listboxId}-opt-${index}`;
 
   const commands = useMemo(() => {
     const navItems = [
@@ -183,30 +185,38 @@ export default function CommandPalette({
           <Search size={18} aria-hidden="true" />
           <input
             ref={inputRef}
-            type="text"
+            type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search pages, policies, holders, documents..."
             aria-label="Search commands"
+            role="combobox"
+            aria-expanded={filtered.length > 0}
+            aria-controls={listboxId}
+            aria-activedescendant={filtered.length > 0 ? optionId(active) : undefined}
+            aria-autocomplete="list"
           />
           <kbd className="ss-cmd-kbd">ESC</kbd>
         </div>
 
-        <div className="ss-cmd-list" ref={listRef}>
+        <div className="ss-cmd-list" ref={listRef} role="listbox" id={listboxId} aria-label="Commands">
           {filtered.length === 0 && (
             <div className="ss-cmd-empty">No matches for &ldquo;{query}&rdquo;</div>
           )}
 
           {groups.map((group) => (
-            <div className="ss-cmd-group" key={group.name}>
-              <div className="ss-cmd-group-label">{group.name}</div>
+            <div className="ss-cmd-group" key={group.name} role="group" aria-label={group.name}>
+              <div className="ss-cmd-group-label" aria-hidden="true">{group.name}</div>
               {group.items.map((command) => {
                 const Icon = command.icon;
                 return (
                   <button
                     key={command.id}
                     type="button"
+                    id={optionId(command._index)}
+                    role="option"
+                    aria-selected={command._index === active}
                     data-index={command._index}
                     className={`ss-cmd-item ${command._index === active ? "active" : ""}`}
                     onMouseEnter={() => setActive(command._index)}

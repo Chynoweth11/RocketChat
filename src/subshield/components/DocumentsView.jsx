@@ -130,6 +130,7 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
                   type="button"
                   key={item.id}
                   className={`ss-chip ${typeFilter === item.id ? "active" : ""}`}
+                  aria-pressed={typeFilter === item.id}
                   onClick={() => setTypeFilter(item.id)}
                 >
                   {item.label}

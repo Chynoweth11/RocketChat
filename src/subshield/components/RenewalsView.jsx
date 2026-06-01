@@ -137,6 +137,7 @@ export default function RenewalsView({
               key={item.id}
               type="button"
               className={`ss-chip ${filter === item.id ? "active" : ""}`}
+              aria-pressed={filter === item.id}
               onClick={() => setFilter(item.id)}
             >
               {item.label}

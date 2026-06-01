@@ -189,6 +189,7 @@ export default function SavingsView({
                   type="button"
                   key={item.id}
                   className={`ss-chip ${statusFilter === item.id ? "active" : ""}`}
+                  aria-pressed={statusFilter === item.id}
                   onClick={() => setStatusFilter(item.id)}
                 >
                   {item.label}
@@ -496,7 +497,7 @@ function CoverageApplicationCard({
                   </option>
                 ))}
               </select>
-              {errors.policyType && <span className="ss-field-error">{errors.policyType}</span>}
+              {errors.policyType && <span className="ss-field-error" role="alert">{errors.policyType}</span>}
             </label>
             <label className="ss-field">
               <span className="ss-field-label">Current insurance carrier (optional)</span>
@@ -549,7 +550,7 @@ function CoverageApplicationCard({
                   <option key={month} value={month}>{month}</option>
                 ))}
               </select>
-              {errors.renewalMonth && <span className="ss-field-error">{errors.renewalMonth}</span>}
+              {errors.renewalMonth && <span className="ss-field-error" role="alert">{errors.renewalMonth}</span>}
             </label>
             <label className="ss-field">
               <span className="ss-field-label">Policy renewal year</span>
@@ -562,7 +563,7 @@ function CoverageApplicationCard({
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
-              {errors.renewalYear && <span className="ss-field-error">{errors.renewalYear}</span>}
+              {errors.renewalYear && <span className="ss-field-error" role="alert">{errors.renewalYear}</span>}
             </label>
           </div>
           <div className="ss-field-grid">
@@ -581,7 +582,7 @@ function CoverageApplicationCard({
                 onChange={(event) => updateField("state", event.target.value)}
                 placeholder="TX"
               />
-              {errors.state && <span className="ss-field-error">{errors.state}</span>}
+              {errors.state && <span className="ss-field-error" role="alert">{errors.state}</span>}
             </label>
           </div>
           <div className="ss-field-grid">
@@ -620,7 +621,7 @@ function CoverageApplicationCard({
                 onChange={(event) => updateField("contactEmail", event.target.value)}
                 placeholder="owner@company.com"
               />
-              {errors.contactEmail && <span className="ss-field-error">{errors.contactEmail}</span>}
+              {errors.contactEmail && <span className="ss-field-error" role="alert">{errors.contactEmail}</span>}
             </label>
             <label className="ss-field">
               <span className="ss-field-label">Preferred licensed partner</span>

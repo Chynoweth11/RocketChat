@@ -162,9 +162,13 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
       onClick={onClick}
       aria-current={active ? "page" : undefined}
     >
-      <Icon size={19} />
+      <Icon size={19} aria-hidden="true" />
       <span>{label}</span>
-      {badge ? <span className="ss-nav-badge">{badge}</span> : null}
+      {badge ? (
+        <span className="ss-nav-badge" aria-label={`${badge} needs attention`}>
+          {badge}
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -228,9 +232,9 @@ export function Header({ view, onUpload, onActivity, onSearch, unread }) {
           type="button"
           className="ss-icon-button"
           onClick={onActivity}
-          aria-label="View activity"
+          aria-label={unread > 0 ? `View activity, ${unread} need attention` : "View activity"}
         >
-          <Bell size={18} />
+          <Bell size={18} aria-hidden="true" />
           {unread > 0 && <span className="ss-dot" aria-hidden="true" />}
         </button>
       </div>

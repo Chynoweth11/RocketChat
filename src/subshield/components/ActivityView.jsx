@@ -155,6 +155,7 @@ export default function ActivityView({ activity }) {
                 key={item.id}
                 type="button"
                 className={`ss-chip ${typeFilter === item.id ? "active" : ""}`}
+                aria-pressed={typeFilter === item.id}
                 onClick={() => setTypeFilter(item.id)}
               >
                 {item.label}

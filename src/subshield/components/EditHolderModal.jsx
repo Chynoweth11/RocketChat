@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { SquarePen, Trash2 } from "lucide-react";
 import Modal from "./Modal.jsx";
 import { deriveInitials } from "../utils.js";
@@ -155,15 +155,21 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
 }
 
 function FormField({ label, value, onChange, type = "text", error, multiline }) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <label className={`ss-field${error ? " has-error" : ""}`}>
       <span className="ss-field-label">{label}</span>
       {multiline ? (
-        <textarea value={value} onChange={onChange} aria-invalid={!!error} />
+        <textarea value={value} onChange={onChange} aria-invalid={!!error} aria-describedby={describedBy} />
       ) : (
-        <input value={value} onChange={onChange} type={type} aria-invalid={!!error} />
+        <input value={value} onChange={onChange} type={type} aria-invalid={!!error} aria-describedby={describedBy} />
       )}
-      {error && <span className="ss-field-error" role="alert">{error}</span>}
+      {error && (
+        <span className="ss-field-error" id={errorId} role="alert">
+          {error}
+        </span>
+      )}
     </label>
   );
 }

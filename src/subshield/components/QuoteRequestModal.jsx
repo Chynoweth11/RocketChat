@@ -125,8 +125,13 @@ export default function QuoteRequestModal({
         {STEPS.map((item, index) => {
           const state = index < step ? "done" : index === step ? "current" : "upcoming";
           return (
-            <li key={item.id} className={`ss-step ${state}`}>
-              <span className="ss-step-dot">
+            <li
+              key={item.id}
+              className={`ss-step ${state}`}
+              aria-current={state === "current" ? "step" : undefined}
+              aria-label={`Step ${index + 1} of ${STEPS.length}: ${item.label}${state === "done" ? " (completed)" : state === "current" ? " (current)" : ""}`}
+            >
+              <span className="ss-step-dot" aria-hidden="true">
                 {state === "done" ? <Check size={13} /> : index + 1}
               </span>
               <span className="ss-step-label">{item.label}</span>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { FilePlus2 } from "lucide-react";
 import Modal from "./Modal.jsx";
 import { makeId, policyLabelFromType } from "../utils.js";
@@ -207,6 +207,8 @@ function FormField({
   multiline,
   children,
 }) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <label className={`ss-field${error ? " has-error" : ""}`}>
       <span className="ss-field-label">{label}</span>
@@ -218,6 +220,7 @@ function FormField({
           onChange={onChange}
           placeholder={placeholder}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       ) : (
         <input
@@ -226,9 +229,14 @@ function FormField({
           placeholder={placeholder}
           type={type}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
         />
       )}
-      {error && <span className="ss-field-error" role="alert">{error}</span>}
+      {error && (
+        <span className="ss-field-error" id={errorId} role="alert">
+          {error}
+        </span>
+      )}
     </label>
   );
 }

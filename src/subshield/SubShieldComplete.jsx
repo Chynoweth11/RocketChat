@@ -1150,9 +1150,13 @@ export default function SubShieldComplete() {
 
   const existingTypes = policies.map((policy) => policy.policyType || policy.type);
 
+  // Any open overlay (a modal or the command palette) makes the underlying
+  // app inert so screen readers and keyboard tabbing stay within the overlay.
+  const overlayOpen = modal !== null || paletteOpen;
+
   return (
     <div className="ss-app">
-      <div className="ss-layout">
+      <div className="ss-layout" inert={overlayOpen ? true : undefined}>
         <Sidebar
           view={view}
           setView={setView}

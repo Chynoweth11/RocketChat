@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { BriefcaseBusiness } from "lucide-react";
 import Modal from "./Modal.jsx";
 import { makeId } from "../utils.js";
@@ -111,20 +111,34 @@ export default function AddBrokerModal({ onClose, onSave }) {
 }
 
 function FormField({ label, value, onChange, placeholder, type = "text", error, multiline }) {
+  const errorId = useId();
+  const describedBy = error ? errorId : undefined;
   return (
     <label className="ss-field">
       <span className="ss-field-label">{label}</span>
       {multiline ? (
-        <textarea value={value} onChange={onChange} placeholder={placeholder} />
+        <textarea
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+        />
       ) : (
         <input
           value={value}
           onChange={onChange}
           type={type}
           placeholder={placeholder}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
         />
       )}
-      {error && <span className="ss-field-error">{error}</span>}
+      {error && (
+        <span className="ss-field-error" id={errorId} role="alert">
+          {error}
+        </span>
+      )}
     </label>
   );
 }
