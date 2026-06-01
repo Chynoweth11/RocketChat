@@ -117,11 +117,14 @@ const QUOTE_STATUS_LABELS = {
   draft: "Draft",
   submitted: "Submitted",
   requested: "Requested",
+  pending_partner: "Awaiting partner",
   sent_to_partner: "Sent to partner",
-  quote_received: "Quote ready",
+  at_partner: "Purchasing at partner",
+  quote_received: "Partner offer ready",
   available: "Savings available",
   monitoring: "Monitoring",
-  accepted: "Switched & saving",
+  accepted: "Purchased via partner",
+  purchased: "Purchased via partner",
   remind_later: "Snoozed",
   dismissed: "Dismissed",
   declined: "Declined",
@@ -376,7 +379,7 @@ export function getCoverageGaps(policies = []) {
 /** Total annual savings still available from open opportunities. */
 export function getPotentialSavings(opportunities = []) {
   return opportunities
-    .filter((item) => ["available", "quote_received"].includes(item.status))
+    .filter((item) => ["available", "pending_partner", "quote_received", "at_partner"].includes(item.status))
     .reduce((sum, item) => sum + savingsForOpportunity(item), 0);
 }
 
@@ -548,7 +551,7 @@ export function quoteStatusLabel(status) {
 
 export function getOpenQuoteRequests(requests = []) {
   return requests.filter((item) =>
-    ["submitted", "sent_to_partner", "quote_received"].includes(item.status)
+    ["submitted", "sent_to_partner", "pending_partner", "at_partner", "quote_received"].includes(item.status)
   );
 }
 

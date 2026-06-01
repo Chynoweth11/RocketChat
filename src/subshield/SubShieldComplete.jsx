@@ -497,60 +497,74 @@ export default function SubShieldComplete() {
 
   /* ---------- Savings ---------- */
 
-  function findBetterRate(opportunity) {
+  function requestPartnerQuote(opportunity) {
+    // Step 1: mark pending immediately so the UI shows "Awaiting partner response".
+    // In production this triggers an API call to the partner; here we simulate
+    // the partner responding after a short delay with their actual offer.
     if (findingId) return;
+
+    const partnerForOpportunity =
+      data.partners.find((p) => p.id === opportunity.partnerId && p.active) ||
+      data.partners.find((p) => p.active && p.policyTypes?.includes(opportunity.policyType)) ||
+      data.partners.find((p) => p.active);
+
+    const quoteRequest = normalizeQuoteRequest(
+      {
+        policyId: opportunity.policyId,
+        partnerId: partnerForOpportunity?.id || null,
+        routeType: "partner",
+        status: "pending_partner",
+        submittedAt: new Date().toISOString(),
+        notes: "Coverage review request submitted — awaiting partner response.",
+      },
+      company.id
+    );
+
+    // Immediately persist pending state so UI reflects "awaiting" on reload
+    commit({
+      ...data,
+      savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+        status: "pending_partner",
+        partnerId: partnerForOpportunity?.id || opportunity.partnerId,
+      }),
+      quoteRequests: [quoteRequest, ...quoteRequests],
+      activity: prependActivity(
+        data.activity,
+        `Quote request sent for ${policyLabelFromType(opportunity.policyType)}`,
+        `Submitted to ${partnerForOpportunity?.name || "licensed partner"} for review.`
+      ),
+    });
     setFindingId(opportunity.id);
+    fireToast("Submitted to partner", `${partnerForOpportunity?.name || "Partner"} is reviewing your request.`);
+
+    // Simulate the partner sending back their actual offer (in production this
+    // arrives via webhook / polling; here we resolve it after a brief delay).
     setTimeout(() => {
       const policy = policies.find((item) => item.id === opportunity.policyId);
       const base = opportunity.currentPremium || policy?.premiumAmount || 0;
-      const est = opportunity.estimatedSavings || estimateSavings(base);
-      const newPremium = Math.max(200, base - est);
-      const savings = base - newPremium;
-      const partner =
-        data.partners.find((p) => p.id === opportunity.partnerId && p.active) ||
-        data.partners.find(
-          (p) => p.active && p.policyTypes?.includes(opportunity.policyType)
-        ) ||
-        data.partners.find((p) => p.active);
+      const partnerSavings = opportunity.estimatedSavings || estimateSavings(base);
+      const partnerPremium = Math.max(200, base - partnerSavings);
+      const partner = partnerForOpportunity;
 
+      // The quote object is flagged source:"partner" so the UI can make clear
+      // these numbers came from the licensed partner, not from SubShield.
       const alternateQuote = {
         partnerId: partner?.id || null,
         partnerName: partner?.name || "Licensed partner",
         carrier: partner?.name || "Licensed partner",
-        premium: newPremium,
+        premium: partnerPremium,
         deductible: policy?.deductible ?? null,
-        coverageLimits: policy?.coverageLimits || "",
+        coverageLimits: policy?.coverageLimits || policy?.limit || "",
         amRating: partner?.amRating || "A (Excellent)",
         bindableUntil: dateFromToday(14),
+        source: "partner",
+        quoteUrl: partner?.quoteUrl || null,
         highlights: [
           "Comparable coverage and limits",
-          `${formatMoney(savings)}/yr lower premium`,
-          "No coverage gap when you switch",
+          `${formatMoney(base - partnerPremium)}/yr lower than current premium`,
+          "Purchase and documents completed through the partner",
         ],
       };
-
-      const quoteDoc = normalizeDocument({
-        name: `${policy?.name || policyLabelFromType(opportunity.policyType)} Quote | ${alternateQuote.carrier}`,
-        docType: "quote",
-        policyId: opportunity.policyId,
-        policyType: opportunity.policyType,
-        carrier: alternateQuote.carrier,
-        status: "pending",
-        addedBy: "SubShield",
-      });
-
-      const quoteRequest = normalizeQuoteRequest(
-        {
-          policyId: opportunity.policyId,
-          partnerId: partner?.id || null,
-          routeType: "partner",
-          status: "quote_received",
-          submittedAt: new Date().toISOString(),
-          respondedAt: new Date().toISOString(),
-          notes: `Auto-shopped | ${formatMoney(savings)}/yr below current premium.`,
-        },
-        company.id
-      );
 
       commit({
         ...data,
@@ -559,20 +573,59 @@ export default function SubShieldComplete() {
           alternateQuote,
           partnerId: partner?.id || opportunity.partnerId,
         }),
-        quoteRequests: [quoteRequest, ...quoteRequests],
-        documents: [quoteDoc, ...(data.documents || [])],
+        quoteRequests: quoteRequests.map((req) =>
+          req.partnerId === (partner?.id || null) && req.status === "pending_partner"
+            ? { ...req, status: "quote_received", respondedAt: new Date().toISOString() }
+            : req
+        ),
         activity: prependActivity(
           data.activity,
-          `Better ${policyLabelFromType(opportunity.policyType)} rate found`,
-          `${alternateQuote.carrier} quoted ${formatMoney(newPremium)}/yr | saving ${formatMoney(savings)}/yr.`
+          `${partner?.name || "Partner"} returned an offer for ${policyLabelFromType(opportunity.policyType)}`,
+          `${formatMoney(partnerPremium)}/yr — est. ${formatMoney(base - partnerPremium)}/yr below your current premium.`
         ),
       });
       setFindingId(null);
-      fireToast("Partner quote received", `${alternateQuote.carrier} returned a quote | est. ${formatMoney(savings)}/yr lower.`);
-    }, 1100);
+      fireToast(
+        "Partner offer received",
+        `${partner?.name || "Partner"} has returned a quote. Review and go to their site to purchase.`
+      );
+    }, 1800);
   }
 
-  function acceptQuote(opportunity) {
+  // Step 2: user reviews partner's offer and clicks "Go purchase at [Partner]".
+  // We open the partner's URL in a new tab and mark the opportunity so the
+  // user can come back to SubShield and confirm once they've completed purchase.
+  function goToPurchaseAtPartner(opportunity) {
+    const quote = opportunity.alternateQuote;
+    if (!quote) return;
+    const partner = data.partners.find((p) => p.id === quote.partnerId);
+    const url = quote.quoteUrl || partner?.quoteUrl;
+
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    commit({
+      ...data,
+      savingsOpportunities: patchOpportunity(opportunities, opportunity.id, {
+        status: "at_partner",
+      }),
+      activity: prependActivity(
+        data.activity,
+        `Sent to ${quote.carrier} to purchase`,
+        `Opened ${quote.carrier} in a new tab. Return here to upload your new policy once purchased.`
+      ),
+    });
+    fireToast(
+      `Opened ${quote.carrier}`,
+      "Complete your purchase there. Come back to upload your new policy document."
+    );
+  }
+
+  // Step 3: user returns after purchasing at the partner. We update SubShield's
+  // policy record with the partner's numbers and open the upload/scan modal so
+  // they can store the new declarations page directly in their vault.
+  function confirmPurchaseAtPartner(opportunity) {
     const quote = opportunity.alternateQuote;
     if (!quote) return;
     const policy = policies.find((item) => item.id === opportunity.policyId);
@@ -588,7 +641,7 @@ export default function SubShieldComplete() {
             deductible: quote.deductible ?? item.deductible,
             coverageLimits: quote.coverageLimits || item.coverageLimits,
             limit: quote.coverageLimits || item.limit,
-            statusNote: `Switched to ${quote.carrier} | saving ${formatMoney(savings)}/yr.`,
+            statusNote: `Purchased through ${quote.carrier} | saving ${formatMoney(savings)}/yr. Upload your new declarations page.`,
             lastQuotedAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }
@@ -604,11 +657,17 @@ export default function SubShieldComplete() {
       }),
       activity: prependActivity(
         data.activity,
-        `Proceeding with ${quote.carrier} for ${policy?.name || "policy"}`,
-        `Routed to the licensed partner to finalize. Estimated savings ${formatMoney(savings)}/yr.`
+        `${policy?.name || "Policy"} purchased through ${quote.carrier}`,
+        `Saving ${formatMoney(savings)}/yr. Upload your new declarations page to keep SubShield current.`
       ),
     });
-    fireToast("Sent to partner", `${quote.carrier} will finalize your coverage. Est. ${formatMoney(savings)}/yr saved.`);
+
+    // Open the scan/upload modal so the user can save their new policy document
+    setModal("scan");
+    fireToast(
+      "Purchase confirmed — upload your policy",
+      "SubShield is ready to store your new declarations page."
+    );
   }
 
   function keepCurrentOpportunity(opportunity) {
@@ -1257,8 +1316,9 @@ export default function SubShieldComplete() {
               potentialSavings={potentialSavings}
               realizedSavings={realizedSavings}
               findingId={findingId}
-              onFindBetterRate={findBetterRate}
-              onAcceptQuote={acceptQuote}
+              onRequestQuote={requestPartnerQuote}
+              onGoToPurchase={goToPurchaseAtPartner}
+              onConfirmPurchase={confirmPurchaseAtPartner}
               onKeepCurrent={keepCurrentOpportunity}
               onTalkToAdvisor={(opportunity) => openQuoteModal(opportunity, "broker")}
               onRemindLater={remindLaterOpportunity}

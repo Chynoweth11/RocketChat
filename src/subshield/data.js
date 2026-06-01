@@ -50,6 +50,8 @@ export const initialData = {
       contactMethod: "api",
       commissionModel: "referral_fee",
       amRating: "A (Excellent)",
+      quoteUrl: "https://www.nextinsurance.com/",
+      logoMark: "NX",
       active: true,
     },
     {
@@ -62,6 +64,8 @@ export const initialData = {
       contactMethod: "email",
       commissionModel: "lead_fee",
       amRating: "A+ (Superior)",
+      quoteUrl: "https://www.thehartford.com/",
+      logoMark: "HF",
       active: true,
     },
     {
@@ -74,6 +78,8 @@ export const initialData = {
       contactMethod: "api",
       commissionModel: "referral_fee",
       amRating: "A (Excellent)",
+      quoteUrl: "https://www.coalitioninc.com/",
+      logoMark: "CC",
       active: true,
     },
     {
@@ -86,6 +92,8 @@ export const initialData = {
       contactMethod: "email",
       commissionModel: "commission_share",
       amRating: "A (Excellent)",
+      quoteUrl: "https://www.summittrade.com/",
+      logoMark: "ST",
       active: true,
     },
   ],

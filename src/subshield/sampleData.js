@@ -286,6 +286,8 @@ export const sampleData = {
       contactMethod: "api",
       commissionModel: "referral_fee",
       amRating: "A (Excellent)",
+      quoteUrl: "https://www.nextinsurance.com/",
+      logoMark: "NX",
       active: true,
     },
     {
@@ -298,6 +300,8 @@ export const sampleData = {
       contactMethod: "email",
       commissionModel: "lead_fee",
       amRating: "A+ (Superior)",
+      quoteUrl: "https://www.thehartford.com/",
+      logoMark: "HF",
       active: true,
     },
     {
@@ -310,6 +314,8 @@ export const sampleData = {
       contactMethod: "api",
       commissionModel: "referral_fee",
       amRating: "A (Excellent)",
+      quoteUrl: "https://www.coalitioninc.com/",
+      logoMark: "CC",
       active: true,
     },
     {
@@ -322,6 +328,8 @@ export const sampleData = {
       contactMethod: "email",
       commissionModel: "commission_share",
       amRating: "A (Excellent)",
+      quoteUrl: "https://www.summittrade.com/",
+      logoMark: "ST",
       active: true,
     },
   ],
@@ -347,6 +355,8 @@ export const sampleData = {
         coverageLimits: "Statutory / $1M employer liability",
         amRating: "A+ (Superior)",
         bindableUntil: isoDaysFromNow(14),
+        source: "partner",
+        quoteUrl: "https://www.thehartford.com/",
         highlights: [
           "Identical statutory coverage",
           "Pay-as-you-go payroll reporting",
