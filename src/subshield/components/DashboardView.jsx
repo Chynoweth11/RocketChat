@@ -133,8 +133,9 @@ export default function DashboardView({
               <span className="ss-eyebrow">{firstName ? `${greetingFor()}, ${firstName}` : "Welcome to SubShield"}</span>
               <h2>Your insurance command center</h2>
               <p className="ss-muted">
-                Upload your first policy document and SubShield will extract the details,
-                track your renewal dates, and start looking for savings.
+                Keep every policy, certificate, and renewal in one place — so you can
+                prove coverage in seconds, never miss an expiration, and never let
+                paperwork hold up a job or a payment.
               </p>
               <div className="ss-row" style={{ marginTop: 18 }}>
                 <button type="button" className="ss-button" onClick={onUpload}>
@@ -149,22 +150,22 @@ export default function DashboardView({
               <div className="ss-dash-onboard-step">
                 <span className="ss-dash-onboard-num">1</span>
                 <div>
-                  <b>Upload a declarations page</b>
-                  <small>We extract policy, carrier, and renewal details automatically.</small>
+                  <b>Upload your policies</b>
+                  <small>We pull carrier, coverage, and renewal dates so nothing slips through.</small>
                 </div>
               </div>
               <div className="ss-dash-onboard-step">
                 <span className="ss-dash-onboard-num">2</span>
                 <div>
-                  <b>Add your certificate holders</b>
-                  <small>Save GC contact info and send COIs in a few clicks.</small>
+                  <b>Save your GCs & send COIs</b>
+                  <small>Store client info once and send proof of insurance in a few clicks.</small>
                 </div>
               </div>
               <div className="ss-dash-onboard-step">
                 <span className="ss-dash-onboard-num">3</span>
                 <div>
-                  <b>Let SubShield watch for savings</b>
-                  <small>We compare rates at renewal time and surface lower-cost options.</small>
+                  <b>Stay ahead of renewals</b>
+                  <small>Get reminders before coverage expires — and compare options with licensed partners when you want.</small>
                 </div>
               </div>
             </div>
