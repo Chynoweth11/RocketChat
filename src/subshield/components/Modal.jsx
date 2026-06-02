@@ -8,7 +8,7 @@ import { X } from "lucide-react";
  *  - Body scroll lock while open
  *  - Auto-focus on the close button
  */
-export default function Modal({ title, subtitle, children, onClose }) {
+export default function Modal({ title, subtitle, children, onClose, className = "" }) {
   const closeRef = useRef(null);
   const modalRef = useRef(null);
   const previousFocusRef = useRef(null);
@@ -69,7 +69,7 @@ export default function Modal({ title, subtitle, children, onClose }) {
       aria-describedby={subtitle ? subtitleId : undefined}
       onClick={onBackdropClick}
     >
-      <section className="ss-modal" ref={modalRef}>
+      <section className={`ss-modal${className ? ` ${className}` : ""}`} ref={modalRef}>
         <button
           ref={closeRef}
           className="ss-close"

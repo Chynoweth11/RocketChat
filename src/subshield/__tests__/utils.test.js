@@ -28,6 +28,10 @@ import {
   policyHasEndorsement,
   normalizeRequirements,
   checkCompliance,
+  buildJobs,
+  jobPaymentStatus,
+  summarizeJobs,
+  daysSince,
 } from "../utils.js";
 
 describe("formatMoney", () => {
@@ -357,5 +361,144 @@ describe("checkCompliance", () => {
     const result = checkCompliance([], policies);
     expect(result.hasRequirements).toBe(false);
     expect(result.compliant).toBe(false);
+  });
+});
+
+describe("daysSince", () => {
+  it("returns 0 for a current timestamp", () => {
+    expect(daysSince(new Date().toISOString())).toBe(0);
+  });
+  it("counts whole past days", () => {
+    const fiveDaysAgo = new Date(Date.now() - 5 * 86400000).toISOString();
+    expect(daysSince(fiveDaysAgo)).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe("jobPaymentStatus", () => {
+  const compliant = { hasRequirements: true, compliant: true, metCount: 2, total: 2, unmetCount: 0 };
+  const gap = { hasRequirements: true, compliant: false, metCount: 1, total: 2, unmetCount: 1 };
+
+  it("flags coverage gaps as not_covered (danger) and not billable", () => {
+    const verdict = jobPaymentStatus({ compliance: gap, lastSend: null, daysSinceSend: null });
+    expect(verdict.status).toBe("not_covered");
+    expect(verdict.tone).toBe("danger");
+    expect(verdict.readyToBill).toBe(false);
+    expect(verdict.primaryAction).toBe("fix");
+  });
+
+  it("is ready_to_send when compliant but the COI is unsent", () => {
+    const verdict = jobPaymentStatus({ compliance: compliant, lastSend: null, daysSinceSend: null });
+    expect(verdict.status).toBe("ready_to_send");
+    expect(verdict.primaryAction).toBe("send");
+  });
+
+  it("is covered_sent and billable when compliant and recently sent", () => {
+    const verdict = jobPaymentStatus({
+      compliance: compliant,
+      lastSend: { id: "s1" },
+      daysSinceSend: 5,
+    });
+    expect(verdict.status).toBe("covered_sent");
+    expect(verdict.readyToBill).toBe(true);
+  });
+
+  it("asks for a resend when a sent COI goes stale", () => {
+    const verdict = jobPaymentStatus({
+      compliance: compliant,
+      lastSend: { id: "s1" },
+      daysSinceSend: 200,
+    });
+    expect(verdict.status).toBe("needs_resend");
+    expect(verdict.readyToBill).toBe(false);
+  });
+
+  it("does not treat a no-requirements GC as a coverage blocker", () => {
+    const verdict = jobPaymentStatus({
+      compliance: { hasRequirements: false, compliant: false },
+      lastSend: { id: "s1" },
+      daysSinceSend: 5,
+    });
+    expect(verdict.status).toBe("covered_sent");
+    expect(verdict.readyToBill).toBe(true);
+  });
+});
+
+describe("buildJobs", () => {
+  const policies = [
+    {
+      policyType: "liability",
+      coverageLimits: "$2M aggregate / $1M occurrence",
+      documents: ["GL declarations page", "Additional Insured"],
+      daysRemaining: 100,
+    },
+    { policyType: "workers", coverageLimits: "Statutory", documents: ["WC certificate"], daysRemaining: 100 },
+  ];
+  const contractors = [
+    {
+      id: "gc1",
+      name: "Turner",
+      initials: "TC",
+      coverageRequirements: [
+        { policyType: "liability", minLimit: 2000000, additionalInsured: true },
+        { policyType: "workers" },
+      ],
+      projects: ["Tower A", "Tower B"],
+      pastSends: [
+        {
+          id: "s1",
+          contractorId: "gc1",
+          project: "Tower A",
+          sentAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+        },
+      ],
+    },
+    {
+      id: "gc2",
+      name: "DPR",
+      initials: "DP",
+      coverageRequirements: [{ policyType: "umbrella", minLimit: 5000000 }],
+      projects: ["Lab Buildout"],
+      pastSends: [],
+    },
+  ];
+
+  const jobs = buildJobs(contractors, policies, []);
+
+  it("creates one job per GC-project pairing", () => {
+    expect(jobs).toHaveLength(3);
+  });
+
+  it("marks a compliant, recently-sent project as covered_sent", () => {
+    const towerA = jobs.find((job) => job.contractorId === "gc1" && job.project === "Tower A");
+    expect(towerA.status).toBe("covered_sent");
+    expect(towerA.readyToBill).toBe(true);
+  });
+
+  it("marks a compliant but unsent project as ready_to_send", () => {
+    const towerB = jobs.find((job) => job.project === "Tower B");
+    expect(towerB.status).toBe("ready_to_send");
+  });
+
+  it("marks a GC missing a required coverage as not_covered", () => {
+    const lab = jobs.find((job) => job.contractorId === "gc2");
+    expect(lab.status).toBe("not_covered");
+  });
+
+  it("orders the most urgent jobs first", () => {
+    expect(jobs[0].sortRank).toBeLessThanOrEqual(jobs[jobs.length - 1].sortRank);
+  });
+});
+
+describe("summarizeJobs", () => {
+  it("counts action-needed, covered, and gap jobs", () => {
+    const summary = summarizeJobs([
+      { status: "not_covered" },
+      { status: "ready_to_send" },
+      { status: "covered_sent" },
+    ]);
+    expect(summary.total).toBe(3);
+    expect(summary.actionNeeded).toBe(2);
+    expect(summary.coveredSent).toBe(1);
+    expect(summary.gaps).toBe(1);
   });
 });

@@ -525,6 +525,172 @@ export function checkCompliance(requirements, policies) {
   };
 }
 
+/* ---------- "Get Paid" jobs ----------
+ * A job is one GC + project pairing. For each, we combine the GC's coverage
+ * requirements, the contractor's real policies, and the COI delivery history to
+ * answer the only question that matters on a job site: is anything stopping
+ * this from getting paid? Everything here is derived — jobs are never stored.
+ */
+
+const COI_STALE_DAYS = 90;
+
+// Whole days since an ISO timestamp (never negative).
+export function daysSince(iso) {
+  return Math.max(0, -daysUntil(iso));
+}
+
+function sameProject(a, b) {
+  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+}
+
+// Every COI send for a contractor: their stored pastSends merged with the
+// global coiSends log, de-duplicated by id and newest-first.
+function sendsForContractor(contractor, coiSends = []) {
+  const onHolder = contractor.pastSends || [];
+  const fromLog = (coiSends || []).filter(
+    (send) => send.contractorId === contractor.id && !onHolder.find((ps) => ps.id === send.id)
+  );
+  return [...onHolder, ...fromLog].sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+}
+
+/**
+ * Payment-readiness verdict for a single job. Combines coverage compliance with
+ * COI delivery state into a status, a "what's blocking payment" checklist, and
+ * the recommended next action.
+ */
+export function jobPaymentStatus({ compliance, lastSend, daysSinceSend }) {
+  const hasReqs = Boolean(compliance?.hasRequirements);
+  const coverageOk = !hasReqs || compliance.compliant;
+  const sent = Boolean(lastSend);
+  const current = sent && daysSinceSend != null && daysSinceSend <= COI_STALE_DAYS;
+
+  const blockers = [];
+  if (hasReqs && !compliance.compliant) {
+    blockers.push(
+      `${compliance.unmetCount} coverage gap${compliance.unmetCount !== 1 ? "s" : ""} vs. GC requirements`
+    );
+  }
+  if (!sent) blockers.push("Certificate of insurance not sent yet");
+  else if (!current) blockers.push("Certificate may be outdated");
+
+  const steps = [
+    {
+      label: "Coverage meets GC requirements",
+      done: hasReqs ? compliance.compliant : false,
+      neutral: !hasReqs,
+      detail: hasReqs
+        ? compliance.compliant
+          ? `${compliance.metCount}/${compliance.total} requirements met`
+          : `${compliance.unmetCount} gap${compliance.unmetCount !== 1 ? "s" : ""} to close`
+        : "No requirements on file",
+    },
+    {
+      label: "COI sent to the GC",
+      done: sent,
+      detail: sent ? "Delivered" : "Not sent yet",
+    },
+    {
+      label: "COI is current",
+      done: current,
+      detail: sent ? (current ? `${daysSinceSend}d ago` : "Older than 90 days") : "—",
+    },
+  ];
+
+  let status;
+  let statusLabel;
+  let tone;
+  let primaryAction;
+  let sortRank;
+  if (hasReqs && !compliance.compliant) {
+    status = "not_covered";
+    statusLabel = "Coverage gap — fix before billing";
+    tone = "danger";
+    primaryAction = "fix";
+    sortRank = 0;
+  } else if (!sent) {
+    status = "ready_to_send";
+    statusLabel = "Covered — send the COI to bill";
+    tone = "warning";
+    primaryAction = "send";
+    sortRank = 1;
+  } else if (!current) {
+    status = "needs_resend";
+    statusLabel = "Certificate may be outdated — resend";
+    tone = "warning";
+    primaryAction = "resend";
+    sortRank = 2;
+  } else {
+    status = "covered_sent";
+    statusLabel = "Covered & documented";
+    tone = "success";
+    primaryAction = "none";
+    sortRank = 3;
+  }
+
+  return {
+    status,
+    statusLabel,
+    tone,
+    blockers,
+    steps,
+    readyToBill: coverageOk && sent && current,
+    primaryAction,
+    sortRank,
+  };
+}
+
+/** Build the list of jobs (GC × project) with their payment-readiness verdicts. */
+export function buildJobs(contractors = [], policies = [], coiSends = []) {
+  const jobs = [];
+  contractors.forEach((gc) => {
+    const compliance = checkCompliance(gc.coverageRequirements, policies);
+    const allSends = sendsForContractor(gc, coiSends);
+    const projects = (gc.projects || []).filter(Boolean);
+    const projectList = projects.length ? projects : [null];
+
+    projectList.forEach((project) => {
+      const sends = project
+        ? allSends.filter((send) => sameProject(send.project, project))
+        : allSends;
+      const lastSend = sends[0] || null;
+      const daysSinceSend = lastSend ? daysSince(lastSend.sentAt) : null;
+      const verdict = jobPaymentStatus({ compliance, lastSend, daysSinceSend });
+
+      jobs.push({
+        id: `${gc.id}::${project || "general"}`,
+        contractorId: gc.id,
+        contractor: gc,
+        gcName: gc.name,
+        initials: gc.initials || deriveInitials(gc.name || ""),
+        project: project || "General coverage",
+        hasProject: Boolean(project),
+        compliance,
+        sends,
+        lastSend,
+        daysSinceSend,
+        ...verdict,
+      });
+    });
+  });
+
+  return jobs.sort(
+    (a, b) =>
+      a.sortRank - b.sortRank ||
+      a.gcName.localeCompare(b.gcName) ||
+      a.project.localeCompare(b.project)
+  );
+}
+
+/** Headline counts for the Get Paid view. */
+export function summarizeJobs(jobs = []) {
+  return {
+    total: jobs.length,
+    actionNeeded: jobs.filter((job) => job.status !== "covered_sent").length,
+    coveredSent: jobs.filter((job) => job.status === "covered_sent").length,
+    gaps: jobs.filter((job) => job.status === "not_covered").length,
+  };
+}
+
 export function getComplianceScore(policies = []) {
   if (!policies.length) return 0;
 
