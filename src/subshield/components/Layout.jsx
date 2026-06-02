@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeDollarSign,
+  CircleDollarSign,
   Bell,
   Database,
   FileCheck2,
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "policies", label: "Policies", icon: ShieldCheck },
   { id: "savings", label: "Savings", icon: BadgeDollarSign },
+  { id: "getpaid", label: "Get Paid", icon: CircleDollarSign },
   { id: "certificates", label: "Certificates", icon: FileCheck2 },
   { id: "documents", label: "Documents", icon: FolderOpen },
   { id: "settings", label: "Settings", icon: Settings },
@@ -175,6 +177,7 @@ export function Header({
     certificates: "Certificates",
     documents: "Documents",
     settings: "Settings",
+    getpaid: "Get Paid",
   };
   const eyebrow = {
     dashboard: "Your insurance command center",
@@ -183,6 +186,7 @@ export function Header({
     certificates: "Send and track certificates of insurance",
     documents: "Declarations, certificates, endorsements, and quotes",
     settings: "Account, team, billing, and product controls",
+    getpaid: "Coverage status, delivery, and payment readiness",
   };
 
   return (

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
+  buildJobs,
   countDocuments,
   dateFromToday,
   estimateSavings,
@@ -23,6 +24,7 @@ import {
   policyLabelFromType,
   readStoredData,
   savingsForOpportunity,
+  summarizeJobs,
   totalTrackedPremium,
   writeStoredData,
 } from "./utils.js";
@@ -36,6 +38,7 @@ import DashboardView from "./components/DashboardView.jsx";
 const PoliciesView = lazy(() => import("./components/PoliciesView.jsx"));
 const SavingsView = lazy(() => import("./components/SavingsView.jsx"));
 const CertificatesView = lazy(() => import("./components/CertificatesView.jsx"));
+const GetPaidView = lazy(() => import("./components/GetPaidView.jsx"));
 const DocumentsView = lazy(() => import("./components/DocumentsView.jsx"));
 const SettingsView = lazy(() => import("./components/SettingsView.jsx"));
 const SendModal = lazy(() => import("./components/SendModal.jsx"));
@@ -104,6 +107,18 @@ function patchOpportunity(opportunities, id, patch) {
       ? { ...opportunity, ...patch, updatedAt: new Date().toISOString() }
       : opportunity
   );
+}
+
+// Document labels for a scanned policy: a declarations/certificate page plus a
+// line per detected endorsement, so the COI package lists them and the
+// compliance engine can infer coverage from the file names too.
+function scannedDocumentLabels(raw) {
+  const base = policyLabelFromType(raw.policyType);
+  const labels = [`${base} ${raw.kind === "coi" ? "certificate" : "declarations page"}`];
+  if (raw.endorsements?.additionalInsured) labels.push("Additional Insured");
+  if (raw.endorsements?.waiverOfSubrogation) labels.push("Waiver of Subrogation");
+  if (raw.endorsements?.primaryNonContributory) labels.push("Primary & Non-Contributory");
+  return labels;
 }
 
 const COVERAGE_APPLICATION_STAGES = ["start", "coverage", "application", "quote", "purchase"];
@@ -234,6 +249,12 @@ export default function SubShieldComplete() {
     return Math.max(0, holders - recentSends);
   }, [data.contractors, data.coiSends]);
 
+  const jobs = useMemo(
+    () => buildJobs(data.contractors || [], policies, data.coiSends || []),
+    [data.contractors, policies, data.coiSends]
+  );
+  const jobsSummary = useMemo(() => summarizeJobs(jobs), [jobs]);
+
   const score = useMemo(() => getComplianceScore(policies), [policies]);
   const docs = useMemo(() => countDocuments(policies), [policies]);
   const totalPremium = useMemo(() => totalTrackedPremium(policies), [policies]);
@@ -304,6 +325,7 @@ export default function SubShieldComplete() {
       policies: "Policies",
       savings: "Savings",
       certificates: "Certificates",
+      getpaid: "Get Paid",
       documents: "Documents",
       settings: "Settings",
     };
@@ -407,92 +429,121 @@ export default function SubShieldComplete() {
     fireToast("Policy saved", `${normalized.name} added. We'll watch it for savings.`, "success");
   }
 
-  function vaultDocument(detected) {
-    const existing = policies.find((policy) => policy.policyType === detected.policyType);
-    const normalizedDetected = normalizePolicy(
-      {
-        ...detected,
-        renewalDate: detected.renewalDate || dateFromToday(detected.daysRemaining || 365),
-      },
-      company.id
-    );
+  // Save one or more policies read from a scanned PDF. A single declarations
+  // page yields one policy; an ACORD 25 certificate can yield several at once.
+  // Each detected coverage updates the matching policy in place or is added,
+  // the real file is stored as a document, and savings tracking is started for
+  // new non-license coverages.
+  function saveScannedDocument(scan) {
+    const scanned = scan?.policies || [];
+    if (!scanned.length) return;
 
-    const targetId = existing ? existing.id : normalizedDetected.id;
-    const documentRecord = normalizeDocument({
-      name: `${normalizedDetected.name} Declarations`,
-      docType: "declaration",
-      policyId: targetId,
-      policyType: normalizedDetected.policyType,
-      carrier: normalizedDetected.carrier,
-      status: "verified",
-      addedBy: firstName || "You",
-    });
+    const meta = scan.documentMeta || {};
+    let workingPolicies = [...data.policies];
+    let workingOpportunities = [...opportunities];
+    const newDocuments = [];
+    let firstSavedId = null;
+    let added = 0;
+    let updated = 0;
 
-    if (existing) {
-      const nextPolicies = data.policies.map((policy) =>
-        policy.id === existing.id
-          ? {
-              ...policy,
-              ...normalizedDetected,
-              id: existing.id,
-              documents: Array.from(
-                new Set([...(policy.documents || []), ...normalizedDetected.documents])
-              ),
-              statusNote: "Refreshed from a new carrier document.",
-            }
-          : policy
+    scanned.forEach((raw) => {
+      const normalized = normalizePolicy(
+        {
+          ...raw,
+          renewalDate: raw.renewalDate || raw.expirationDate || dateFromToday(365),
+        },
+        company.id
+      );
+      const existing = workingPolicies.find(
+        (policy) => (policy.policyType || policy.type) === normalized.policyType
+      );
+      const targetId = existing ? existing.id : normalized.id;
+      if (!firstSavedId) firstSavedId = targetId;
+
+      newDocuments.push(
+        normalizeDocument({
+          name: meta.fileName
+            ? `${meta.fileName.replace(/\.pdf$/i, "")} — ${normalized.name}`
+            : `${normalized.name} document`,
+          docType: meta.kind === "coi" ? "certificate" : "declaration",
+          policyId: targetId,
+          policyType: normalized.policyType,
+          carrier: normalized.carrier,
+          fileType: meta.fileType || "PDF",
+          sizeKb: meta.sizeKb || 160,
+          status: "verified",
+          addedBy: firstName || "You",
+        })
       );
 
-      commit({
-        ...data,
-        policies: nextPolicies,
-        documents: [documentRecord, ...(data.documents || [])],
-        activity: prependActivity(
-          data.activity,
-          `${normalizedDetected.name} updated`,
-          `Refreshed ${normalizedDetected.carrier} documents.`
-        ),
-      });
-      setPolicyId(existing.id);
-      fireToast("Policy updated", `${normalizedDetected.name} refreshed from your upload.`);
-    } else {
-      const policy = { ...normalizedDetected, id: targetId };
-      const nextPolicies = [...data.policies, policy];
-      const nextOpportunities =
-        policy.policyType === "license"
-          ? opportunities
-          : [
-              normalizeSavingsOpportunity(
-                {
-                  policyId: policy.id,
-                  policyType: policy.policyType,
-                  currentCarrier: policy.carrier,
-                  currentPremium: policy.premiumAmount,
-                  estimatedSavings: estimateSavings(policy.premiumAmount),
-                  renewalDate: policy.renewalDate,
-                  status: policy.daysRemaining <= 90 ? "available" : "monitoring",
-                },
-                nextPolicies,
-                company.id
-              ),
-              ...opportunities,
-            ];
+      const docLabels = scannedDocumentLabels({ ...raw, kind: meta.kind });
 
-      commit({
-        ...data,
-        policies: nextPolicies,
-        savingsOpportunities: nextOpportunities,
-        documents: [documentRecord, ...(data.documents || [])],
-        activity: prependActivity(
-          data.activity,
-          `${policy.name} uploaded`,
-          `${policy.carrier} document added and filed in your document center.`
-        ),
-      });
-      setPolicyId(policy.id);
-      fireToast("Insurance uploaded", `${policy.name} added | checking for savings.`, "success");
-    }
+      if (existing) {
+        updated += 1;
+        workingPolicies = workingPolicies.map((policy) =>
+          policy.id === existing.id
+            ? {
+                ...policy,
+                ...normalized,
+                id: existing.id,
+                premiumAmount: normalized.premiumAmount || policy.premiumAmount,
+                premium: normalized.premiumAmount || policy.premium,
+                documents: Array.from(new Set([...(policy.documents || []), ...docLabels])),
+                statusNote: "Refreshed from a scanned document.",
+              }
+            : policy
+        );
+      } else {
+        added += 1;
+        const policyRecord = { ...normalized, id: targetId, documents: docLabels };
+        workingPolicies = [...workingPolicies, policyRecord];
+        if (policyRecord.policyType !== "license") {
+          workingOpportunities = [
+            normalizeSavingsOpportunity(
+              {
+                policyId: policyRecord.id,
+                policyType: policyRecord.policyType,
+                currentCarrier: policyRecord.carrier,
+                currentPremium: policyRecord.premiumAmount,
+                estimatedSavings: estimateSavings(policyRecord.premiumAmount),
+                renewalDate: policyRecord.renewalDate,
+                status: policyRecord.daysRemaining <= 90 ? "available" : "monitoring",
+              },
+              workingPolicies,
+              company.id
+            ),
+            ...workingOpportunities,
+          ];
+        }
+      }
+    });
+
+    const summary =
+      [added ? `${added} added` : "", updated ? `${updated} updated` : ""]
+        .filter(Boolean)
+        .join(", ") || "saved";
+
+    commit({
+      ...data,
+      policies: workingPolicies,
+      savingsOpportunities: workingOpportunities,
+      documents: [...newDocuments, ...(data.documents || [])],
+      activity: prependActivity(
+        data.activity,
+        `Scanned ${meta.kind === "coi" ? "certificate" : "document"} — ${summary}`,
+        `${scanned.map((policy) => policyLabelFromType(policy.policyType)).join(", ")} filed from ${
+          meta.fileName || "your upload"
+        }.`
+      ),
+    });
+
+    if (firstSavedId) setPolicyId(firstSavedId);
     setModal(null);
+    fireToast(
+      "Insurance saved",
+      `${scanned.length} ${scanned.length === 1 ? "policy" : "policies"} filed from your scan.`,
+      "success"
+    );
   }
 
   /* ---------- Savings ---------- */
@@ -1167,7 +1218,7 @@ export default function SubShieldComplete() {
 
   /* ---------- Navigation helpers ---------- */
 
-  function openSend(contractor) {
+  function openSend(contractor, presetProject) {
     if (!data.contractors.length) {
       setView("certificates");
       fireToast("No holders saved", "Add a certificate holder before sending.");
@@ -1175,7 +1226,7 @@ export default function SubShieldComplete() {
     }
     if (contractor) {
       setContractorId(contractor.id);
-      setProject(contractor.projects[0] || "");
+      setProject(presetProject || contractor.projects[0] || "");
     } else if (!selectedContractor && data.contractors[0]) {
       setContractorId(data.contractors[0].id);
       setProject(data.contractors[0].projects[0] || "");
@@ -1230,8 +1281,6 @@ export default function SubShieldComplete() {
         break;
     }
   }
-
-  const existingTypes = policies.map((policy) => policy.policyType || policy.type);
 
   // Any open overlay (a modal or the command palette) makes the underlying
   // app inert so screen readers and keyboard tabbing stay within the overlay.
@@ -1364,6 +1413,17 @@ export default function SubShieldComplete() {
               onLogout={logoutUser}
             />
           )}
+          {view === "getpaid" && (
+            <GetPaidView
+              jobs={jobs}
+              summary={jobsSummary}
+              hasHolders={data.contractors.length > 0}
+              onSend={(contractor, project) => openSend(contractor, project)}
+              onFixCoverage={() => setView("savings")}
+              onEditHolder={openEdit}
+              onAddHolder={() => setModal("add-gc")}
+            />
+          )}
           </Suspense>
         </main>
       </div>
@@ -1372,8 +1432,8 @@ export default function SubShieldComplete() {
       {modal === "scan" && (
         <ScanModal
           onClose={() => setModal(null)}
-          onVault={vaultDocument}
-          existingTypes={existingTypes}
+          onSave={saveScannedDocument}
+          existingPolicies={policies}
         />
       )}
 
