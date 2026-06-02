@@ -17,6 +17,7 @@ import {
   deriveInitials,
   makeId,
   daysUntil,
+  timeAgo,
   STORAGE_KEY,
   writeStoredData,
   readStoredData,
@@ -213,5 +214,31 @@ describe("daysUntil", () => {
     const future = new Date();
     future.setDate(future.getDate() + 10);
     expect(daysUntil(future.toISOString().slice(0, 10))).toBe(10);
+  });
+});
+
+describe("timeAgo", () => {
+  it('returns "Just now" for timestamps under a minute old', () => {
+    const recent = new Date(Date.now() - 30 * 1000).toISOString();
+    expect(timeAgo(recent)).toBe("Just now");
+  });
+
+  it("returns minutes ago for timestamps under an hour", () => {
+    const fifteenMin = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    expect(timeAgo(fifteenMin)).toBe("15m ago");
+  });
+
+  it("returns hours ago for same-day timestamps", () => {
+    const threeHours = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+    expect(timeAgo(threeHours)).toBe("3h ago");
+  });
+
+  it('returns "Yesterday" for ~24h old timestamps', () => {
+    const yesterday = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+    expect(timeAgo(yesterday)).toBe("Yesterday");
+  });
+
+  it("returns empty string for null input", () => {
+    expect(timeAgo(null)).toBe("");
   });
 });

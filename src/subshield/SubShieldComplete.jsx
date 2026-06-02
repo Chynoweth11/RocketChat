@@ -1200,7 +1200,7 @@ export default function SubShieldComplete() {
       (o) => o.policyId === id && ["available", "monitoring"].includes(o.status)
     );
     if (opportunity && opportunity.status === "available") {
-      findBetterRate(opportunity);
+      requestPartnerQuote(opportunity);
     }
   }
 
@@ -1274,6 +1274,7 @@ export default function SubShieldComplete() {
               opportunities={opportunities}
               openQuoteRequests={openQuoteRequests}
               coiSends={data.coiSends || []}
+              contractors={data.contractors || []}
               coverageGaps={coverageGaps}
               missingDocuments={missingDocuments}
               recommendedAction={recommendedAction}
@@ -1430,6 +1431,7 @@ export default function SubShieldComplete() {
           onClose={() => setModal(null)}
           contractor={lastSent?.contractor}
           project={lastSent?.project}
+          onSendAnother={() => openSend(lastSent?.contractor)}
         />
       )}
 

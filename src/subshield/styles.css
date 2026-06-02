@@ -1489,6 +1489,25 @@ textarea {
   line-height: 1.4;
 }
 
+.ss-policy-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ss-policy-health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ss-policy-health-dot.success { background: #16a34a; }
+.ss-policy-health-dot.warning { background: #d97706; }
+.ss-policy-health-dot.danger  { background: #dc2626; }
+
 .ss-mini-btn {
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -2870,15 +2889,52 @@ textarea {
   border-radius: 11px;
   background: #fff;
   min-height: 44px;
-  padding: 10px;
+  padding: 10px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: #27354a;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
+  text-align: left;
+}
+
+.ss-setting-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-setting-detail {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.ss-notif-group {
+  margin-bottom: 20px;
+}
+
+.ss-notif-group-head {
+  margin-bottom: 8px;
+}
+
+.ss-notif-group-head b {
+  font-size: 13px;
+  font-weight: 700;
+  display: block;
+}
+
+.ss-notif-group-head small {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
 }
 
 .ss-toggle {
@@ -4203,3 +4259,357 @@ h1, h2, h3 {
 .ss-savings-card.at-partner { border-left: 3px solid var(--brand); }
 .ss-savings-card.accepted { border-left: 3px solid #16a34a; }
 .ss-savings-card.muted { border-left: 3px solid var(--line); opacity: 0.75; }
+
+/* =====================================================
+   Activity timestamps
+   ===================================================== */
+.ss-activity-time {
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* =====================================================
+   COI Status card — Dashboard
+   ===================================================== */
+.ss-coi-overview {
+  margin: 4px 0 12px;
+}
+
+.ss-coi-overview-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ss-coi-stat-num {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.ss-coi-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--line);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.ss-coi-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: #16a34a;
+  transition: width 0.4s ease;
+}
+
+.ss-coi-needs-action {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.ss-coi-holder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ss-coi-holder-row:last-child {
+  border-bottom: none;
+}
+
+.ss-coi-holder-row b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ss-coi-holder-row small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.ss-gc-avatar--sm {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   Holder cards — Certificates view
+   ===================================================== */
+.ss-holder-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.ss-holder-card + .ss-holder-card {
+  margin-top: 8px;
+}
+
+.ss-holder-card.is-expanded {
+  border-color: var(--brand-line);
+  box-shadow: 0 2px 12px rgba(47,99,233,.08);
+}
+
+.ss-holder-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 12px 12px 12px;
+}
+
+.ss-holder-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-holder-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.ss-holder-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ss-holder-meta {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+/* COI status badge */
+.ss-coi-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ss-coi-status.current {
+  color: #15803d;
+  background: #dcfce7;
+  border-color: #bbf7d0;
+}
+
+.ss-coi-status.aging {
+  color: #b45309;
+  background: #fef3c7;
+  border-color: #fde68a;
+}
+
+.ss-coi-status.stale {
+  color: #b91c1c;
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+.ss-coi-status.unsent {
+  color: var(--muted);
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+/* Expanded send history panel */
+.ss-holder-history {
+  border-top: 1px solid var(--line);
+  padding: 14px 14px 12px;
+  background: var(--surface-soft, #f8fafc);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ss-holder-history-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.ss-holder-history-count {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 11.5px;
+}
+
+.ss-holder-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ss-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ss-history-row:last-child {
+  border-bottom: none;
+}
+
+.ss-history-icon {
+  color: #16a34a;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ss-history-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-history-info b {
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-history-info small {
+  font-size: 11.5px;
+  color: var(--muted);
+  display: block;
+  margin-top: 1px;
+}
+
+.ss-history-pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  flex-shrink: 0;
+}
+
+.ss-holder-history-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Send modal docs list */
+.ss-send-docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (max-width: 700px) {
+  .ss-holder-main {
+    flex-wrap: wrap;
+  }
+  .ss-gc-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* =====================================================
+   Success / confirmation modal
+   ===================================================== */
+.ss-success-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: 8px 0 4px;
+}
+
+.ss-success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ss-success-copy h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.ss-success-copy p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ss-success-checklist {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+  text-align: left;
+}
+
+.ss-success-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #166534;
+}
+
+.ss-success-check svg {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.ss-success-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}

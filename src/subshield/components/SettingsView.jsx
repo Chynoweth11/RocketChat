@@ -654,37 +654,72 @@ function CompanyProfileSettings({ initial, onSave }) {
   );
 }
 
+const NOTIFICATION_GROUPS = [
+  {
+    heading: "Renewal reminders",
+    description: "Get ahead of expiring policies before they become urgent.",
+    items: [
+      { key: "renewal90Day", label: "90-day reminder", detail: "Early heads-up — time to compare rates with partners." },
+      { key: "renewal60Day", label: "60-day reminder", detail: "Good window to start renewal conversations." },
+      { key: "renewal30Day", label: "30-day reminder", detail: "Urgent — most carriers require 30 days to renew." },
+      { key: "renewal10Day", label: "10-day critical alert", detail: "Final warning before coverage gaps." },
+      { key: "expirationDay", label: "Expiration day alert", detail: "Same-day notice when a policy expires." },
+      { key: "expiredNotice", label: "Expired policy notice", detail: "Confirmation after a policy has lapsed." },
+    ],
+  },
+  {
+    heading: "Certificates and compliance",
+    description: "Stay on top of COI sends and compliance status.",
+    items: [
+      { key: "gcSendDelivery", label: "COI delivery confirmations", detail: "Confirm each certificate package was sent." },
+      { key: "weeklyComplianceSnapshot", label: "Weekly compliance snapshot", detail: "Weekly summary of policy health and renewal dates." },
+    ],
+  },
+  {
+    heading: "Quotes and savings",
+    description: "Track partner responses and savings opportunities.",
+    items: [
+      { key: "quoteRequestUpdates", label: "Quote request updates", detail: "Notified when a partner returns a rate or offer." },
+    ],
+  },
+  {
+    heading: "Delivery channel",
+    description: "Control where notifications are sent.",
+    items: [
+      { key: "pushEnabled", label: "Browser push notifications", detail: "Receive alerts in the browser, even when SubShield isn't open." },
+    ],
+  },
+];
+
 function NotificationSettings({ initial, onSave }) {
   const [form, setForm] = useState(initial);
 
-  const items = [
-    ["renewal90Day", "90-day renewal reminder"],
-    ["renewal60Day", "60-day renewal reminder"],
-    ["renewal30Day", "30-day renewal reminder"],
-    ["renewal10Day", "10-day renewal reminder"],
-    ["expirationDay", "Expiration day alert"],
-    ["expiredNotice", "Expired policy alert"],
-    ["gcSendDelivery", "COI send confirmations"],
-    ["quoteRequestUpdates", "Quote request status updates"],
-    ["weeklyComplianceSnapshot", "Weekly compliance snapshot"],
-    ["pushEnabled", "Browser push notifications"],
-  ];
-
   return (
     <section className="ss-card">
-      <Section title="Notifications" sub="Choose exactly which alerts your team receives." />
-      <div className="ss-settings-list">
-        {items.map(([key, label]) => (
-          <SettingToggle
-            key={key}
-            label={label}
-            on={Boolean(form[key])}
-            onToggle={() => setForm((prev) => ({ ...prev, [key]: !prev[key] }))}
-          />
-        ))}
-      </div>
+      <Section title="Notifications" sub="Choose which alerts your team receives and when." />
+
+      {NOTIFICATION_GROUPS.map((group) => (
+        <div key={group.heading} className="ss-notif-group">
+          <div className="ss-notif-group-head">
+            <b>{group.heading}</b>
+            <small>{group.description}</small>
+          </div>
+          <div className="ss-settings-list">
+            {group.items.map(({ key, label, detail }) => (
+              <SettingToggle
+                key={key}
+                label={label}
+                detail={detail}
+                on={Boolean(form[key])}
+                onToggle={() => setForm((prev) => ({ ...prev, [key]: !prev[key] }))}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
       <div className="ss-footer">
-        <span className="ss-footer-info">Renewal and compliance alerts are configurable at any time.</span>
+        <span className="ss-footer-info">Renewal and compliance alerts can be updated any time.</span>
         <button
           type="button"
           className="ss-button"
@@ -1929,10 +1964,13 @@ function LogoutSettings({ onLogout, onReset, onLoadSample }) {
   );
 }
 
-function SettingToggle({ label, on, onToggle }) {
+function SettingToggle({ label, detail, on, onToggle }) {
   return (
     <button type="button" className="ss-setting" onClick={onToggle} aria-pressed={on}>
-      <span>{label}</span>
+      <span className="ss-setting-copy">
+        <span>{label}</span>
+        {detail && <small className="ss-setting-detail">{detail}</small>}
+      </span>
       <span className={`ss-toggle ${on ? "on" : ""}`} aria-hidden="true">
         <i />
       </span>

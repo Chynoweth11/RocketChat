@@ -16,6 +16,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { formatMoney } from "../utils.js";
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },

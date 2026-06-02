@@ -40,6 +40,7 @@ import {
   getStatus,
   policyLabelFromType,
   savingsForOpportunity,
+  timeAgo,
 } from "../utils.js";
 import { Section } from "./Layout.jsx";
 
@@ -92,6 +93,7 @@ export default function DashboardView({
   opportunities,
   openQuoteRequests,
   coiSends,
+  contractors = [],
   coverageGaps,
   missingDocuments,
   recommendedAction,
@@ -281,7 +283,7 @@ export default function DashboardView({
                   className="ss-copy-btn"
                   onClick={() => {
                     if (item.target === "upload") onUpload();
-                    else if (item.target) onQueueAction(item.target);
+                    else if (item.target === "certificates") onOpenCertificates();
                   }}
                 >
                   {item.action}
@@ -369,13 +371,22 @@ export default function DashboardView({
             >
               {activityIcon(item.title)}
             </span>
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <b>{item.title}</b>
               <small>{item.body}</small>
             </div>
+            <small className="ss-activity-time">{timeAgo(item.createdAt)}</small>
           </div>
         ))}
       </section>
+
+      {contractors.length > 0 && (
+        <COIStatusCard
+          contractors={contractors}
+          coiSends={coiSends}
+          onOpenCertificates={onOpenCertificates}
+        />
+      )}
 
       <section className="ss-card ss-span">
         <Section
@@ -444,6 +455,84 @@ export default function DashboardView({
         </div>
       </section>
     </div>
+  );
+}
+
+function coiStatusForHolder(contractor, coiSends) {
+  const sends = [
+    ...(contractor.pastSends || []),
+    ...(coiSends || []).filter((s) => s.contractorId === contractor.id),
+  ].sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+  if (!sends.length) return "unsent";
+  const daysSince = Math.floor((Date.now() - new Date(sends[0].sentAt).getTime()) / 86400000);
+  if (daysSince <= 30) return "current";
+  if (daysSince <= 90) return "aging";
+  return "stale";
+}
+
+function COIStatusCard({ contractors, coiSends, onOpenCertificates }) {
+  const statuses = contractors.map((c) => ({ contractor: c, status: coiStatusForHolder(c, coiSends) }));
+  const current = statuses.filter((s) => s.status === "current").length;
+  const needsAction = statuses.filter((s) => s.status !== "current");
+
+  return (
+    <section className="ss-card">
+      <Section
+        title="COI status"
+        sub="Who has a current certificate on file"
+        extra={
+          <button type="button" className="ss-copy-btn" onClick={onOpenCertificates}>
+            Manage <ArrowRight size={13} />
+          </button>
+        }
+      />
+
+      <div className="ss-coi-overview">
+        <div className="ss-coi-overview-stat">
+          <b className="ss-coi-stat-num">{current}</b>
+          <small>of {contractors.length} holders current</small>
+          <div className="ss-coi-bar">
+            <div
+              className="ss-coi-bar-fill"
+              style={{ width: contractors.length ? `${Math.round((current / contractors.length) * 100)}%` : "0%" }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {needsAction.length > 0 && (
+        <div className="ss-coi-needs-action">
+          {needsAction.slice(0, 4).map(({ contractor, status }) => (
+            <div key={contractor.id} className="ss-coi-holder-row">
+              <span className="ss-gc-avatar ss-gc-avatar--sm" aria-hidden="true">{contractor.initials}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <b>{contractor.name}</b>
+                <small>{contractor.email}</small>
+              </div>
+              <span className={`ss-coi-status ${status}`}>
+                {status === "unsent" ? "No COI sent" : status === "aging" ? "COI aging" : "Needs refresh"}
+              </span>
+            </div>
+          ))}
+          {needsAction.length > 4 && (
+            <p className="ss-muted" style={{ margin: "8px 0 0", fontSize: 12 }}>
+              +{needsAction.length - 4} more need action
+            </p>
+          )}
+        </div>
+      )}
+
+      {needsAction.length === 0 && (
+        <div className="ss-note success">
+          <CheckCircle2 size={16} />
+          <span>All certificate holders have a current COI on file — you're good.</span>
+        </div>
+      )}
+
+      <button type="button" className="ss-button soft" style={{ width: "100%", marginTop: 12 }} onClick={onOpenCertificates}>
+        <Send size={14} /> Send certificates
+      </button>
+    </section>
   );
 }
 

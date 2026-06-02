@@ -1,26 +1,64 @@
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, FileCheck2, RefreshCw, Send } from "lucide-react";
 import Modal from "./Modal.jsx";
 
-export default function SuccessModal({ onClose, contractor, project }) {
+export default function SuccessModal({ onClose, contractor, project, onSendAnother }) {
   return (
     <Modal title="Package delivered" onClose={onClose}>
-      <div className="ss-empty" style={{ minHeight: 240 }}>
-        <CheckCircle2 size={56} color="#0b7f5d" />
-        <h2>Verified COI package sent</h2>
-        <p>
+      <div className="ss-success-body">
+        <div className="ss-success-icon" aria-hidden="true">
+          <CheckCircle2 size={48} />
+        </div>
+
+        <div className="ss-success-copy">
+          <h2>COI sent successfully</h2>
           {contractor && project ? (
-            <>
-              {contractor.name} received your verified package for{" "}
-              <strong>{project}</strong>. The send was saved to the activity
-              log and the project is now available for 1-tap re-sends.
-            </>
+            <p>
+              <strong>{contractor.name}</strong> received your verified insurance package
+              for <strong>{project}</strong>.
+            </p>
           ) : (
-            "The send was saved to the activity log."
+            <p>Your verified insurance package was sent and logged.</p>
           )}
-        </p>
-        <button type="button" className="ss-button" onClick={onClose}>
-          Done
-        </button>
+        </div>
+
+        <div className="ss-success-checklist">
+          <div className="ss-success-check">
+            <CheckCircle2 size={15} />
+            <span>Certificate delivered to {contractor?.email || "recipient"}</span>
+          </div>
+          <div className="ss-success-check">
+            <CheckCircle2 size={15} />
+            <span>Send logged in your delivery history</span>
+          </div>
+          <div className="ss-success-check">
+            <CheckCircle2 size={15} />
+            <span>Project saved for future 1-click resends</span>
+          </div>
+          {contractor && (
+            <div className="ss-success-check">
+              <FileCheck2 size={15} />
+              <span>Holder wording and delivery rules saved for {contractor.name}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="ss-success-actions">
+          <button type="button" className="ss-button" onClick={onClose}>
+            Done
+          </button>
+          {contractor && (
+            <button
+              type="button"
+              className="ss-button soft"
+              onClick={() => {
+                onClose();
+                if (onSendAnother) onSendAnother();
+              }}
+            >
+              <RefreshCw size={14} /> Send another
+            </button>
+          )}
+        </div>
       </div>
     </Modal>
   );
