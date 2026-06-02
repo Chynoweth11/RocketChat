@@ -18,7 +18,16 @@ body,
 
 body {
   margin: 0;
-  background: #f6f7f9;
+  background: #eef1f6;
+}
+
+::selection {
+  background: rgba(47, 99, 233, 0.18);
+  color: #0f203d;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 button,
@@ -47,11 +56,42 @@ textarea {
   --danger: #c23e36;
   --danger-soft: #fff1ef;
   --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 18px 40px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.08), 0 30px 60px rgba(15, 23, 42, 0.12);
+  --ring: 0 0 0 3px rgba(47, 99, 233, 0.22);
   min-height: 100%;
-  background: #f6f7f9;
+  background:
+    radial-gradient(1200px 600px at 12% -8%, rgba(47, 99, 233, 0.06), transparent 60%),
+    radial-gradient(1000px 520px at 100% 0%, rgba(31, 143, 98, 0.045), transparent 55%),
+    #eef1f6;
+  background-attachment: fixed;
   color: var(--text);
+}
+
+/* Universal focus ring — accessible and crisp.
+   Form fields keep their own focus styling, so exclude them here. */
+.ss-app button:focus-visible,
+.ss-app a:focus-visible,
+.ss-app [role="button"]:focus-visible,
+.ss-app [tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: 10px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ss-app *,
+  .ss-app *::before,
+  .ss-app *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 .ss-layout {
@@ -68,17 +108,20 @@ textarea {
 }
 
 .ss-card {
-  border: 1px solid #edf0f4;
+  border: 1px solid #e8ecf2;
   border-radius: 20px;
-  background: #ffffff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)) ,
+    #ffffff;
   box-shadow: var(--shadow-sm);
   padding: 22px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 
 .ss-card:hover {
-  border-color: #e2e7ee;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
+  border-color: #dde4ee;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .ss-grid {
@@ -269,8 +312,22 @@ textarea {
 }
 
 .ss-nav.active {
-  background: var(--brand-soft);
-  color: var(--brand);
+  background: linear-gradient(180deg, #eef3ff, #e4ecff);
+  color: var(--brand-strong);
+  border-color: #d4e0fc;
+  box-shadow: 0 1px 2px rgba(37, 87, 210, 0.06);
+}
+
+.ss-nav.active::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  border-radius: 99px;
+  background: linear-gradient(180deg, #4773ea, #2457d4);
 }
 
 .ss-nav.active svg {
@@ -653,27 +710,37 @@ textarea {
 }
 
 .ss-button {
+  position: relative;
   border: 1px solid transparent;
   min-height: 40px;
   padding: 9px 16px;
-  border-radius: 10px;
-  background: var(--brand);
+  border-radius: 11px;
+  background: linear-gradient(180deg, #3a6bec 0%, #2457d4 100%);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(37, 87, 210, 0.25), 0 4px 12px rgba(37, 87, 210, 0.18);
-  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(37, 87, 210, 0.28), 0 6px 16px rgba(37, 87, 210, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .ss-button:hover:not(:disabled) {
-  background: #2051c8;
+  filter: brightness(1.04);
   transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(37, 87, 210, 0.3), 0 8px 20px rgba(37, 87, 210, 0.2);
+  box-shadow: 0 2px 6px rgba(37, 87, 210, 0.32), 0 10px 24px rgba(37, 87, 210, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.ss-button:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.98);
+  box-shadow: 0 1px 2px rgba(37, 87, 210, 0.28), inset 0 1px 2px rgba(15, 23, 42, 0.12);
 }
 
 .ss-button:disabled {
@@ -696,13 +763,19 @@ textarea {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
+.ss-button.soft:active:not(:disabled) {
+  transform: translateY(0);
+  background: #f1f4f9;
+}
+
 .ss-button.danger {
-  background: #dc2626;
-  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);
+  background: linear-gradient(180deg, #e2483f 0%, #c8362d 100%);
+  box-shadow: 0 1px 2px rgba(200, 54, 45, 0.28), 0 6px 16px rgba(200, 54, 45, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .ss-button.danger:hover:not(:disabled) {
-  background: #b91c1c;
+  filter: brightness(1.04);
 }
 
 .ss-button-sm {
@@ -783,12 +856,19 @@ textarea {
   font-weight: 700;
   color: #5d6b81;
   cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.ss-chip:hover {
+  border-color: #c5cfdd;
+  color: #2b3850;
 }
 
 .ss-chip.active {
   color: #1746ad;
   border-color: #bfd1ff;
-  background: #edf3ff;
+  background: linear-gradient(180deg, #f1f6ff, #e6efff);
+  box-shadow: 0 1px 2px rgba(37, 87, 210, 0.08);
 }
 
 .ss-status {
@@ -3038,10 +3118,10 @@ textarea {
   width: min(760px, 100%);
   max-height: 90vh;
   overflow: auto;
-  border-radius: 20px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: var(--shadow-md);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow-lg);
   padding: 18px;
   position: relative;
 }
