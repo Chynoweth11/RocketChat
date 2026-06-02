@@ -217,6 +217,11 @@ export const sampleData = {
       holder: "Turner Construction Company\n375 Hudson Street\nNew York, NY 10014",
       requirements:
         "Requires $2M umbrella and primary non-contributory wording on GL.",
+      coverageRequirements: [
+        { policyType: "liability", minLimit: 2000000, additionalInsured: true, primaryNonContributory: true },
+        { policyType: "workers", minLimit: 0 },
+        { policyType: "umbrella", minLimit: 2000000 },
+      ],
       projects: ["Downtown Marriott Remodel", "Westside School District"],
       notes: "Prefers certificate holder exactly as legal entity above.",
       portalInstructions: "Upload to TrustLayer, then email compliance copy.",
@@ -240,6 +245,11 @@ export const sampleData = {
       holder: "Suffolk Construction Company, Inc.\n65 Allerton Street\nBoston, MA 02119",
       requirements:
         "30-day cancellation notice required. Include Waiver of Subrogation when available.",
+      coverageRequirements: [
+        { policyType: "liability", minLimit: 1000000, waiverOfSubrogation: true },
+        { policyType: "workers", minLimit: 0, waiverOfSubrogation: true },
+        { policyType: "auto", minLimit: 1000000 },
+      ],
       projects: ["Seaport Tower Phase II"],
       notes: "Ask for updated wording before each send.",
       portalInstructions: "",
@@ -254,7 +264,11 @@ export const sampleData = {
       phone: "(650) 555-0136",
       delivery: "myCOI inbox",
       holder: "DPR Construction\n1450 Veterans Blvd\nRedwood City, CA 94063",
-      requirements: "Standard verified COI package accepted.",
+      requirements: "High-limit umbrella required for lab buildout work.",
+      coverageRequirements: [
+        { policyType: "liability", minLimit: 2000000, additionalInsured: true },
+        { policyType: "umbrella", minLimit: 5000000 },
+      ],
       projects: ["Genentech Lab Buildout"],
       notes: "",
       portalInstructions: "Send to myCOI + cc project team.",

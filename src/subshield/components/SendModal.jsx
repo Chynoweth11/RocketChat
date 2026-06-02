@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { Check, Clock, Mail, Send } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Clock, Mail, Send, ShieldAlert, ShieldCheck } from "lucide-react";
 import Modal from "./Modal.jsx";
 import CopyButton from "./CopyButton.jsx";
-import { countDocuments, formatShortDate } from "../utils.js";
+import { CompliancePanel } from "./CompliancePanel.jsx";
+import { checkCompliance, countDocuments, formatShortDate } from "../utils.js";
 
 export default function SendModal({
   contractors,
   policies,
+  allPolicies,
   contractor,
   project,
   newProject,
@@ -17,8 +19,14 @@ export default function SendModal({
   onSend,
 }) {
   const [sending, setSending] = useState(false);
+  const [showChecks, setShowChecks] = useState(false);
   const finalProject = newProject.trim() || project;
   const docs = countDocuments(policies);
+
+  const compliance = useMemo(
+    () => checkCompliance(contractor.coverageRequirements, allPolicies || policies),
+    [contractor.coverageRequirements, allPolicies, policies]
+  );
 
   const lastSend = (contractor.pastSends || []).sort(
     (a, b) => new Date(b.sentAt) - new Date(a.sentAt)
@@ -51,6 +59,42 @@ export default function SendModal({
             Last sent to {contractor.name}: <b>{formatShortDate(lastSend.sentAt)}</b> for{" "}
             <b>{lastSend.project}</b>
           </span>
+        </div>
+      )}
+
+      {compliance.hasRequirements && (
+        <div className={`ss-comply-banner ${compliance.compliant ? "ok" : "gap"}`}>
+          <div className="ss-comply-banner-head">
+            <span className="ss-comply-banner-icon" aria-hidden="true">
+              {compliance.compliant ? <ShieldCheck size={18} /> : <ShieldAlert size={18} />}
+            </span>
+            <div className="ss-comply-banner-copy">
+              <b>
+                {compliance.compliant
+                  ? `Coverage meets ${contractor.name}'s requirements`
+                  : `${compliance.unmetCount} coverage ${
+                      compliance.unmetCount === 1 ? "gap" : "gaps"
+                    } vs. ${contractor.name}'s requirements`}
+              </b>
+              <small>
+                {compliance.compliant
+                  ? `${compliance.metCount} of ${compliance.total} requirements met — safe to send.`
+                  : "This certificate may be rejected. Review the gaps before sending."}
+              </small>
+            </div>
+            <button
+              type="button"
+              className="ss-copy-btn"
+              onClick={() => setShowChecks((open) => !open)}
+            >
+              {showChecks ? "Hide" : "View"} checks
+            </button>
+          </div>
+          {showChecks && (
+            <div className="ss-comply-banner-body">
+              <CompliancePanel result={compliance} compact />
+            </div>
+          )}
         </div>
       )}
 
@@ -155,9 +199,21 @@ export default function SendModal({
 
       <footer className="ss-footer">
         <span className="ss-footer-info">
-          {docs} verified file{docs !== 1 ? "s" : ""} ready for delivery
+          {compliance.hasRequirements && !compliance.compliant ? (
+            <>
+              <ShieldAlert size={14} style={{ verticalAlign: -2, marginRight: 4, color: "var(--warning)" }} />
+              {compliance.unmetCount} unmet requirement{compliance.unmetCount !== 1 ? "s" : ""} — send anyway?
+            </>
+          ) : (
+            <>{docs} verified file{docs !== 1 ? "s" : ""} ready for delivery</>
+          )}
         </span>
-        <button type="button" className="ss-button" onClick={handleSend} disabled={sending}>
+        <button
+          type="button"
+          className={`ss-button${compliance.hasRequirements && !compliance.compliant ? " warn" : ""}`}
+          onClick={handleSend}
+          disabled={sending}
+        >
           {sending ? (
             <>
               <span className="ss-spinner" /> Routing…

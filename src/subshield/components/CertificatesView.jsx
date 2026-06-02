@@ -12,14 +12,23 @@ import {
   RefreshCw,
   Search,
   Send,
+  ShieldCheck,
   SquarePen,
   TriangleAlert,
 } from "lucide-react";
 import { Section, Info } from "./Layout.jsx";
-import { formatShortDate } from "../utils.js";
+import { ComplianceBadge, CompliancePanel } from "./CompliancePanel.jsx";
+import { checkCompliance, formatShortDate } from "../utils.js";
 import CopyButton from "./CopyButton.jsx";
 
-export default function CertificatesView({ contractors, coiSends, onSend, onAdd, onEdit }) {
+export default function CertificatesView({
+  contractors,
+  coiSends,
+  policies = [],
+  onSend,
+  onAdd,
+  onEdit,
+}) {
   const [query, setQuery] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
@@ -38,6 +47,27 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
     });
     return map;
   }, [contractors, coiSends]);
+
+  const complianceByHolder = useMemo(() => {
+    const map = new Map();
+    contractors.forEach((c) => {
+      map.set(c.id, checkCompliance(c.coverageRequirements, policies));
+    });
+    return map;
+  }, [contractors, policies]);
+
+  const compliantCount = useMemo(() => {
+    let withReqs = 0;
+    let compliant = 0;
+    contractors.forEach((c) => {
+      const result = complianceByHolder.get(c.id);
+      if (result?.hasRequirements) {
+        withReqs += 1;
+        if (result.compliant) compliant += 1;
+      }
+    });
+    return { withReqs, compliant };
+  }, [contractors, complianceByHolder]);
 
   const totalSends = (coiSends || []).length;
   const totalProjects = contractors.reduce((sum, gc) => sum + (gc.projects || []).length, 0);
@@ -76,9 +106,14 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
         <div className="ss-command-metrics">
           <Info label="Saved holders" value={contractors.length} />
           <Info label="COIs sent" value={totalSends} />
-          <Info label="Projects tracked" value={totalProjects} />
           {contractors.length > 0 && (
             <Info label="COI current" value={`${holdersWithRecentCOI} / ${contractors.length}`} />
+          )}
+          {compliantCount.withReqs > 0 && (
+            <Info
+              label="Coverage compliant"
+              value={`${compliantCount.compliant} / ${compliantCount.withReqs}`}
+            />
           )}
         </div>
       </section>
@@ -137,6 +172,7 @@ export default function CertificatesView({ contractors, coiSends, onSend, onAdd,
               key={contractor.id}
               contractor={contractor}
               sends={sends}
+              compliance={complianceByHolder.get(contractor.id)}
               isExpanded={isExpanded}
               onToggle={() => setExpandedId(isExpanded ? null : contractor.id)}
               onSend={() => onSend(contractor)}
@@ -196,9 +232,10 @@ const COI_STATUS_LABEL = {
   stale: "COI may need refresh",
 };
 
-function HolderCard({ contractor, sends, isExpanded, onToggle, onSend, onEdit }) {
+function HolderCard({ contractor, sends, compliance, isExpanded, onToggle, onSend, onEdit }) {
   const status = coiStatusFor(sends);
   const lastSend = sends[0];
+  const hasHistory = sends.length > 0 || compliance?.hasRequirements;
 
   return (
     <div className={`ss-holder-card${isExpanded ? " is-expanded" : ""}`}>
@@ -215,6 +252,7 @@ function HolderCard({ contractor, sends, isExpanded, onToggle, onSend, onEdit })
               {(status === "aging" || status === "stale") && <Clock size={11} />}
               {COI_STATUS_LABEL[status]}
             </span>
+            {compliance?.hasRequirements && <ComplianceBadge result={compliance} />}
           </div>
           <small className="ss-holder-meta">
             {contractor.email}
@@ -240,13 +278,13 @@ function HolderCard({ contractor, sends, isExpanded, onToggle, onSend, onEdit })
           >
             <SquarePen size={16} />
           </button>
-          {sends.length > 0 && (
+          {hasHistory && (
             <button
               type="button"
               className="ss-mini-btn"
               onClick={onToggle}
-              aria-label={isExpanded ? "Hide send history" : "View send history"}
-              title={isExpanded ? "Hide history" : "View history"}
+              aria-label={isExpanded ? "Hide details" : "View details"}
+              title={isExpanded ? "Hide details" : "View details"}
             >
               {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </button>
@@ -264,31 +302,50 @@ function HolderCard({ contractor, sends, isExpanded, onToggle, onSend, onEdit })
         </div>
       </div>
 
-      {isExpanded && sends.length > 0 && (
+      {isExpanded && hasHistory && (
         <div className="ss-holder-history">
-          <div className="ss-holder-history-head">
+          {compliance?.hasRequirements && (
+            <div className="ss-holder-comply">
+              <div className="ss-holder-history-head">
+                <ShieldCheck size={13} />
+                <span>Coverage requirements</span>
+                <span className="ss-holder-history-count">
+                  {compliance.metCount}/{compliance.total} met
+                </span>
+              </div>
+              <CompliancePanel result={compliance} compact />
+            </div>
+          )}
+
+          <div className="ss-holder-history-head" style={{ marginTop: compliance?.hasRequirements ? 14 : 0 }}>
             <FileText size={13} />
             <span>Send history</span>
             <span className="ss-holder-history-count">{sends.length} send{sends.length !== 1 ? "s" : ""}</span>
             <CopyButton text={contractor.holder} label="Copy holder wording" small />
           </div>
-          <div className="ss-holder-history-list">
-            {sends.slice(0, 8).map((send) => (
-              <div key={send.id} className="ss-history-row">
-                <span className="ss-history-icon" aria-hidden="true">
-                  <CheckCircle2 size={13} />
-                </span>
-                <div className="ss-history-info">
-                  <b>{send.project}</b>
-                  <small>
-                    {formatShortDate(send.sentAt)} · {send.docCount} file
-                    {send.docCount !== 1 ? "s" : ""} · {send.email}
-                  </small>
+          {sends.length > 0 ? (
+            <div className="ss-holder-history-list">
+              {sends.slice(0, 8).map((send) => (
+                <div key={send.id} className="ss-history-row">
+                  <span className="ss-history-icon" aria-hidden="true">
+                    <CheckCircle2 size={13} />
+                  </span>
+                  <div className="ss-history-info">
+                    <b>{send.project}</b>
+                    <small>
+                      {formatShortDate(send.sentAt)} · {send.docCount} file
+                      {send.docCount !== 1 ? "s" : ""} · {send.email}
+                    </small>
+                  </div>
+                  <span className="ss-history-pill">Delivered</span>
                 </div>
-                <span className="ss-history-pill">Delivered</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="ss-muted" style={{ margin: "6px 0 0", fontSize: 12.5 }}>
+              No certificates sent to this holder yet.
+            </p>
+          )}
           <div className="ss-holder-history-footer">
             <button
               type="button"
@@ -296,7 +353,7 @@ function HolderCard({ contractor, sends, isExpanded, onToggle, onSend, onEdit })
               onClick={onSend}
               style={{ minHeight: 34, padding: "7px 14px", fontSize: 13 }}
             >
-              <RefreshCw size={13} /> Resend to {contractor.name}
+              <RefreshCw size={13} /> {sends.length > 0 ? "Resend to" : "Send to"} {contractor.name}
             </button>
           </div>
         </div>

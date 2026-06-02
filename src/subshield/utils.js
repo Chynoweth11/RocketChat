@@ -357,6 +357,174 @@ export function policyHealthScore(policy) {
   return { score: finalScore, grade, issues, good };
 }
 
+/* ---------- COI compliance matching ----------
+ * GCs require specific coverage on their certificates (a minimum limit, plus
+ * endorsements like Additional Insured). These helpers let SubShield compare a
+ * GC's structured requirements against the contractor's actual policies, so we
+ * can answer "Am I covered for this job?" before a COI is sent.
+ */
+
+// Coverage types that can be required on a COI (license is never a COI line).
+export const REQUIREMENT_COVERAGE_TYPES = [
+  "liability",
+  "workers",
+  "auto",
+  "umbrella",
+  "property",
+];
+
+// Common minimum-limit options for the requirement builder, in dollars.
+export const LIMIT_OPTIONS = [
+  { value: 500000, label: "$500K" },
+  { value: 1000000, label: "$1M" },
+  { value: 2000000, label: "$2M" },
+  { value: 5000000, label: "$5M" },
+  { value: 10000000, label: "$10M" },
+];
+
+// Endorsements a GC may demand. We detect them from an explicit policy flag
+// (`policy.endorsements[key]`) or, failing that, from the policy's document
+// names (e.g. a "Additional Insured" document implies the endorsement).
+export const ENDORSEMENT_TYPES = [
+  { key: "additionalInsured", label: "Additional Insured", keywords: ["additional insured"] },
+  { key: "waiverOfSubrogation", label: "Waiver of Subrogation", keywords: ["waiver"] },
+  {
+    key: "primaryNonContributory",
+    label: "Primary & Non-Contributory",
+    keywords: ["primary", "non-contributory", "noncontributory"],
+  },
+];
+
+// Short money label used in compliance UI: 2000000 -> "$2M", 750000 -> "$750K".
+export function formatLimitShort(value) {
+  const num = toNumber(value, 0);
+  if (num >= 1_000_000) {
+    const m = num / 1_000_000;
+    return `$${Number.isInteger(m) ? m : m.toFixed(1)}M`;
+  }
+  if (num >= 1000) return `$${Math.round(num / 1000)}K`;
+  return `$${num}`;
+}
+
+// Parse a free-text limit string ("$2M aggregate / $1M occurrence") into its
+// largest dollar figure so it can be compared numerically. Returns 0 when no
+// figure is present (e.g. "Statutory").
+export function parseLimitToNumber(value) {
+  if (typeof value === "number") return value;
+  if (!value) return 0;
+  let max = 0;
+  const re = /\$?\s*(\d[\d,]*(?:\.\d+)?)\s*([mk])?/gi;
+  let match;
+  while ((match = re.exec(String(value))) !== null) {
+    let n = parseFloat(match[1].replace(/,/g, ""));
+    if (!Number.isFinite(n)) continue;
+    const unit = (match[2] || "").toLowerCase();
+    if (unit === "m") n *= 1_000_000;
+    else if (unit === "k") n *= 1_000;
+    if (n > max) max = n;
+  }
+  return max;
+}
+
+// Does a policy carry a given endorsement? Explicit flag wins, otherwise we
+// look for the endorsement name in the policy's document list.
+export function policyHasEndorsement(policy, endorsementKey) {
+  if (!policy) return false;
+  if (policy.endorsements && policy.endorsements[endorsementKey]) return true;
+  const def = ENDORSEMENT_TYPES.find((item) => item.key === endorsementKey);
+  if (!def) return false;
+  const haystack = (policy.documents || []).join(" ").toLowerCase();
+  return def.keywords.some((keyword) => haystack.includes(keyword));
+}
+
+// Clean a requirements array (as stored on a GC) into a predictable shape.
+export function normalizeRequirements(list) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const cleaned = [];
+  list.forEach((req) => {
+    if (!req || !REQUIREMENT_COVERAGE_TYPES.includes(req.policyType)) return;
+    if (seen.has(req.policyType)) return;
+    seen.add(req.policyType);
+    cleaned.push({
+      policyType: req.policyType,
+      minLimit: toNumber(req.minLimit, 0),
+      additionalInsured: Boolean(req.additionalInsured),
+      waiverOfSubrogation: Boolean(req.waiverOfSubrogation),
+      primaryNonContributory: Boolean(req.primaryNonContributory),
+    });
+  });
+  return cleaned;
+}
+
+// Compare a GC's structured requirements against the contractor's policies.
+// Returns a summary plus a per-requirement breakdown with individual checks,
+// so the UI can render ✓/✗ lines and an overall compliant/gaps verdict.
+export function checkCompliance(requirements, policies) {
+  const reqs = normalizeRequirements(requirements);
+  const results = reqs.map((req) => {
+    const label = policyLabelFromType(req.policyType);
+    const policy = (policies || []).find(
+      (item) => (item.policyType || item.type) === req.policyType
+    );
+
+    if (!policy) {
+      return {
+        policyType: req.policyType,
+        label,
+        status: "missing",
+        policy: null,
+        checks: [{ label: `${label} policy on file`, ok: false }],
+      };
+    }
+
+    const checks = [];
+
+    if (req.minLimit > 0) {
+      const have = parseLimitToNumber(policy.coverageLimits || policy.limit);
+      checks.push({
+        label: `Limit ≥ ${formatLimitShort(req.minLimit)}`,
+        ok: have >= req.minLimit,
+        detail: have > 0 ? `carries ${formatLimitShort(have)}` : "limit not detected",
+      });
+    } else {
+      checks.push({ label: "Coverage on file", ok: true });
+    }
+
+    ENDORSEMENT_TYPES.forEach((endorsement) => {
+      if (req[endorsement.key]) {
+        checks.push({
+          label: endorsement.label,
+          ok: policyHasEndorsement(policy, endorsement.key),
+        });
+      }
+    });
+
+    if ((policy.daysRemaining ?? 0) <= 0) {
+      checks.push({ label: "Policy active (not expired)", ok: false });
+    }
+
+    const allOk = checks.every((check) => check.ok);
+    return {
+      policyType: req.policyType,
+      label,
+      status: allOk ? "met" : "unmet",
+      policy,
+      checks,
+    };
+  });
+
+  const unmetCount = results.filter((result) => result.status !== "met").length;
+  return {
+    hasRequirements: reqs.length > 0,
+    compliant: reqs.length > 0 && unmetCount === 0,
+    total: results.length,
+    metCount: results.length - unmetCount,
+    unmetCount,
+    results,
+  };
+}
+
 export function getComplianceScore(policies = []) {
   if (!policies.length) return 0;
 

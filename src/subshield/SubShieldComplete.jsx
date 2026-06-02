@@ -1336,6 +1336,7 @@ export default function SubShieldComplete() {
             <CertificatesView
               contractors={data.contractors}
               coiSends={data.coiSends || []}
+              policies={policies}
               onSend={openSend}
               onAdd={() => setModal("add-gc")}
               onEdit={openEdit}
@@ -1392,6 +1393,7 @@ export default function SubShieldComplete() {
         <SendModal
           contractors={data.contractors}
           policies={packagePolicies(policies)}
+          allPolicies={policies}
           contractor={selectedContractor}
           project={project}
           newProject={newProject}

@@ -23,6 +23,11 @@ import {
   readStoredData,
   clearStoredData,
   policyHealthScore,
+  parseLimitToNumber,
+  formatLimitShort,
+  policyHasEndorsement,
+  normalizeRequirements,
+  checkCompliance,
 } from "../utils.js";
 
 describe("formatMoney", () => {
@@ -240,5 +245,117 @@ describe("timeAgo", () => {
 
   it("returns empty string for null input", () => {
     expect(timeAgo(null)).toBe("");
+  });
+});
+
+describe("parseLimitToNumber", () => {
+  it("extracts the largest figure from a compound limit", () => {
+    expect(parseLimitToNumber("$2M aggregate / $1M occurrence")).toBe(2_000_000);
+  });
+  it("handles K suffixes", () => {
+    expect(parseLimitToNumber("$750k building / $250k contents")).toBe(750_000);
+  });
+  it("returns 0 for non-numeric limits like Statutory", () => {
+    expect(parseLimitToNumber("Statutory")).toBe(0);
+  });
+  it("passes numbers through unchanged", () => {
+    expect(parseLimitToNumber(1_000_000)).toBe(1_000_000);
+  });
+  it("returns 0 for empty input", () => {
+    expect(parseLimitToNumber("")).toBe(0);
+  });
+});
+
+describe("formatLimitShort", () => {
+  it("formats millions", () => expect(formatLimitShort(2_000_000)).toBe("$2M"));
+  it("formats fractional millions", () => expect(formatLimitShort(1_500_000)).toBe("$1.5M"));
+  it("formats thousands", () => expect(formatLimitShort(750_000)).toBe("$750K"));
+});
+
+describe("policyHasEndorsement", () => {
+  it("detects an endorsement from document names", () => {
+    const policy = { documents: ["GL declarations page", "Additional Insured"] };
+    expect(policyHasEndorsement(policy, "additionalInsured")).toBe(true);
+  });
+  it("honors an explicit endorsement flag", () => {
+    const policy = { documents: [], endorsements: { waiverOfSubrogation: true } };
+    expect(policyHasEndorsement(policy, "waiverOfSubrogation")).toBe(true);
+  });
+  it("returns false when the endorsement is absent", () => {
+    const policy = { documents: ["GL declarations page"] };
+    expect(policyHasEndorsement(policy, "primaryNonContributory")).toBe(false);
+  });
+});
+
+describe("normalizeRequirements", () => {
+  it("drops unknown coverage types and dedupes", () => {
+    const result = normalizeRequirements([
+      { policyType: "liability", minLimit: 1000000 },
+      { policyType: "liability", minLimit: 2000000 },
+      { policyType: "nonsense", minLimit: 5 },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].minLimit).toBe(1000000);
+  });
+  it("coerces endorsement flags to booleans", () => {
+    const [req] = normalizeRequirements([{ policyType: "workers", additionalInsured: 1 }]);
+    expect(req.additionalInsured).toBe(true);
+  });
+  it("returns an empty array for non-array input", () => {
+    expect(normalizeRequirements(null)).toEqual([]);
+  });
+});
+
+describe("checkCompliance", () => {
+  const policies = [
+    {
+      policyType: "liability",
+      coverageLimits: "$2M aggregate / $1M occurrence",
+      documents: ["GL declarations page", "Additional Insured"],
+      daysRemaining: 45,
+    },
+    {
+      policyType: "umbrella",
+      coverageLimits: "$2M excess liability",
+      documents: ["Umbrella declarations page"],
+      daysRemaining: 300,
+    },
+  ];
+
+  it("reports compliant when every requirement is met", () => {
+    const result = checkCompliance(
+      [{ policyType: "liability", minLimit: 2000000, additionalInsured: true }],
+      policies
+    );
+    expect(result.compliant).toBe(true);
+    expect(result.unmetCount).toBe(0);
+  });
+
+  it("flags a limit that falls short", () => {
+    const result = checkCompliance([{ policyType: "umbrella", minLimit: 5000000 }], policies);
+    expect(result.compliant).toBe(false);
+    expect(result.unmetCount).toBe(1);
+    expect(result.results[0].status).toBe("unmet");
+  });
+
+  it("flags a missing endorsement", () => {
+    const result = checkCompliance(
+      [{ policyType: "liability", minLimit: 1000000, primaryNonContributory: true }],
+      policies
+    );
+    expect(result.compliant).toBe(false);
+    expect(result.results[0].checks.some((c) => !c.ok)).toBe(true);
+  });
+
+  it("marks a required coverage with no policy as missing", () => {
+    const result = checkCompliance([{ policyType: "workers", minLimit: 0 }], policies);
+    expect(result.results[0].status).toBe("missing");
+    expect(result.compliant).toBe(false);
+  });
+
+  it("reports no requirements when the list is empty", () => {
+    const result = checkCompliance([], policies);
+    expect(result.hasRequirements).toBe(false);
+    expect(result.compliant).toBe(false);
   });
 });

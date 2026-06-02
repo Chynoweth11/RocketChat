@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { SquarePen, Trash2 } from "lucide-react";
 import Modal from "./Modal.jsx";
+import RequirementsBuilder from "./RequirementsBuilder.jsx";
 import { deriveInitials } from "../utils.js";
 
 export default function EditHolderModal({ contractor, onClose, onSave, onDelete }) {
@@ -12,6 +13,7 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
     delivery: contractor.delivery,
     holder: contractor.holder,
     requirements: contractor.requirements,
+    coverageRequirements: contractor.coverageRequirements || [],
     notes: contractor.notes || "",
     portalInstructions: contractor.portalInstructions || "",
   });
@@ -46,6 +48,7 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
       holder: form.holder.trim(),
       requirements:
         form.requirements.trim() || "Standard verified COI package accepted.",
+      coverageRequirements: form.coverageRequirements,
       notes: form.notes.trim(),
       portalInstructions: form.portalInstructions.trim(),
     });
@@ -97,8 +100,16 @@ export default function EditHolderModal({ contractor, onClose, onSave, onDelete 
         error={errors.holder}
       />
 
+      <div className="ss-field">
+        <span className="ss-field-label">Coverage requirements</span>
+        <RequirementsBuilder
+          value={form.coverageRequirements}
+          onChange={(next) => setForm((current) => ({ ...current, coverageRequirements: next }))}
+        />
+      </div>
+
       <FormField
-        label="Requirements"
+        label="Other requirements / wording notes"
         value={form.requirements}
         onChange={change("requirements")}
         multiline

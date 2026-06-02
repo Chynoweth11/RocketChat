@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { Building2, Plus } from "lucide-react";
 import Modal from "./Modal.jsx";
+import RequirementsBuilder from "./RequirementsBuilder.jsx";
 import { deriveInitials, makeId } from "../utils.js";
 
 const EMPTY = {
@@ -14,6 +15,7 @@ const EMPTY = {
   notes: "",
   portalInstructions: "",
   firstProject: "",
+  coverageRequirements: [],
 };
 
 export default function AddGCModal({ onClose, onSave }) {
@@ -48,6 +50,7 @@ export default function AddGCModal({ onClose, onSave }) {
       holder: form.holder.trim(),
       requirements:
         form.requirements.trim() || "Standard verified COI package accepted.",
+      coverageRequirements: form.coverageRequirements,
       notes: form.notes.trim(),
       portalInstructions: form.portalInstructions.trim(),
       projects: form.firstProject.trim() ? [form.firstProject.trim()] : [],
@@ -108,11 +111,19 @@ export default function AddGCModal({ onClose, onSave }) {
         error={errors.holder}
       />
 
+      <div className="ss-field">
+        <span className="ss-field-label">Coverage requirements</span>
+        <RequirementsBuilder
+          value={form.coverageRequirements}
+          onChange={(next) => setForm((current) => ({ ...current, coverageRequirements: next }))}
+        />
+      </div>
+
       <FormField
-        label="Special requirements"
+        label="Other requirements / wording notes"
         value={form.requirements}
         onChange={change("requirements")}
-        placeholder="Primary non-contributory wording, $2M umbrella, etc."
+        placeholder="30-day cancellation notice, specific holder wording, etc."
         multiline
       />
 
