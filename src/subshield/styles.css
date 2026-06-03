@@ -618,16 +618,17 @@ textarea {
 }
 
 .ss-top-date {
-  color: #55657e;
-  font-size: 11px;
-  font-weight: 800;
+  color: #6a7e96;
+  font-size: 10.5px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 9px 12px;
+  letter-spacing: 0.09em;
+  padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dde4ee;
+  background: #fff;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(10,18,38,0.04);
 }
 
 /* Demo-data controls in the header */
@@ -826,22 +827,23 @@ textarea {
 .ss-copy-btn {
   border: 0;
   background: transparent;
-  color: #617086;
-  font-size: 11px;
+  color: #6b7f98;
+  font-size: 10.5px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 800;
+  letter-spacing: 0.07em;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 5px;
-  border-radius: 8px;
+  gap: 5px;
+  padding: 4px 7px;
+  border-radius: 7px;
   cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
 }
 
 .ss-copy-btn:hover {
-  color: #111827;
-  background: #edf2fa;
+  color: #0f1c30;
+  background: #ecf1f9;
 }
 
 .ss-copy-btn.copied {
@@ -1401,11 +1403,11 @@ textarea {
 .ss-dash-activity-icon {
   flex-shrink: 0;
   margin-top: 1px;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 9px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: #f7f9fc;
+  border: 1px solid #e8edf5;
+  background: #f4f7fc;
   display: grid;
   place-items: center;
 }
@@ -1582,14 +1584,15 @@ textarea {
 .ss-gc,
 .ss-broker-card {
   width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 13px;
+  border: 1px solid #e4eaf2;
+  border-radius: 12px;
   background: #fff;
-  padding: 11px;
+  padding: 12px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
   text-align: left;
+  transition: border-color 0.13s ease, box-shadow 0.13s ease;
 }
 
 .ss-policy {
@@ -1599,12 +1602,14 @@ textarea {
 .ss-policy:hover,
 .ss-gc:hover,
 .ss-broker-card:hover {
-  border-color: #c8d3e2;
+  border-color: #c2cfdf;
+  box-shadow: 0 2px 8px rgba(10,18,38,0.05);
 }
 
 .ss-policy.selected {
-  border-color: #bad0ff;
-  background: #f2f6ff;
+  border-color: #9dbffe;
+  background: #eef5ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 .ss-icon-tile,
