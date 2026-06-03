@@ -2094,26 +2094,26 @@ textarea {
 }
 
 .ss-field-label {
-  font-size: 11px;
+  font-size: 11.5px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #62738a;
-  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: #5a6e8a;
+  font-weight: 600;
 }
 
 .ss-field input,
 .ss-field select,
 .ss-field textarea {
   width: 100%;
-  min-height: 42px;
-  border: 1.5px solid #dce3ee;
-  border-radius: 11px;
+  min-height: 44px;
+  border: 1.5px solid #d8e0eb;
+  border-radius: 10px;
   background: #f9fafb;
   padding: 10px 13px;
   font-size: 14px;
   font-family: inherit;
-  color: #0f172a;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  color: #0b1422;
+  transition: border-color 0.13s ease, box-shadow 0.13s ease, background 0.13s ease;
 }
 
 .ss-field select {
@@ -2134,9 +2134,9 @@ textarea {
 .ss-field select:focus,
 .ss-field textarea:focus {
   outline: none;
-  border-color: #6b9cf0;
+  border-color: #5b8ff0;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(61, 106, 232, 0.12);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .ss-field input::placeholder,
@@ -2644,19 +2644,26 @@ textarea {
 }
 
 .ss-savings-card {
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  border: 1px solid #e4eaf2;
+  border-radius: 13px;
   background: #fff;
-  padding: 12px;
+  padding: 16px;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.ss-savings-card:hover {
+  border-color: #c8d5e6;
+  box-shadow: 0 3px 14px rgba(10, 18, 38, 0.06);
 }
 
 .ss-savings-card.accepted {
-  border-color: #cce9da;
-  background: linear-gradient(180deg, #f4fbf7 0%, #edf8f1 100%);
+  border-color: #b4dfc7;
+  background: linear-gradient(160deg, #f2faf6 0%, #fff 100%);
 }
 
 .ss-savings-card.muted {
-  background: #f8fafd;
+  background: #f8fafb;
+  opacity: 0.85;
 }
 
 .ss-savings-head {
@@ -3235,7 +3242,7 @@ textarea {
 
 .ss-ring-track {
   fill: none;
-  stroke: #e5ebf3;
+  stroke: #eaeff7;
   stroke-width: 10;
 }
 
@@ -3243,6 +3250,7 @@ textarea {
   fill: none;
   stroke-width: 10;
   stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ss-ring-fill.success {
@@ -3266,19 +3274,19 @@ textarea {
 }
 
 .ss-ring-value {
-  font-size: 36px;
+  font-size: 34px;
   line-height: 1;
-  font-weight: 820;
+  font-weight: 700;
   letter-spacing: -0.06em;
 }
 
 .ss-ring-label {
   margin-top: 4px;
   color: var(--faint);
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
-  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-weight: 600;
 }
 
 .ss-ring.success .ss-ring-value {
@@ -3353,7 +3361,7 @@ textarea {
     top: 0;
     height: auto;
     border-right: none;
-    border-bottom: 1px solid #e4e9f2;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     padding: 12px;
   }
 
@@ -5371,14 +5379,16 @@ h1, h2, h3 {
 
 .ss-job {
   position: relative;
-  border: 1px solid #e8ecf2;
-  border-radius: 14px;
+  border: 1px solid #e4eaf2;
+  border-radius: 13px;
   overflow: hidden;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  background: #fff;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.12s ease;
 }
 .ss-job:hover {
-  border-color: #d8dfe9;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+  border-color: #c8d4e4;
+  box-shadow: 0 4px 18px rgba(10, 18, 38, 0.07);
+  transform: translateY(-1px);
 }
 .ss-job::before {
   content: "";
@@ -5545,24 +5555,25 @@ h1, h2, h3 {
 }
 
 .ss-carrier-card {
-  border: 1px solid #e8ecf3;
-  border-radius: 14px;
+  border: 1px solid #e4eaf2;
+  border-radius: 13px;
   background: #fff;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.12s ease;
 }
 
 .ss-carrier-card:hover {
-  border-color: #d2dbed;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border-color: #c8d5e6;
+  box-shadow: 0 4px 18px rgba(10, 18, 38, 0.07);
+  transform: translateY(-1px);
 }
 
 .ss-carrier-card.is-connected {
-  border-color: #b8dfc9;
-  background: linear-gradient(180deg, #f7fdf9, #fff);
+  border-color: #a8d8be;
+  background: linear-gradient(160deg, #f4fcf8 0%, #fff 100%);
 }
 
 .ss-carrier-card-head {
