@@ -310,7 +310,7 @@ textarea {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(255, 255, 255, 0.62);
   min-height: 38px;
   padding: 8px 11px;
   display: flex;
@@ -325,8 +325,8 @@ textarea {
 }
 
 .ss-nav:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .ss-nav.active {
@@ -341,7 +341,26 @@ textarea {
 }
 
 .ss-nav.active svg {
-  color: #6fa3ff;
+  color: #7db3ff;
+}
+
+.ss-nav-section {
+  padding: 10px 4px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.ss-nav-section:first-child {
+  padding-top: 2px;
+}
+
+.ss-nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 8px 4px;
 }
 
 .ss-nav-badge {
@@ -917,45 +936,46 @@ textarea {
 .ss-status {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   border-radius: 999px;
-  padding: 5px 9px;
-  font-size: 11px;
-  font-weight: 800;
+  padding: 4px 9px;
+  font-size: 10.5px;
+  font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
 
 .ss-status.success {
-  color: var(--success);
-  background: var(--success-soft);
-  border: 1px solid #ccebdc;
+  color: #0d6e49;
+  background: #e8f8f2;
+  border: 1px solid #b6e2cd;
 }
 
 .ss-status.warning {
-  color: var(--warning);
-  background: var(--warning-soft);
-  border: 1px solid #f5ddba;
+  color: #8c5a10;
+  background: #fdf3e3;
+  border: 1px solid #f0cf98;
 }
 
 .ss-status.danger {
-  color: var(--danger);
-  background: var(--danger-soft);
-  border: 1px solid #f2c7c5;
+  color: #9e3026;
+  background: #fff0ee;
+  border: 1px solid #f0c2bc;
 }
 
 .ss-note {
   margin-top: 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border: 1px solid #e4eaf2;
+  border-radius: 11px;
+  padding: 10px 13px;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  background: #f8fafd;
-  color: #3f4d62;
-  font-size: 13px;
-  line-height: 1.5;
+  gap: 9px;
+  background: #f6f9fd;
+  color: #3d4e64;
+  font-size: 12.5px;
+  line-height: 1.55;
 }
 
 .ss-note.success {
@@ -1358,33 +1378,34 @@ textarea {
 }
 
 .ss-dash-metric {
-  border: 1px solid #edf0f4;
-  border-radius: 14px;
-  background: var(--surface-soft);
-  padding: 13px;
+  border: 1px solid #e8edf5;
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px 16px;
   display: grid;
   gap: 6px;
-  transition: border-color 0.16s ease, background 0.16s ease;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
 }
 
 .ss-dash-metric:hover {
-  border-color: #dbe2ec;
-  background: #fff;
+  border-color: #c8d6ea;
+  box-shadow: 0 2px 8px rgba(10,18,38,0.05);
 }
 
 .ss-dash-metric span {
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--faint);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .ss-dash-metric b {
   font-size: 22px;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   font-weight: 700;
+  color: #0b1422;
 }
 
 .ss-dash-activity-row {
@@ -5088,13 +5109,18 @@ h1, h2, h3 {
 
 /* Warning-style primary button (send-anyway when non-compliant) */
 .ss-button.warn {
-  background: #d97706;
-  border-color: #d97706;
+  background: #fff;
+  color: #9a5b09;
+  border-color: #f5c97c;
+  box-shadow: 0 1px 2px rgba(154,91,9,0.1);
 }
 
-.ss-button.warn:hover {
-  background: #c2680a;
-  border-color: #c2680a;
+.ss-button.warn:hover:not(:disabled) {
+  background: #fffbf3;
+  border-color: #e4a847;
+  filter: none;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(154,91,9,0.12);
 }
 
 /* ───── Scan Modal ───── */

@@ -20,15 +20,26 @@ import {
 } from "lucide-react";
 import { formatMoney } from "../utils.js";
 
-const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "policies", label: "Policies", icon: ShieldCheck },
-  { id: "savings", label: "Savings", icon: BadgeDollarSign },
-  { id: "getpaid", label: "Get Paid", icon: CircleDollarSign },
-  { id: "certificates", label: "Certificates", icon: FileCheck2 },
-  { id: "connections", label: "Connections", icon: Link2 },
-  { id: "documents", label: "Documents", icon: FolderOpen },
-  { id: "settings", label: "Settings", icon: Settings },
+const NAV_SECTIONS = [
+  {
+    items: [{ id: "dashboard", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Coverage",
+    items: [
+      { id: "policies", label: "Policies", icon: ShieldCheck },
+      { id: "savings", label: "Savings", icon: BadgeDollarSign },
+      { id: "getpaid", label: "Get Paid", icon: CircleDollarSign },
+      { id: "certificates", label: "Certificates", icon: FileCheck2 },
+    ],
+  },
+  {
+    label: "Integrations",
+    items: [
+      { id: "connections", label: "Connections", icon: Link2 },
+      { id: "documents", label: "Documents", icon: FolderOpen },
+    ],
+  },
 ];
 
 export function Brand() {
@@ -74,16 +85,29 @@ export function Sidebar({
 
       <div className="ss-sidebar-scroll">
         <nav aria-label="Primary" onKeyDown={handleNavKeyDown}>
-          {NAV_ITEMS.map((item) => (
-            <NavButton
-              key={item.id}
-              active={view === item.id}
-              icon={item.icon}
-              label={item.label}
-              badge={item.id === "savings" && savingsCount > 0 ? savingsCount : null}
-              onClick={() => setView(item.id)}
-            />
+          {NAV_SECTIONS.map((section, sIdx) => (
+            <div key={sIdx}>
+              {sIdx > 0 && <div className="ss-nav-divider" aria-hidden="true" />}
+              {section.label && <div className="ss-nav-section">{section.label}</div>}
+              {section.items.map((item) => (
+                <NavButton
+                  key={item.id}
+                  active={view === item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  badge={item.id === "savings" && savingsCount > 0 ? savingsCount : null}
+                  onClick={() => setView(item.id)}
+                />
+              ))}
+            </div>
           ))}
+          <div className="ss-nav-divider" aria-hidden="true" />
+          <NavButton
+            active={view === "settings"}
+            icon={Settings}
+            label="Settings"
+            onClick={() => setView("settings")}
+          />
         </nav>
 
         <div className="ss-side-card">
@@ -189,7 +213,7 @@ export function Header({
     certificates: "Send and track certificates of insurance",
     documents: "Declarations, certificates, endorsements, and quotes",
     settings: "Account, team, billing, and product controls",
-    getpaid: "Coverage status, delivery, and payment readiness",
+    getpaid: "Payment readiness and coverage status",
     connections: "Link carriers to sync policies and verify coverage in real time",
   };
 
