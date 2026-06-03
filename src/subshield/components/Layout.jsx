@@ -10,6 +10,7 @@ import {
   FlaskConical,
   FolderOpen,
   LayoutDashboard,
+  Link2,
   Search,
   Settings,
   Shield,
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { id: "savings", label: "Savings", icon: BadgeDollarSign },
   { id: "getpaid", label: "Get Paid", icon: CircleDollarSign },
   { id: "certificates", label: "Certificates", icon: FileCheck2 },
+  { id: "connections", label: "Connections", icon: Link2 },
   { id: "documents", label: "Documents", icon: FolderOpen },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -178,6 +180,7 @@ export function Header({
     documents: "Documents",
     settings: "Settings",
     getpaid: "Get Paid",
+    connections: "Connections",
   };
   const eyebrow = {
     dashboard: "Your insurance command center",
@@ -187,6 +190,7 @@ export function Header({
     documents: "Declarations, certificates, endorsements, and quotes",
     settings: "Account, team, billing, and product controls",
     getpaid: "Coverage status, delivery, and payment readiness",
+    connections: "Link carriers to sync policies and verify coverage in real time",
   };
 
   return (

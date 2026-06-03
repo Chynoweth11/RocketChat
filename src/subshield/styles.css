@@ -5425,3 +5425,367 @@ h1, h2, h3 {
 .ss-link-btn:hover {
   opacity: 0.8;
 }
+
+/* ───── Carrier Connections ───── */
+.ss-carrier-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.ss-carrier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.ss-carrier-card {
+  border: 1px solid #e8ecf3;
+  border-radius: 14px;
+  background: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-carrier-card:hover {
+  border-color: #d2dbed;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.ss-carrier-card.is-connected {
+  border-color: #b8dfc9;
+  background: linear-gradient(180deg, #f7fdf9, #fff);
+}
+
+.ss-carrier-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ss-carrier-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-carrier-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.ss-carrier-card-name-row b {
+  font-size: 14px;
+}
+
+.ss-carrier-rating {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--success);
+  background: var(--success-soft);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.ss-carrier-category {
+  font-size: 11px;
+  color: var(--muted);
+  background: #f0f3f8;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.ss-carrier-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ss-carrier-card-status {
+  flex-shrink: 0;
+}
+
+.ss-carrier-sync-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  background: #f4f7fb;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.ss-carrier-sync-bar svg {
+  color: var(--success);
+}
+
+.ss-carrier-caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ss-carrier-cap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5f7e;
+  background: #f0f4fa;
+  border-radius: 99px;
+  padding: 3px 8px;
+}
+
+.ss-carrier-card-foot {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #f0f3f8;
+}
+
+.ss-connections-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+
+.ss-connections-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 24px 16px 8px;
+}
+
+.ss-connections-hero-logos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ss-connections-hero h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.ss-connections-hero p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.ss-connections-hero-points {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: left;
+  margin-top: 4px;
+}
+
+.ss-connections-hero-points > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ss-connections-hero-points svg {
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+/* Connect modal */
+.ss-modal--connect {
+  max-width: 480px;
+}
+
+.ss-connect-modal-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-right: 32px;
+}
+
+.ss-connect-modal-head h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.ss-connect-modal-head p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ss-connect-caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ss-connect-cap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-strong);
+  background: var(--brand-soft);
+  border-radius: 99px;
+  padding: 4px 10px;
+}
+
+.ss-connect-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ss-connect-notice {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.ss-connect-notice::before {
+  content: "🔒";
+  font-size: 12px;
+}
+
+.ss-connect-error {
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ss-connect-foot {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.ss-connect-progress,
+.ss-connect-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 24px 16px;
+}
+
+.ss-connect-progress h2,
+.ss-connect-success h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.ss-connect-progress p,
+.ss-connect-success p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 340px;
+}
+
+.ss-connect-progress-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  display: grid;
+  place-items: center;
+  color: var(--brand);
+}
+
+.ss-connect-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--success-soft);
+  display: grid;
+  place-items: center;
+  color: var(--success);
+}
+
+.ss-connect-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  text-align: left;
+  width: 100%;
+  max-width: 280px;
+}
+
+.ss-connect-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ss-connect-step.done {
+  color: var(--success);
+}
+
+.ss-connect-step.active {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.ss-spin {
+  animation: ss-icon-spin 0.9s linear infinite;
+}
+
+@keyframes ss-icon-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ss-carrier-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--success);
+  background: var(--success-soft);
+  border-radius: 99px;
+  padding: 3px 9px;
+  margin-top: 4px;
+}

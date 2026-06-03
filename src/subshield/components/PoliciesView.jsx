@@ -13,6 +13,7 @@ import {
   Search,
   Send,
   Shield,
+  ShieldCheck,
   Upload,
   Zap,
 } from "lucide-react";
@@ -25,6 +26,7 @@ import {
   getStatus,
   policyHealthScore,
   scoreClass,
+  timeAgo,
 } from "../utils.js";
 
 function exportPoliciesCsv(policies) {
@@ -79,6 +81,8 @@ export default function PoliciesView({
   onAddPolicy,
   onFindSavings,
   renewingId,
+  carrierConnections = {},
+  onManageConnections,
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -207,6 +211,8 @@ export default function PoliciesView({
             onFindSavings={() => onFindSavings(policyForDetail.id)}
             onSend={onSend}
             isRenewing={renewingId === policyForDetail.id}
+            carrierConnections={carrierConnections}
+            onManageConnections={onManageConnections}
           />
         ) : (
           <div className="ss-empty" style={{ minHeight: 220 }}>
@@ -288,7 +294,10 @@ function PolicyRow({ policy, selected, onClick }) {
   );
 }
 
-function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
+function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing, carrierConnections = {}, onManageConnections }) {
+  const verifiedCarrierId = Object.keys(carrierConnections).find((id) =>
+    policy.carrier?.toLowerCase().includes(id)
+  );
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
   const width = `${Math.max(0, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
@@ -308,6 +317,15 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing }) {
           <p className="ss-muted">
             {policy.carrier} | {policy.policyNumber}
           </p>
+          {verifiedCarrierId ? (
+            <span className="ss-carrier-verified-badge">
+              <ShieldCheck size={12} /> Carrier verified · synced {timeAgo(carrierConnections[verifiedCarrierId].syncedAt)}
+            </span>
+          ) : (
+            <button type="button" className="ss-link-btn" style={{ fontSize: 12, marginTop: 2 }} onClick={onManageConnections}>
+              Connect carrier for real-time verification →
+            </button>
+          )}
         </div>
         <em className={`ss-status ${status.className}`}>{status.label}</em>
       </div>

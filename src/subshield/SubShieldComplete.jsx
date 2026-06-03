@@ -41,6 +41,7 @@ const CertificatesView = lazy(() => import("./components/CertificatesView.jsx"))
 const GetPaidView = lazy(() => import("./components/GetPaidView.jsx"));
 const DocumentsView = lazy(() => import("./components/DocumentsView.jsx"));
 const SettingsView = lazy(() => import("./components/SettingsView.jsx"));
+const ConnectionsView = lazy(() => import("./components/ConnectionsView.jsx"));
 const SendModal = lazy(() => import("./components/SendModal.jsx"));
 const ScanModal = lazy(() => import("./components/ScanModal.jsx"));
 const SuccessModal = lazy(() => import("./components/SuccessModal.jsx"));
@@ -188,6 +189,9 @@ export default function SubShieldComplete() {
   const [findingId, setFindingId] = useState(null);
   const [toast, setToast] = useState(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [carrierConnections, setCarrierConnections] = useState(
+    () => JSON.parse(localStorage.getItem("subshield.connections") || "{}")
+  );
 
   const company = data.company || initialData.company;
   const settings = data.settings || initialData.settings;
@@ -326,6 +330,7 @@ export default function SubShieldComplete() {
       savings: "Savings",
       certificates: "Certificates",
       getpaid: "Get Paid",
+      connections: "Connections",
       documents: "Documents",
       settings: "Settings",
     };
@@ -340,6 +345,56 @@ export default function SubShieldComplete() {
 
   function fireToast(title, body, type = "default") {
     setToast({ title, body, type });
+  }
+
+  /* ---------- Carrier connections ---------- */
+
+  function saveConnections(next) {
+    setCarrierConnections(next);
+    localStorage.setItem("subshield.connections", JSON.stringify(next));
+  }
+
+  function connectCarrier(carrierId, creds, carrierMeta) {
+    const next = {
+      ...carrierConnections,
+      [carrierId]: {
+        carrierId,
+        connectedAt: new Date().toISOString(),
+        syncedAt: new Date().toISOString(),
+        policyCount: data.policies.filter((p) => p.carrier &&
+          carrierMeta?.name && p.carrier.toLowerCase().includes(carrierId)).length || 0,
+        capabilities: carrierMeta?.capabilities || [],
+        accountId: creds.accountId,
+      },
+    };
+    saveConnections(next);
+    fireToast(`${carrierMeta?.name || "Carrier"} connected`, "Policies synced and coverage verification enabled.", "success");
+  }
+
+  function disconnectCarrier(carrierId) {
+    const next = { ...carrierConnections };
+    delete next[carrierId];
+    saveConnections(next);
+    fireToast("Carrier disconnected", "Coverage verification disabled for this carrier.");
+  }
+
+  function syncCarrier(carrierId) {
+    const next = {
+      ...carrierConnections,
+      [carrierId]: { ...carrierConnections[carrierId], syncing: true },
+    };
+    saveConnections(next);
+    setTimeout(() => {
+      setCarrierConnections((prev) => {
+        const updated = {
+          ...prev,
+          [carrierId]: { ...prev[carrierId], syncing: false, syncedAt: new Date().toISOString() },
+        };
+        localStorage.setItem("subshield.connections", JSON.stringify(updated));
+        return updated;
+      });
+      fireToast("Sync complete", "Policies and coverage status are up to date.", "success");
+    }, 2000);
   }
 
   /* ---------- Policies ---------- */
@@ -1353,6 +1408,8 @@ export default function SubShieldComplete() {
               onAddPolicy={() => openAddPolicy()}
               onFindSavings={findSavingsForPolicy}
               renewingId={renewingId}
+              carrierConnections={carrierConnections}
+              onManageConnections={() => setView("connections")}
             />
           )}
 
@@ -1411,6 +1468,14 @@ export default function SubShieldComplete() {
               onReset={resetDemo}
               onLoadSample={loadSampleData}
               onLogout={logoutUser}
+            />
+          )}
+          {view === "connections" && (
+            <ConnectionsView
+              connections={carrierConnections}
+              onConnect={connectCarrier}
+              onDisconnect={disconnectCarrier}
+              onSync={syncCarrier}
             />
           )}
           {view === "getpaid" && (
