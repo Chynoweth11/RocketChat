@@ -190,7 +190,7 @@ export default function SubShieldComplete() {
   const [toast, setToast] = useState(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [carrierConnections, setCarrierConnections] = useState(
-    () => JSON.parse(localStorage.getItem("subshield.connections") || "{}")
+    () => JSON.parse(window.localStorage.getItem("subshield.connections") || "{}")
   );
 
   const company = data.company || initialData.company;
@@ -351,7 +351,7 @@ export default function SubShieldComplete() {
 
   function saveConnections(next) {
     setCarrierConnections(next);
-    localStorage.setItem("subshield.connections", JSON.stringify(next));
+    window.localStorage.setItem("subshield.connections", JSON.stringify(next));
   }
 
   function connectCarrier(carrierId, creds, carrierMeta) {
@@ -390,7 +390,7 @@ export default function SubShieldComplete() {
           ...prev,
           [carrierId]: { ...prev[carrierId], syncing: false, syncedAt: new Date().toISOString() },
         };
-        localStorage.setItem("subshield.connections", JSON.stringify(updated));
+        window.localStorage.setItem("subshield.connections", JSON.stringify(updated));
         return updated;
       });
       fireToast("Sync complete", "Policies and coverage status are up to date.", "success");

@@ -306,13 +306,13 @@ export default function DashboardView({
         pendingCertificates={pendingCertificates}
       />
 
-      <section className="ss-card">
+      <section className="ss-card ss-dash-lower-left">
         <Section
           title="Upcoming renewals"
           sub="Deadlines needing action first"
           extra={
             <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
-              View policies <ArrowRight size={13} />
+              View all <ArrowRight size={13} />
             </button>
           }
         />
@@ -349,7 +349,7 @@ export default function DashboardView({
         )}
       </section>
 
-      <section className="ss-card">
+      <section className="ss-card ss-dash-lower-right">
         <Section
           title="Recent activity"
           sub="Latest policy, certificate, and quote events"
