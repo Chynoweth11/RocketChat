@@ -61,11 +61,7 @@ textarea {
   --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.08), 0 30px 60px rgba(15, 23, 42, 0.12);
   --ring: 0 0 0 3px rgba(47, 99, 233, 0.22);
   min-height: 100%;
-  background:
-    radial-gradient(1200px 600px at 12% -8%, rgba(47, 99, 233, 0.06), transparent 60%),
-    radial-gradient(1000px 520px at 100% 0%, rgba(31, 143, 98, 0.045), transparent 55%),
-    #eef1f6;
-  background-attachment: fixed;
+  background: #eef1f6;
   color: var(--text);
 }
 
@@ -95,16 +91,20 @@ textarea {
 }
 
 .ss-layout {
-  max-width: 1460px;
-  margin: 0 auto;
-  padding: 24px;
   display: grid;
-  grid-template-columns: 274px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 248px minmax(0, 1fr);
+  height: 100vh;
+  overflow: hidden;
+  gap: 0;
 }
 
 .ss-main {
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 28px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: #dde4ef transparent;
 }
 
 .ss-card {
@@ -121,7 +121,6 @@ textarea {
 .ss-card:hover {
   border-color: #dde4ee;
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 
 .ss-grid {
@@ -219,13 +218,14 @@ textarea {
 
 .ss-sidebar {
   position: sticky;
-  top: 20px;
-  height: calc(100vh - 40px);
-  border-radius: 22px;
-  border: 1px solid #edf0f4;
-  background: #ffffff;
-  box-shadow: var(--shadow-sm);
-  padding: 18px;
+  top: 0;
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+  border-right: 1px solid #e4e9f2;
+  background: #f3f5f9;
+  box-shadow: none;
+  padding: 16px 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -256,12 +256,15 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 4px 4px 10px;
+  border-bottom: 1px solid #e4e9f2;
+  margin-bottom: 4px;
 }
 
 .ss-brand-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
   color: #fff;
@@ -271,16 +274,16 @@ textarea {
 
 .ss-brand b {
   display: block;
-  font-size: 21px;
+  font-size: 16px;
   line-height: 1.1;
   letter-spacing: -0.03em;
 }
 
 .ss-small {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .ss-sidebar nav {
@@ -290,12 +293,12 @@ textarea {
 
 .ss-nav {
   position: relative;
-  border: 1px solid transparent;
-  border-radius: 14px;
+  border: none;
+  border-radius: 9px;
   background: transparent;
   color: #546277;
-  min-height: 45px;
-  padding: 11px 13px;
+  min-height: 40px;
+  padding: 9px 11px;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -303,31 +306,22 @@ textarea {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
 .ss-nav:hover {
-  background: #f4f6f9;
-  color: #14233e;
+  background: rgba(15, 23, 42, 0.05);
+  color: #1a2840;
 }
 
 .ss-nav.active {
-  background: linear-gradient(180deg, #eef3ff, #e4ecff);
-  color: var(--brand-strong);
-  border-color: #d4e0fc;
-  box-shadow: 0 1px 2px rgba(37, 87, 210, 0.06);
+  background: #fff;
+  color: #1746ad;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1), 0 1px 1px rgba(15, 23, 42, 0.06);
 }
 
 .ss-nav.active::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 18px;
-  border-radius: 99px;
-  background: linear-gradient(180deg, #4773ea, #2457d4);
+  display: none;
 }
 
 .ss-nav.active svg {
@@ -416,16 +410,16 @@ textarea {
 }
 
 .ss-side-card {
-  border: 1px solid #e7ecf3;
-  border-radius: 18px;
-  background: var(--surface-soft);
-  padding: 15px;
+  border: 1px solid #e4e9f2;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px;
 }
 
 .ss-side-card strong {
   display: block;
   margin: 5px 0 7px;
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1;
   letter-spacing: -0.03em;
   color: #0f203d;
@@ -759,7 +753,6 @@ textarea {
 .ss-button.soft:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #c5cdd9;
-  transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
@@ -970,12 +963,24 @@ textarea {
 }
 
 .ss-info {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px;
-  background: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #f8fafc;
   display: grid;
-  gap: 4px;
+  gap: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ss-info::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), #6d9cf8);
+  opacity: 0.4;
+  border-radius: 14px 14px 0 0;
 }
 
 .ss-info span {
@@ -987,10 +992,10 @@ textarea {
 }
 
 .ss-info b {
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .ss-info-hint {
@@ -1490,10 +1495,12 @@ textarea {
 }
 
 .ss-command-metrics {
-  margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f0f3f8;
 }
 
 .ss-policy,
@@ -2278,7 +2285,7 @@ textarea {
 .ss-action-row-card {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
   padding: 0;
   overflow: hidden;
 }
@@ -2286,23 +2293,24 @@ textarea {
 .ss-action-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 13px 18px;
+  gap: 14px;
+  padding: 14px 16px;
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--line-soft);
+  background: #fff;
+  border: 1px solid #edf0f6;
+  border-radius: 12px;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s ease;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .ss-action-item:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid #edf0f6;
 }
 
 .ss-action-item:hover {
-  background: var(--surface-soft);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
 }
 
 .ss-action-dot {
@@ -3255,10 +3263,22 @@ textarea {
   color: var(--danger);
 }
 
+.ss-ring.is-zero .ss-ring-track {
+  stroke: #e8edf5;
+}
+
+.ss-ring.is-zero .ss-ring-value {
+  color: #94a3b8;
+  font-size: 24px;
+}
+
+.ss-ring.is-zero .ss-ring-label {
+  color: #b0bad0;
+}
+
 @media (max-width: 1240px) {
   .ss-layout {
-    grid-template-columns: 240px minmax(0, 1fr);
-    max-width: 1180px;
+    grid-template-columns: 224px minmax(0, 1fr);
   }
 
   .ss-grid {
@@ -3294,15 +3314,23 @@ textarea {
 @media (max-width: 980px) {
   .ss-layout {
     grid-template-columns: 1fr;
-    padding: 12px;
-    gap: 12px;
+    height: auto;
+    overflow: visible;
   }
 
   .ss-sidebar {
     position: relative;
     top: 0;
     height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e4e9f2;
     padding: 12px;
+  }
+
+  .ss-main {
+    height: auto;
+    overflow-y: visible;
+    padding: 16px;
   }
 
   .ss-sidebar nav {

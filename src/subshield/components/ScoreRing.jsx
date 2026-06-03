@@ -13,7 +13,7 @@ export default function ScoreRing({ value, size = 138 }) {
 
   return (
     <div
-      className={`ss-ring ${cls}`}
+      className={`ss-ring ${cls}${value === 0 ? ' is-zero' : ''}`}
       style={{ width: size, height: size }}
       role="img"
       aria-label={`Compliance score ${value} percent`}
