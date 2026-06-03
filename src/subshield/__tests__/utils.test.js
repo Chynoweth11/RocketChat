@@ -60,9 +60,9 @@ describe("getStatus", () => {
 });
 
 describe("scoreClass", () => {
-  it("success at 85+", () => expect(scoreClass(85)).toBe("success"));
-  it("warning at 65-84", () => expect(scoreClass(70)).toBe("warning"));
-  it("danger below 65", () => expect(scoreClass(50)).toBe("danger"));
+  it("success at 80+", () => expect(scoreClass(85)).toBe("success"));
+  it("warning at 60-79", () => expect(scoreClass(70)).toBe("warning"));
+  it("danger below 60", () => expect(scoreClass(50)).toBe("danger"));
 });
 
 describe("getComplianceScore", () => {

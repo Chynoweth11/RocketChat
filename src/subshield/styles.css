@@ -970,30 +970,24 @@ textarea {
 }
 
 .ss-info {
-  border: none;
+  border: 1px solid #eef1f6;
   border-radius: 14px;
-  padding: 14px 16px;
-  background: #f8fafc;
+  padding: 15px 16px;
+  background: #fbfcfe;
   display: grid;
-  gap: 3px;
-  position: relative;
-  overflow: hidden;
+  gap: 5px;
+  transition: border-color 0.16s ease, background 0.16s ease;
 }
 
-.ss-info::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--brand), #6d9cf8);
-  opacity: 0.4;
-  border-radius: 14px 14px 0 0;
+.ss-info:hover {
+  border-color: #e2e8f2;
+  background: #fff;
 }
 
 .ss-info span {
-  font-size: 10px;
+  font-size: 10.5px;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   color: var(--faint);
   font-weight: 800;
 }
@@ -1130,15 +1124,15 @@ textarea {
 }
 
 .ss-spend-chart {
-  margin: 14px 0 15px;
-  border: 1px solid var(--line-soft);
+  margin: 16px 0 14px;
+  border: 1px solid #eef1f6;
   border-radius: 14px;
-  background: var(--surface-soft);
-  padding: 12px 10px 8px;
+  background: linear-gradient(180deg, #fbfcfe 0%, #f5f8fc 100%);
+  padding: 14px 14px 10px;
   display: flex;
   align-items: flex-end;
-  gap: 6px;
-  height: 110px;
+  gap: 10px;
+  height: 120px;
 }
 
 .ss-spend-point {
@@ -1154,19 +1148,19 @@ textarea {
 
 .ss-spend-point span {
   width: 100%;
-  max-width: 28px;
-  border-radius: 6px 6px 3px 3px;
-  background: linear-gradient(180deg, #9db4f5, #c5d2f7);
+  max-width: 40px;
+  border-radius: 7px 7px 0 0;
+  background: linear-gradient(180deg, #c3d2f7 0%, #dde6fa 100%);
   flex-shrink: 0;
-  transition: background 0.16s ease, transform 0.16s ease;
+  transition: background 0.16s ease, filter 0.16s ease;
 }
 
 .ss-spend-point.is-current span {
-  background: linear-gradient(180deg, var(--brand), #6a8bf0);
+  background: linear-gradient(180deg, var(--brand) 0%, #6a8bf0 100%);
 }
 
 .ss-spend-point:hover span {
-  transform: scaleY(1.03);
+  filter: brightness(0.96);
 }
 
 .ss-spend-val {
@@ -5321,18 +5315,32 @@ h1, h2, h3 {
 }
 
 .ss-job {
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  position: relative;
+  border: 1px solid #e8ecf2;
+  border-radius: 14px;
   overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.ss-job--danger {
-  border-left: 3px solid var(--danger, #ef4444);
+.ss-job:hover {
+  border-color: #d8dfe9;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
 }
-.ss-job--warning {
-  border-left: 3px solid var(--warning, #f59e0b);
+.ss-job::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
 }
-.ss-job--success {
-  border-left: 3px solid #22c55e;
+.ss-job--danger::before {
+  background: var(--danger, #ef4444);
+}
+.ss-job--warning::before {
+  background: var(--warning, #f59e0b);
+}
+.ss-job--success::before {
+  background: #22c55e;
 }
 
 .ss-job-head {
