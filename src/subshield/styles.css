@@ -3413,10 +3413,6 @@ textarea {
 }
 
 @media (max-width: 640px) {
-  .ss-layout {
-    padding: 8px;
-  }
-
   .ss-card {
     padding: 14px;
     border-radius: 16px;
