@@ -42,29 +42,32 @@ textarea {
 
 .ss-app {
   --surface: #ffffff;
-  --surface-soft: #f7f9fc;
-  --line: #dde4ee;
-  --line-soft: #e8edf5;
-  --text: #0d1526;
-  --muted: #566274;
-  --faint: #8998ae;
-  --brand: #2563eb;
-  --brand-soft: #eff5ff;
-  --brand-line: #bfd3fe;
-  --brand-strong: #1a4ec0;
+  --surface-soft: #f8f6f3;
+  --line: #e0dbd4;
+  --line-soft: #ece8e2;
+  --ink: #1a1714;
+  --text: #1a1714;
+  --muted: #6b6158;
+  --faint: #9e9589;
+  --brand: #2558d6;
+  --brand-soft: #f0f4ff;
+  --brand-line: #c0d0f8;
+  --brand-strong: #1840a8;
+  --accent: #9a6c3a;
+  --accent-soft: #fdf6ec;
   --success: #0f7a54;
-  --success-soft: #e8f8f1;
+  --success-soft: #eaf8f3;
   --warning: #a86c1e;
-  --warning-soft: #fef5e7;
+  --warning-soft: #fef7ec;
   --danger: #b83830;
-  --danger-soft: #fff0ee;
-  --shadow-xs: 0 1px 2px rgba(10, 18, 38, 0.05);
-  --shadow-sm: 0 1px 3px rgba(10, 18, 38, 0.05), 0 4px 14px rgba(10, 18, 38, 0.04);
-  --shadow-md: 0 4px 14px rgba(10, 18, 38, 0.07), 0 18px 40px rgba(10, 18, 38, 0.08);
-  --shadow-lg: 0 8px 26px rgba(10, 18, 38, 0.09), 0 32px 64px rgba(10, 18, 38, 0.12);
-  --ring: 0 0 0 3px rgba(37, 99, 235, 0.22);
+  --danger-soft: #fff1ef;
+  --shadow-xs: 0 1px 2px rgba(22, 16, 10, 0.05);
+  --shadow-sm: 0 1px 3px rgba(22, 16, 10, 0.05), 0 4px 14px rgba(22, 16, 10, 0.04);
+  --shadow-md: 0 4px 14px rgba(22, 16, 10, 0.07), 0 18px 40px rgba(22, 16, 10, 0.08);
+  --shadow-lg: 0 8px 26px rgba(22, 16, 10, 0.09), 0 32px 64px rgba(22, 16, 10, 0.12);
+  --ring: 0 0 0 3px rgba(37, 88, 214, 0.22);
   min-height: 100%;
-  background: #eaecf2;
+  background: #ece9e4;
   color: var(--text);
 }
 
@@ -5481,6 +5484,69 @@ h1, h2, h3 {
 }
 
 /* ───── Get Paid view ───── */
+/* ── Payment Readiness (Get Paid) ──────────────────────────────────── */
+
+.ss-pr-header .ss-command-metrics {
+  margin-top: 16px;
+}
+
+.ss-pr-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #c2430a 7%, #fff9f6);
+  border: 1px solid color-mix(in srgb, #c2430a 18%, transparent);
+  color: #9a3d0a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.ss-pr-alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #c2430a;
+}
+
+.ss-pr-context {
+  padding: 0;
+}
+.ss-pr-context-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.ss-pr-context-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px;
+  border-right: 1px solid var(--line);
+}
+.ss-pr-context-item:last-child {
+  border-right: none;
+}
+.ss-pr-context-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #a8845c;
+}
+.ss-pr-context-item b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.ss-pr-context-item small {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── GC Readiness Cards ─────────────────────────────────────────────── */
+
 .ss-jobs {
   display: flex;
   flex-direction: column;
@@ -5497,7 +5563,7 @@ h1, h2, h3 {
   transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.12s ease;
 }
 .ss-job:hover {
-  border-color: #c8d4e4;
+  border-color: #cdd5e0;
   box-shadow: 0 4px 18px rgba(10, 18, 38, 0.07);
   transform: translateY(-1px);
 }
@@ -5509,21 +5575,15 @@ h1, h2, h3 {
   bottom: 0;
   width: 4px;
 }
-.ss-job--danger::before {
-  background: var(--danger, #ef4444);
-}
-.ss-job--warning::before {
-  background: var(--warning, #f59e0b);
-}
-.ss-job--success::before {
-  background: #22c55e;
-}
+.ss-job--danger::before { background: #d84040; }
+.ss-job--warning::before { background: #c2850a; }
+.ss-job--success::before { background: #1a9e6e; }
 
 .ss-job-head {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px 10px;
+  padding: 13px 16px 11px;
 }
 .ss-job-id {
   flex: 1;
@@ -5536,10 +5596,12 @@ h1, h2, h3 {
   flex-wrap: wrap;
 }
 .ss-job-project {
-  font-size: 14px;
+  font-size: 14.5px;
+  font-weight: 650;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--ink);
 }
 .ss-job-gc {
   font-size: 12px;
@@ -5555,62 +5617,126 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 590;
   white-space: nowrap;
   flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.01em;
 }
-.ss-job-status--danger { color: var(--danger, #ef4444); }
-.ss-job-status--warning { color: var(--warning, #f59e0b); }
-.ss-job-status--success { color: #22c55e; }
-.ss-job-status--neutral { color: var(--muted); }
+.ss-job-status--danger {
+  color: #b03030;
+  background: #fff2f2;
+  border: 1px solid #f5c5c5;
+}
+.ss-job-status--warning {
+  color: #966008;
+  background: #fffbf0;
+  border: 1px solid #f5df9a;
+}
+.ss-job-status--success {
+  color: #156947;
+  background: #f0faf5;
+  border: 1px solid #9fe0c0;
+}
+.ss-job-status--neutral {
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
 
-.ss-job-steps {
+/* ── Document Checklist ─────────────────────────────────────────────── */
+
+.ss-doc-checklist {
+  padding: 0 16px 12px;
+}
+.ss-doc-checklist-label {
+  font-size: 10.5px;
+  font-weight: 680;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.ss-doc-rows {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 14px 10px;
+  gap: 5px;
 }
-.ss-job-step {
+.ss-doc-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 7px;
 }
-.ss-job-step.done {
+.ss-doc-row--present {
+  background: #f5fdf8;
+  color: #1a6644;
+  border: 1px solid #c0e8d3;
+}
+.ss-doc-row--present svg { color: #1a9e6e; }
+.ss-doc-row--missing {
+  background: #fdf5f5;
+  color: #9a2e2e;
+  border: 1px solid #f2c4c4;
+}
+.ss-doc-row--missing svg { color: #d84040; }
+.ss-doc-row--expiring {
+  background: #fffbf0;
+  color: #7a5208;
+  border: 1px solid #f0d87a;
+}
+.ss-doc-row--expiring svg { color: #b87800; }
+.ss-doc-row--neutral {
+  background: var(--surface);
   color: var(--muted);
+  border: 1px solid var(--line);
 }
-.ss-job-step.done svg {
-  color: #22c55e;
-}
-.ss-job-step.todo svg {
-  color: var(--line);
-}
-.ss-job-step.neutral svg {
-  color: var(--muted);
-}
-.ss-job-step-label {
+.ss-doc-name {
   flex: 1;
+  font-weight: 500;
 }
-.ss-job-step-detail {
-  font-size: 12px;
-  color: var(--muted);
-  text-align: right;
+.ss-doc-detail {
+  font-size: 11.5px;
+  opacity: 0.75;
 }
+
+/* ── Blockers ───────────────────────────────────────────────────────── */
 
 .ss-job-blockers {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 8px 14px;
-  background: color-mix(in srgb, var(--danger, #ef4444) 8%, transparent);
-  font-size: 12px;
-  color: var(--danger, #ef4444);
-  border-top: 1px solid color-mix(in srgb, var(--danger, #ef4444) 20%, transparent);
+  gap: 10px;
+  padding: 10px 16px;
+  background: #fff8f5;
+  font-size: 12.5px;
+  color: #8a3010;
+  border-top: 1px solid #f5d5c0;
+  line-height: 1.5;
+}
+.ss-job-blockers svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #c2430a;
+}
+.ss-job-blockers b {
+  display: block;
+  font-weight: 650;
+  margin-bottom: 3px;
+}
+.ss-blocker-list {
+  margin: 0;
+  padding-left: 16px;
+}
+.ss-blocker-list li {
+  margin-bottom: 2px;
 }
 
 .ss-job-coverage {
-  padding: 12px 14px;
+  padding: 12px 16px;
   border-top: 1px solid var(--line);
 }
 
@@ -5618,9 +5744,9 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 10px 16px;
   border-top: 1px solid var(--line);
-  background: var(--surface);
+  background: #fafbfc;
   flex-wrap: wrap;
 }
 
@@ -5629,7 +5755,8 @@ h1, h2, h3 {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #22c55e;
+  color: #1a9e6e;
+  font-weight: 500;
   flex: 1;
 }
 
@@ -6009,4 +6136,18 @@ h1, h2, h3 {
   border-radius: 99px;
   padding: 3px 9px;
   margin-top: 4px;
+}
+
+/* ── Payment Readiness responsive ───────────────────────────────────── */
+@media (max-width: 700px) {
+  .ss-pr-context-inner {
+    grid-template-columns: 1fr;
+  }
+  .ss-pr-context-item {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .ss-pr-context-item:last-child {
+    border-bottom: none;
+  }
 }

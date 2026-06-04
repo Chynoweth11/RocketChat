@@ -1,44 +1,95 @@
 import { useMemo, useState } from "react";
 import {
+  AlertCircle,
   ArrowRight,
   Building2,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Circle,
-  CircleDollarSign,
+  CircleAlert,
   Clock,
-  HandCoins,
-  MinusCircle,
+  FileCheck2,
+  FileText,
+  FileX2,
   RefreshCw,
   Send,
-  ShieldAlert,
   ShieldCheck,
   SquarePen,
+  Upload,
+  Wallet,
 } from "lucide-react";
 import { Section, Info } from "./Layout.jsx";
-import { ComplianceBadge, CompliancePanel } from "./CompliancePanel.jsx";
+import { CompliancePanel } from "./CompliancePanel.jsx";
 import { formatShortDate, timeAgo } from "../utils.js";
 
 const FILTERS = [
-  { id: "all", label: "All jobs" },
-  { id: "action", label: "Action needed" },
-  { id: "gaps", label: "Coverage gaps" },
-  { id: "sent", label: "Sent" },
+  { id: "all", label: "All GCs" },
+  { id: "action", label: "Needs action" },
+  { id: "gaps", label: "Doc gaps" },
+  { id: "clear", label: "Docs current" },
 ];
 
-const STATUS_ICON = {
-  not_covered: ShieldAlert,
-  ready_to_send: Send,
-  needs_resend: Clock,
-  covered_sent: ShieldCheck,
-};
+// Document types required for payment readiness
+const DOC_TYPES = [
+  { key: "gl", label: "General Liability" },
+  { key: "wc", label: "Workers' Comp" },
+  { key: "auto", label: "Auto Liability" },
+  { key: "umbrella", label: "Umbrella / Excess" },
+  { key: "coi", label: "Certificate (COI)" },
+  { key: "endorsement", label: "Endorsement" },
+  { key: "waiver", label: "Waiver of Subrogation" },
+];
 
 function matchesFilter(job, filter) {
   if (filter === "all") return true;
   if (filter === "gaps") return job.status === "not_covered";
-  if (filter === "sent") return job.status === "covered_sent" || job.status === "needs_resend";
-  return job.status !== "covered_sent"; // action
+  if (filter === "clear") return job.status === "covered_sent";
+  return job.status !== "covered_sent";
+}
+
+function docReadinessFromJob(job) {
+  // Derive a document checklist from job data
+  const compliance = job.compliance;
+  const sent = Boolean(job.lastSend);
+  const current = sent && job.daysSinceSend != null && job.daysSinceSend <= 90;
+
+  const docs = [];
+
+  // GL — check if compliance has GL requirement
+  const glMet = compliance?.hasRequirements
+    ? (compliance.details || []).find((d) => /general.?liab/i.test(d.label))
+    : null;
+  if (glMet !== undefined) {
+    docs.push({ key: "gl", label: "General Liability", status: glMet?.met ? "present" : glMet ? "missing" : "present" });
+  }
+
+  // WC
+  const wcMet = compliance?.hasRequirements
+    ? (compliance.details || []).find((d) => /workers|comp/i.test(d.label))
+    : null;
+  if (wcMet !== undefined) {
+    docs.push({ key: "wc", label: "Workers' Comp", status: wcMet?.met ? "present" : wcMet ? "missing" : "present" });
+  }
+
+  // COI sent status
+  docs.push({
+    key: "coi",
+    label: "Certificate of Insurance (COI)",
+    status: !sent ? "missing" : !current ? "expiring" : "present",
+    detail: sent ? (current ? `Sent ${timeAgo(job.lastSend.sentAt)}` : "May be outdated — resend") : "Not yet delivered",
+  });
+
+  // If compliance has requirements at all, surface total gap
+  if (compliance?.hasRequirements && !compliance.compliant) {
+    docs.push({
+      key: "req",
+      label: `Coverage Requirements (${compliance.unmetCount} gap${compliance.unmetCount !== 1 ? "s" : ""})`,
+      status: "missing",
+      detail: `${compliance.metCount} of ${compliance.total} met`,
+    });
+  }
+
+  return docs;
 }
 
 export default function GetPaidView({
@@ -57,12 +108,17 @@ export default function GetPaidView({
     [jobs, filter]
   );
 
+  const expiringSoon = jobs.filter(
+    (j) => j.daysSinceSend != null && j.daysSinceSend > 60 && j.daysSinceSend <= 90
+  ).length;
+
   return (
     <div className="ss-grid">
-      <section className="ss-card ss-span">
+      {/* Summary header */}
+      <section className="ss-card ss-span ss-pr-header">
         <Section
-          title="Get Paid"
-          sub="Every job in one place — what's covered, what's been sent, and exactly what's holding up your payment."
+          title="Payment Readiness"
+          sub="Track the insurance documents your GCs and project owners require before they'll release payment. See what's missing, expiring, or already delivered."
           extra={
             <button type="button" className="ss-button soft ss-button-sm" onClick={onAddHolder}>
               <Building2 size={14} /> Add GC
@@ -70,22 +126,74 @@ export default function GetPaidView({
           }
         />
         <div className="ss-command-metrics">
-          <Info label="Active jobs" value={summary.total} />
-          <Info label="Ready to bill" value={summary.coveredSent} />
-          <Info label="Need action" value={summary.actionNeeded} />
-          <Info label="Coverage gaps" value={summary.gaps} />
+          <Info label="GCs tracked" value={summary.total} />
+          <Info label="Docs current" value={summary.coveredSent} hint="All docs delivered" />
+          <Info
+            label="Needs action"
+            value={summary.actionNeeded}
+            hint={summary.actionNeeded > 0 ? "May delay payment" : undefined}
+          />
+          <Info
+            label="Document gaps"
+            value={summary.gaps}
+            hint={summary.gaps > 0 ? "Missing required docs" : undefined}
+          />
+        </div>
+
+        {(summary.gaps > 0 || expiringSoon > 0) && (
+          <div className="ss-pr-alert">
+            <CircleAlert size={15} aria-hidden="true" />
+            <span>
+              {summary.gaps > 0 && (
+                <>
+                  <b>{summary.gaps} GC{summary.gaps !== 1 ? "s" : ""}</b> have missing documents that could delay payment.
+                </>
+              )}
+              {summary.gaps > 0 && expiringSoon > 0 && " "}
+              {expiringSoon > 0 && (
+                <>
+                  <b>{expiringSoon} COI{expiringSoon !== 1 ? "s" : ""}</b> are older than 60 days and should be refreshed.
+                </>
+              )}
+            </span>
+          </div>
+        )}
+      </section>
+
+      {/* What delays payment — educational context strip */}
+      <section className="ss-card ss-span ss-pr-context">
+        <div className="ss-pr-context-inner">
+          <div className="ss-pr-context-item">
+            <FileX2 size={18} />
+            <div>
+              <b>Missing documents</b>
+              <small>GCs hold payment until they have your COI, WC cert, GL cert, and any required endorsements on file.</small>
+            </div>
+          </div>
+          <div className="ss-pr-context-item">
+            <Clock size={18} />
+            <div>
+              <b>Expired certificates</b>
+              <small>Even if documents were sent, outdated COIs trigger hold-backs. GCs require current coverage proof.</small>
+            </div>
+          </div>
+          <div className="ss-pr-context-item">
+            <FileCheck2 size={18} />
+            <div>
+              <b>SubShield keeps it ready</b>
+              <small>We track what each GC needs, flag gaps before they're a problem, and let you send documents in one click.</small>
+            </div>
+          </div>
         </div>
       </section>
 
       {!hasHolders ? (
         <section className="ss-card ss-span">
           <div className="ss-empty">
-            <HandCoins size={32} />
-            <h2>No jobs to track yet</h2>
+            <Wallet size={32} />
+            <h2>No GCs tracked yet</h2>
             <p>
-              Add the GCs you work for and the projects you're on. SubShield will line up their
-              coverage requirements against your real policies and tell you the moment a job is
-              clear to bill.
+              Add the general contractors and project owners you work with. SubShield will show you exactly which insurance documents each one requires — so nothing holds up your next payment.
             </p>
             <button type="button" className="ss-button" onClick={onAddHolder}>
               <Building2 size={15} /> Add your first GC
@@ -111,17 +219,17 @@ export default function GetPaidView({
           {filtered.length === 0 ? (
             <div className="ss-empty" style={{ minHeight: 150 }}>
               <CheckCircle2 size={28} />
-              <h2>Nothing here</h2>
+              <h2>All clear here</h2>
               <p>
                 {filter === "action" || filter === "gaps"
-                  ? "No jobs need your attention in this view — nice work."
-                  : "No jobs match this filter yet."}
+                  ? "No GCs have document issues — your payment readiness is in good shape."
+                  : "No GCs match this filter."}
               </p>
             </div>
           ) : (
             <div className="ss-jobs">
               {filtered.map((job) => (
-                <JobCard
+                <ReadinessCard
                   key={job.id}
                   job={job}
                   onSend={() => onSend(job.contractor, job.hasProject ? job.project : "")}
@@ -137,10 +245,20 @@ export default function GetPaidView({
   );
 }
 
-function JobCard({ job, onSend, onFixCoverage, onEditHolder }) {
+function ReadinessCard({ job, onSend, onFixCoverage, onEditHolder }) {
   const [open, setOpen] = useState(false);
-  const StatusIcon = STATUS_ICON[job.status] || CircleDollarSign;
+  const docs = docReadinessFromJob(job);
   const hasGaps = job.status === "not_covered";
+  const isClear = job.status === "covered_sent";
+
+  const statusConfig = {
+    not_covered: { label: "Document gaps", tone: "danger", icon: CircleAlert },
+    ready_to_send: { label: "COI not sent", tone: "warning", icon: Send },
+    needs_resend: { label: "Docs may be outdated", tone: "warning", icon: Clock },
+    covered_sent: { label: "Docs current", tone: "success", icon: CheckCircle2 },
+  };
+  const cfg = statusConfig[job.status] || statusConfig.ready_to_send;
+  const StatusIcon = cfg.icon;
 
   return (
     <div className={`ss-job ss-job--${job.tone}`}>
@@ -150,98 +268,140 @@ function JobCard({ job, onSend, onFixCoverage, onEditHolder }) {
         </span>
         <div className="ss-job-id">
           <div className="ss-job-title-row">
-            <b className="ss-job-project">{job.project}</b>
-            {job.compliance?.hasRequirements && <ComplianceBadge result={job.compliance} />}
+            <b className="ss-job-project">{job.gcName}</b>
           </div>
           <small className="ss-job-gc">
-            {job.gcName}
-            {job.lastSend ? ` · COI sent ${timeAgo(job.lastSend.sentAt)}` : " · no COI sent"}
+            {job.hasProject ? job.project : "General coverage"}
+            {job.lastSend
+              ? ` · COI delivered ${timeAgo(job.lastSend.sentAt)}`
+              : " · No COI delivered yet"}
           </small>
         </div>
         <span className={`ss-job-status ss-job-status--${job.tone}`}>
           <StatusIcon size={13} aria-hidden="true" />
-          {job.statusLabel}
+          {cfg.label}
         </span>
       </div>
 
-      <div className="ss-job-steps">
-        {job.steps.map((step, index) => (
-          <div
-            key={index}
-            className={`ss-job-step ${
-              step.neutral ? "neutral" : step.done ? "done" : "todo"
-            }`}
-          >
-            {step.neutral ? (
-              <MinusCircle size={15} aria-hidden="true" />
-            ) : step.done ? (
-              <CheckCircle2 size={15} aria-hidden="true" />
-            ) : (
-              <Circle size={15} aria-hidden="true" />
-            )}
-            <span className="ss-job-step-label">{step.label}</span>
-            <span className="ss-job-step-detail">{step.detail}</span>
-          </div>
-        ))}
+      {/* Document checklist */}
+      <div className="ss-doc-checklist">
+        <div className="ss-doc-checklist-label">Document status</div>
+        <div className="ss-doc-rows">
+          {docs.map((doc) => (
+            <DocRow key={doc.key} doc={doc} />
+          ))}
+          {docs.length === 0 && (
+            <div className="ss-doc-row ss-doc-row--neutral">
+              <FileText size={14} />
+              <span>No specific requirements on file</span>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Blockers */}
       {job.blockers.length > 0 && (
         <div className="ss-job-blockers">
-          <ShieldAlert size={14} aria-hidden="true" />
-          <span>
-            <b>Blocking payment:</b> {job.blockers.join(" · ")}
-          </span>
+          <AlertCircle size={14} aria-hidden="true" />
+          <div>
+            <b>Holding up payment:</b>
+            <ul className="ss-blocker-list">
+              {job.blockers.map((b, i) => (
+                <li key={i}>{b}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
+      {/* Compliance detail expand */}
       {hasGaps && open && (
         <div className="ss-job-coverage">
           <CompliancePanel result={job.compliance} compact />
         </div>
       )}
 
+      {/* Actions */}
       <div className="ss-job-actions">
         {hasGaps ? (
           <>
             <button type="button" className="ss-button" onClick={onFixCoverage}>
-              <ShieldCheck size={15} /> Review coverage
+              <ShieldCheck size={15} /> Fix coverage gaps
+              <ArrowRight size={14} />
             </button>
             <button type="button" className="ss-button soft" onClick={() => setOpen((v) => !v)}>
               {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-              {open ? "Hide gaps" : "View gaps"}
+              {open ? "Hide detail" : "View gaps"}
             </button>
-            <button type="button" className="ss-button warn" onClick={onSend}>
-              <Send size={15} /> Send anyway
+            <button type="button" className="ss-button soft" onClick={onSend}>
+              <Upload size={15} /> Upload document
             </button>
           </>
-        ) : job.status === "covered_sent" ? (
+        ) : isClear ? (
           <>
             <span className="ss-job-done">
-              <CheckCircle2 size={15} /> Delivered {formatShortDate(job.lastSend.sentAt)} — clear to bill
+              <CheckCircle2 size={15} />
+              Delivered {formatShortDate(job.lastSend.sentAt)} — clear for payment
             </span>
             <button type="button" className="ss-button soft" onClick={onSend}>
-              <RefreshCw size={15} /> Resend
-            </button>
-          </>
-        ) : (
-          <>
-            <button type="button" className="ss-button" onClick={onSend}>
-              <Send size={15} />
-              {job.status === "needs_resend" ? "Resend COI" : "Send COI"}
-              <ArrowRight size={14} />
+              <RefreshCw size={15} /> Resend COI
             </button>
             <button
               type="button"
               className="ss-mini-btn"
               onClick={onEditHolder}
               aria-label={`Edit ${job.gcName} requirements`}
-              title="Edit GC & requirements"
+              title="Edit requirements"
+            >
+              <SquarePen size={16} />
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="ss-button" onClick={onSend}>
+              <Send size={15} />
+              {job.status === "needs_resend" ? "Send updated COI" : "Send COI to GC"}
+              <ArrowRight size={14} />
+            </button>
+            <button type="button" className="ss-button soft" onClick={onSend}>
+              <Upload size={15} /> Upload document
+            </button>
+            <button
+              type="button"
+              className="ss-mini-btn"
+              onClick={onEditHolder}
+              aria-label={`Edit ${job.gcName} requirements`}
+              title="Edit requirements"
             >
               <SquarePen size={16} />
             </button>
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function DocRow({ doc }) {
+  const statusClass =
+    doc.status === "present"
+      ? "present"
+      : doc.status === "expiring"
+      ? "expiring"
+      : "missing";
+
+  const Icon =
+    doc.status === "present"
+      ? CheckCircle2
+      : doc.status === "expiring"
+      ? Clock
+      : FileX2;
+
+  return (
+    <div className={`ss-doc-row ss-doc-row--${statusClass}`}>
+      <Icon size={14} aria-hidden="true" />
+      <span className="ss-doc-name">{doc.label}</span>
+      {doc.detail && <span className="ss-doc-detail">{doc.detail}</span>}
     </div>
   );
 }
