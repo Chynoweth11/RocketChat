@@ -150,78 +150,80 @@ export default function PoliciesView({
         </div>
       </section>
 
-      <section className="ss-card ss-policies-list">
-        <Section
-          title="Policy list"
-          sub={`${filteredPolicies.length} ${filteredPolicies.length === 1 ? "policy" : "policies"} shown`}
-        />
-
-        {policies.length > 0 && (
-          <>
-            <div className="ss-search">
-              <Search size={16} className="ss-search-icon" aria-hidden="true" />
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by policy, carrier, or number..."
-                aria-label="Search policies"
-              />
-            </div>
-
-            <div className="ss-chip-group">
-              {FILTERS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`ss-chip ${filter === item.id ? "active" : ""}`}
-                  aria-pressed={filter === item.id}
-                  onClick={() => setFilter(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {filteredPolicies.length === 0 && (
-          <div className="ss-empty" style={{ minHeight: 170 }}>
-            <Search size={28} />
-            <h2>No matching policies</h2>
-            <p>Try a different search or filter to find the policy you need.</p>
-          </div>
-        )}
-
-        {filteredPolicies.map((policy) => (
-          <PolicyRow
-            key={policy.id}
-            policy={policy}
-            selected={policyForDetail && policy.id === policyForDetail.id}
-            onClick={() => onSelectPolicy(policy.id)}
+      <div className="ss-policies-body">
+        <section className="ss-card ss-policies-list">
+          <Section
+            title="Policy list"
+            sub={`${filteredPolicies.length} ${filteredPolicies.length === 1 ? "policy" : "policies"} shown`}
           />
-        ))}
-      </section>
 
-      <section className="ss-card ss-policies-detail">
-        {policyForDetail ? (
-          <PolicyDetail
-            policy={policyForDetail}
-            onRenew={() => onRenew(policyForDetail.id)}
-            onFindSavings={() => onFindSavings(policyForDetail.id)}
-            onSend={onSend}
-            isRenewing={renewingId === policyForDetail.id}
-            carrierConnections={carrierConnections}
-            onManageConnections={onManageConnections}
-          />
-        ) : (
-          <div className="ss-empty" style={{ minHeight: 220 }}>
-            <AlertTriangle size={28} />
-            <h2>No policy selected</h2>
-            <p>Add or select a policy to view full coverage details.</p>
-          </div>
-        )}
-      </section>
+          {policies.length > 0 && (
+            <>
+              <div className="ss-search">
+                <Search size={16} className="ss-search-icon" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search by policy, carrier, or number..."
+                  aria-label="Search policies"
+                />
+              </div>
+
+              <div className="ss-chip-group">
+                {FILTERS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`ss-chip ${filter === item.id ? "active" : ""}`}
+                    aria-pressed={filter === item.id}
+                    onClick={() => setFilter(item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {filteredPolicies.length === 0 && (
+            <div className="ss-empty" style={{ minHeight: 170 }}>
+              <Search size={28} />
+              <h2>No matching policies</h2>
+              <p>Try a different search or filter to find the policy you need.</p>
+            </div>
+          )}
+
+          {filteredPolicies.map((policy) => (
+            <PolicyRow
+              key={policy.id}
+              policy={policy}
+              selected={policyForDetail && policy.id === policyForDetail.id}
+              onClick={() => onSelectPolicy(policy.id)}
+            />
+          ))}
+        </section>
+
+        <section className="ss-card ss-policies-detail">
+          {policyForDetail ? (
+            <PolicyDetail
+              policy={policyForDetail}
+              onRenew={() => onRenew(policyForDetail.id)}
+              onFindSavings={() => onFindSavings(policyForDetail.id)}
+              onSend={onSend}
+              isRenewing={renewingId === policyForDetail.id}
+              carrierConnections={carrierConnections}
+              onManageConnections={onManageConnections}
+            />
+          ) : (
+            <div className="ss-empty" style={{ minHeight: 220 }}>
+              <AlertTriangle size={28} />
+              <h2>No policy selected</h2>
+              <p>Add or select a policy to view full coverage details.</p>
+            </div>
+          )}
+        </section>
+      </div>
 
       {upcoming.length > 0 && (
         <section className="ss-card ss-span">
