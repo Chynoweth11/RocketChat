@@ -686,13 +686,13 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px 6px 11px;
+  padding: 6px 8px 6px 12px;
   border-radius: 999px;
-  border: 1px solid #f5c884;
-  background: #fff7ea;
-  color: #9a5b09;
-  font-size: 12px;
-  font-weight: 800;
+  border: 1px solid #ecd49a;
+  background: #fdf6e7;
+  color: #8c6014;
+  font-size: 11.5px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -4271,12 +4271,14 @@ h1, h2, h3 {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #fff0ee;
+  color: #b0392f;
+  border: 1px solid #f3cac4;
   font-size: 12px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 100px;
+  box-shadow: 0 1px 2px rgba(176, 57, 47, 0.08);
 }
 
 /* =====================================================
