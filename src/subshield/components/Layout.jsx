@@ -1,5 +1,35 @@
-import { Bell, Building2, Camera, History, Shield, ShieldCheck, User } from "lucide-react";
-import { getStatus } from "../utils.js";
+import {
+  ArrowRight,
+  BadgeDollarSign,
+  Bell,
+  Beaker,
+  CalendarClock,
+  Command,
+  FileCheck2,
+  FolderOpen,
+  History,
+  LayoutDashboard,
+  Search,
+  Settings,
+  Shield,
+  ShieldCheck,
+  Upload,
+  UserRound,
+} from "lucide-react";
+import { formatMoney, getStatus } from "../utils.js";
+
+const NAV_ITEMS = [
+  { id: "dashboard", label: "Command center", icon: LayoutDashboard, group: "Workspace" },
+  { id: "policies", label: "Policies", icon: ShieldCheck, group: "Coverage" },
+  { id: "savings", label: "Savings", icon: BadgeDollarSign, group: "Coverage" },
+  { id: "renewals", label: "Renewals", icon: CalendarClock, group: "Coverage" },
+  { id: "certificates", label: "Certificates", icon: FileCheck2, group: "Operations" },
+  { id: "documents", label: "Documents", icon: FolderOpen, group: "Operations" },
+  { id: "activity", label: "Activity", icon: History, group: "Operations" },
+  { id: "settings", label: "Settings", icon: Settings, group: "Admin" },
+];
+
+const NAV_GROUPS = ["Workspace", "Coverage", "Operations", "Admin"];
 
 export function Brand() {
   return (
@@ -9,7 +39,7 @@ export function Brand() {
       </span>
       <div>
         <b>SubShield</b>
-        <small className="ss-small">Compliance vault</small>
+        <small className="ss-small">Business insurance, handled</small>
       </div>
     </div>
   );
@@ -18,39 +48,30 @@ export function Brand() {
 export function Sidebar({
   view,
   setView,
-  docCount,
   upcoming,
-  criticalCount,
-  onSend,
+  potentialSavings,
+  savingsCount,
+  onReviewSavings,
 }) {
   return (
     <aside className="ss-sidebar">
       <Brand />
       <nav aria-label="Primary">
-        <NavButton
-          active={view === "vault"}
-          icon={ShieldCheck}
-          label="Vault"
-          onClick={() => setView("vault")}
-        />
-        <NavButton
-          active={view === "contractors"}
-          icon={Building2}
-          label="GCs"
-          onClick={() => setView("contractors")}
-        />
-        <NavButton
-          active={view === "activity"}
-          icon={History}
-          label="Activity"
-          onClick={() => setView("activity")}
-        />
-        <NavButton
-          active={view === "profile"}
-          icon={User}
-          label="Profile"
-          onClick={() => setView("profile")}
-        />
+        {NAV_GROUPS.map((group) => (
+          <div className="ss-nav-group" key={group}>
+            <span className="ss-nav-label">{group}</span>
+            {NAV_ITEMS.filter((item) => item.group === group).map((item) => (
+              <NavButton
+                key={item.id}
+                active={view === item.id}
+                icon={item.icon}
+                label={item.label}
+                badge={item.id === "savings" && savingsCount > 0 ? savingsCount : null}
+                onClick={() => setView(item.id)}
+              />
+            ))}
+          </div>
+        ))}
       </nav>
 
       {upcoming && upcoming.length > 0 && (
@@ -75,23 +96,37 @@ export function Sidebar({
 
       <div className="ss-side-card">
         <span className="ss-eyebrow">
-          {criticalCount > 0 ? "Action needed" : "Package ready"}
+          {potentialSavings > 0 ? "Savings found" : "All optimized"}
         </span>
-        <strong>{docCount} files</strong>
+        <strong>
+          {potentialSavings > 0 ? `${formatMoney(potentialSavings)}/yr` : "You're set"}
+        </strong>
         <p>
-          {criticalCount > 0
-            ? `${criticalCount} polic${criticalCount === 1 ? "y" : "ies"} need attention before routing.`
-            : "Original carrier-issued documents are ready to route."}
+          {potentialSavings > 0
+            ? "We found lower-cost options on your current coverage. Review and switch in a few clicks."
+            : "No new savings right now. We'll keep watching your renewals and the market."}
         </p>
-        <button className="ss-button" onClick={onSend}>
-          Send COI
+        <button className="ss-button" onClick={onReviewSavings}>
+          {potentialSavings > 0 ? "Review savings" : "View savings center"}
+          <ArrowRight size={15} />
         </button>
+      </div>
+
+      <div className="ss-account-card">
+        <span className="ss-account-avatar" aria-hidden="true">
+          <UserRound size={15} />
+        </span>
+        <div>
+          <b>Jordan Rivera</b>
+          <small>SubShield Tile Co.</small>
+        </div>
+        <em>Growth</em>
       </div>
     </aside>
   );
 }
 
-export function NavButton({ active, icon: Icon, label, onClick }) {
+export function NavButton({ active, icon: Icon, label, onClick, badge }) {
   return (
     <button
       type="button"
@@ -101,22 +136,31 @@ export function NavButton({ active, icon: Icon, label, onClick }) {
     >
       <Icon size={19} />
       <span>{label}</span>
+      {badge ? <span className="ss-nav-badge">{badge}</span> : null}
     </button>
   );
 }
 
-export function Header({ view, onScan, onActivity, unread }) {
+export function Header({ view, onUpload, onActivity, unread }) {
   const titles = {
-    vault: "Document Vault",
-    contractors: "GC Directory",
-    activity: "Activity Log",
-    profile: "Company Profile",
+    dashboard: "Dashboard",
+    policies: "My Insurance",
+    savings: "Lower My Insurance",
+    renewals: "Renewals",
+    certificates: "Certificates",
+    documents: "Documents",
+    activity: "Activity",
+    settings: "Settings",
   };
   const eyebrow = {
-    vault: "Subcontractor compliance",
-    contractors: "Saved certificate holders",
-    activity: "What's happened",
-    profile: "Account & preferences",
+    dashboard: "Insurance command center",
+    policies: "Coverage, premiums, deductibles, and renewals",
+    savings: "Find better rates through licensed coverage partners",
+    renewals: "Never miss a renewal deadline",
+    certificates: "Send and track certificates of insurance",
+    documents: "Declarations, certificates, endorsements, and quotes",
+    activity: "A complete record of every insurance action",
+    settings: "Account, team, alerts, and workspace controls",
   };
 
   return (
@@ -126,13 +170,23 @@ export function Header({ view, onScan, onActivity, unread }) {
         <h1>{titles[view]}</h1>
       </div>
       <div className="ss-top-actions">
+        <span className="ss-top-chip demo">
+          <Beaker size={14} /> Demo data
+        </span>
+        <span className="ss-top-chip">
+          <Command size={14} /> Synced Jun 3, 2026
+        </span>
+        <label className="ss-global-search">
+          <Search size={15} />
+          <input type="search" placeholder="Search" aria-label="Search workspace" />
+          <kbd>Ctrl K</kbd>
+        </label>
         <button
           type="button"
-          className="ss-icon-button"
-          onClick={onScan}
-          aria-label="Vault a document"
+          className="ss-button soft ss-upload-btn"
+          onClick={onUpload}
         >
-          <Camera size={18} />
+          <Upload size={16} /> Upload insurance
         </button>
         <button
           type="button"
@@ -160,11 +214,12 @@ export function Section({ title, sub, extra }) {
   );
 }
 
-export function Info({ label, value }) {
+export function Info({ label, value, hint }) {
   return (
     <div className="ss-info">
       <span>{label}</span>
       <b>{value}</b>
+      {hint && <small className="ss-info-hint">{hint}</small>}
     </div>
   );
 }

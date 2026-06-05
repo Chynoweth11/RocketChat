@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { X } from "lucide-react";
 
 /**
@@ -10,15 +10,40 @@ import { X } from "lucide-react";
  */
 export default function Modal({ title, subtitle, children, onClose }) {
   const closeRef = useRef(null);
+  const modalRef = useRef(null);
+  const previousFocusRef = useRef(null);
+  const titleId = useId();
 
   useEffect(() => {
     const onKey = (event) => {
       if (event.key === "Escape") onClose();
+      if (event.key !== "Tab") return;
+
+      const focusables = modalRef.current?.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables?.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
 
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    previousFocusRef.current = document.activeElement;
 
     // Move focus to the close button so keyboard users land here.
     closeRef.current?.focus();
@@ -26,6 +51,7 @@ export default function Modal({ title, subtitle, children, onClose }) {
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
+      previousFocusRef.current?.focus?.();
     };
   }, [onClose]);
 
@@ -38,10 +64,10 @@ export default function Modal({ title, subtitle, children, onClose }) {
       className="ss-modal-bg"
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={titleId}
       onClick={onBackdropClick}
     >
-      <section className="ss-modal">
+      <section className="ss-modal" ref={modalRef}>
         <button
           ref={closeRef}
           className="ss-close"
@@ -50,7 +76,7 @@ export default function Modal({ title, subtitle, children, onClose }) {
         >
           <X size={18} />
         </button>
-        <h2>{title}</h2>
+        <h2 id={titleId}>{title}</h2>
         {subtitle && <p className="ss-muted">{subtitle}</p>}
         {children}
       </section>

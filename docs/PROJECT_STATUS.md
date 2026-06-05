@@ -1,51 +1,43 @@
-# SubShield project status
+# SubShield Project Status
 
-_Last refreshed when the prototype was restructured into a component tree._
+## Product vision
 
-## Current active app
+**Rocket Money for business insurance.** Review a company's commercial insurance,
+track renewals, surface savings, compare current vs. better options, switch carriers,
+send certificates, and keep all paperwork organized. Brokers/partners are a
+background network — not the headline feature.
 
-The active app is `src/subshield/SubShieldComplete.jsx`, mounted via
-`src/App.jsx`. There is no longer a backup at `src/components/SubShield.jsx`
-— the old prototype was removed and replaced by the new component tree.
+## Current app
 
-## Architecture
+Main entry: `src/subshield/SubShieldComplete.jsx`
 
-- `src/subshield/data.js` — initial mock data (policies, GCs, activity)
-- `src/subshield/utils.js` — pure helpers (storage, scoring, dates, ids)
-- `src/subshield/icons.js` — policy → lucide icon mapping
-- `src/subshield/styles.css` — unified design system (replaces the old
-  `styles.css` + `debug.css` + `premium.css` trio)
-- `src/subshield/SubShieldComplete.jsx` — orchestrator
-- `src/subshield/components/` — view + modal components
+## Navigation / surfaces
 
-The previous three CSS files have been consolidated into a single
-organized stylesheet with documented sections, design tokens on
-`.ss-app`, and proper responsive breakpoints.
+1. **Dashboard** (`DashboardView`) — savings-forward executive overview + priority queue
+2. **Policies** (`PoliciesView`) — coverage, premium, deductible, limits, renewals
+3. **Savings** (`SavingsView`) — instant rate check + current-vs-recommended comparison + accept/switch
+4. **Certificates** (`CertificatesView`) — COI sends, holders, delivery history
+5. **Documents** (`DocumentsView`) — declarations, certificates, endorsements, renewal quotes, compliance files
+6. **Activity** (`ActivityView`) — audit trail
+7. **Settings** (`SettingsView`) — full SaaS settings center
 
-## What works now
+## Key workflows (end-to-end)
 
-- Policy vault with score, status pills, and per-policy detail
-- Renew action with loading state, computed expiry, activity log entry
-- Lower-bill / rate-shop action with savings calc + activity log
-- Document scan / vault flow (umbrella add or re-vault)
-- GC directory: browse, edit, remove, add a new GC (full form + validation)
-- Certificate holder editing
-- COI package review modal with cover email preview
-- Simulated package send with loading state + success modal + toast
-- Activity log (latest 30 events, persisted)
-- Profile view with stats and confirmable demo reset
-- Local storage persistence (`subshield.complete.v2`)
-- Accessible modals (ESC, backdrop, focus)
-- Responsive layout (≤900px tablet, ≤560px phone)
-- Toast notifications
+- Upload insurance (`ScanModal`) → creates/updates a policy + files a declaration document
+- Find better rate → simulates a partner quote, attaches `alternateQuote`, logs a quote doc + request
+- Accept & switch → updates the policy carrier/premium/deductible, records realized savings
+- Coverage gaps → recommends missing coverage, deep-links into Add Policy prefilled
+- Send certificate → records a COI send + files a certificate document
 
-## Next production work
+## Data model
 
-- Real authentication (Clerk, Supabase, etc.)
-- Real PDF upload + object storage
-- OCR / document extraction service
-- Outbound email delivery integration
-- Backend database tables
-- Audit logs
-- Stripe billing
-- E2E tests
+Storage key: `subshield.complete.v5`
+
+Tracked entities: company, policies (with `deductible`), savingsOpportunities
+(with `alternateQuote`), quoteRequests, documents, contractors, coiSends, brokers,
+partners, activity, settings, preferences.
+
+## Validation
+
+- `npm run lint` passes
+- `npm run build` passes

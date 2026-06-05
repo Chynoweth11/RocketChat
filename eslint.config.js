@@ -18,6 +18,8 @@ export default [
         window: "readonly",
         document: "readonly",
         navigator: "readonly",
+        Blob: "readonly",
+        URL: "readonly",
         performance: "readonly",
         requestAnimationFrame: "readonly",
         cancelAnimationFrame: "readonly",

@@ -99,7 +99,7 @@ These are intentionally out of scope for the frontend prototype:
 - Outbound email delivery (Resend, Postmark, SendGrid)
 - Database tables for policies, contractors, projects, activity
 - Audit logs for compliance traceability
-- Stripe billing
+- Workspace subscription provisioning
 - E2E tests
 
 The state shape in `data.js` and the helpers in `utils.js` are designed to

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Mail, Send } from "lucide-react";
+import { Check, FileCheck2, Mail, Send, ShieldCheck } from "lucide-react";
 import Modal from "./Modal.jsx";
 import CopyButton from "./CopyButton.jsx";
 import { countDocuments } from "../utils.js";
@@ -23,26 +23,52 @@ export default function SendModal({
   const handleSend = async () => {
     if (sending) return;
     setSending(true);
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((resolve) => setTimeout(resolve, 700));
     onSend();
   };
 
   const firstName = contractor.contact.split(" ")[0] || "team";
   const coverEmail =
     `To: ${contractor.email}\n` +
-    `Subject: COI Package — ${finalProject}\n\n` +
+    `Subject: COI Package - ${finalProject}\n\n` +
     `Hello ${firstName}, please see the attached verified insurance package for ${finalProject}. ` +
-    `All documents are originals issued by our carriers and licensed broker.`;
+    "All documents are originals issued by our carriers and licensed insurance partners.";
 
   return (
     <Modal
-      title="Review COI package"
-      subtitle={`${docs} verified files · routed to ${contractor.email}`}
+      title="Send COI package"
+      subtitle={`${docs} verified files ready for ${contractor.name}`}
       onClose={onClose}
     >
+      <div className="ss-modal-brief">
+        <div>
+          <span className="ss-eyebrow">Delivery review</span>
+          <b>{contractor.email}</b>
+          <small>Logged delivery, reusable holder wording, verified document package.</small>
+        </div>
+        <span>
+          <ShieldCheck size={15} /> Ready
+        </span>
+      </div>
+
+      <div className="ss-send-summary">
+        <div>
+          <small>Recipient</small>
+          <b>{contractor.name}</b>
+        </div>
+        <div>
+          <small>Project</small>
+          <b>{finalProject || "Select project"}</b>
+        </div>
+        <div>
+          <small>Files</small>
+          <b>{docs}</b>
+        </div>
+      </div>
+
       <div className="ss-field-grid">
         <label className="ss-field">
-          <span className="ss-field-label">General contractor</span>
+          <span className="ss-field-label">Recipient company</span>
           <select
             value={contractor.id}
             onChange={(event) => onContractorChange(event.target.value)}
@@ -74,7 +100,7 @@ export default function SendModal({
       </div>
 
       <label className="ss-field">
-        <span className="ss-field-label">Or create new project</span>
+        <span className="ss-field-label">New project name</span>
         <input
           value={newProject}
           onChange={(event) => onNewProjectChange(event.target.value)}
@@ -84,20 +110,20 @@ export default function SendModal({
 
       <div className="ss-review">
         <div className="ss-review-box">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <b>Certificate holder</b>
+          <div className="ss-review-box-head">
+            <b>Certificate holder wording</b>
             <CopyButton text={contractor.holder} small />
           </div>
           <pre>{contractor.holder}</pre>
         </div>
         <div className="ss-review-box">
-          <b>Requirements</b>
+          <b>GC requirements</b>
           <p>{contractor.requirements || "Standard package accepted."}</p>
         </div>
       </div>
 
       <div className="ss-email">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+        <div className="ss-email-head">
           <b>
             <Mail size={16} /> Cover email preview
           </b>
@@ -107,25 +133,29 @@ export default function SendModal({
           <strong>To:</strong> {contractor.email}
         </p>
         <p>
-          <strong>Subject:</strong> COI Package — {finalProject}
+          <strong>Subject:</strong> COI Package - {finalProject}
         </p>
-        <p style={{ marginTop: 8 }}>
-          Hello {firstName}, please see the attached verified insurance package
-          for {finalProject}. All documents are originals issued by our
-          carriers and licensed broker.
+        <p>
+          Hello {firstName}, please see the attached verified insurance package for {finalProject}.
+          All documents are originals issued by our carriers and licensed insurance partners.
         </p>
       </div>
 
-      <div>
+      <div className="ss-modal-doc-list">
+        <div className="ss-modal-list-head">
+          <FileCheck2 size={15} />
+          <b>Verified attachments</b>
+          <span>{docs} files</span>
+        </div>
         {policies.map((policy) =>
           policy.documents.map((doc) => (
-            <DocumentRow key={`${policy.id}-${doc}`} name={`${policy.name} · ${doc}`} />
+            <DocumentRow key={`${policy.id}-${doc}`} name={`${policy.name} - ${doc}`} />
           ))
         )}
       </div>
 
       <footer className="ss-footer">
-        <span className="ss-footer-info">{docs} verified files ready</span>
+        <span className="ss-footer-info">{docs} verified files ready for delivery</span>
         <button
           type="button"
           className="ss-button"
@@ -134,7 +164,7 @@ export default function SendModal({
         >
           {sending ? (
             <>
-              <span className="ss-spinner" /> Routing…
+              <span className="ss-spinner" /> Routing...
             </>
           ) : (
             <>
@@ -153,7 +183,7 @@ function DocumentRow({ name }) {
       <span className="ss-pdf" aria-hidden="true">PDF</span>
       <div className="ss-doc-body">
         <b>{name}</b>
-        <small>Original carrier-issued document · verified</small>
+        <small>Original carrier-issued document - verified</small>
       </div>
       <em className="ss-verified">
         <Check size={13} /> Verified
