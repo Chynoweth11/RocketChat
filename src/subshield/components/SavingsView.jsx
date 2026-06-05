@@ -806,10 +806,10 @@ function PolicyServicesCard({ onNavigate, partnerNames, potentialSavings }) {
       icon: CalendarClock,
     },
     {
-      key: "billing",
+      key: "workspace",
       nav: "settings",
-      title: "Manage billing and account",
-      detail: "Update billing contacts, payment methods, and workspace settings.",
+      title: "Manage workspace settings",
+      detail: "Update alerts, team access, document preferences, and COI templates.",
       icon: Handshake,
     },
   ];

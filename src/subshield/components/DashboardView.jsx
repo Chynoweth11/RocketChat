@@ -69,7 +69,7 @@ function greetingFor(date = new Date()) {
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 // Projected monthly pace: we only know the annual premium until a backend
-// supplies real billing history, so this charts an even 1/12 distribution
+// supplies real spend history, so this charts an even 1/12 distribution
 // across the trailing six months ending with the current month. Labels are
 // derived from today's date so they never go stale.
 function buildMonthlySpend(totalPremium, now = new Date()) {
@@ -137,7 +137,7 @@ export default function DashboardView({
               <p className="ss-muted">
                 Keep every policy, certificate, and renewal in one place — so you can
                 prove coverage in seconds, never miss an expiration, and never let
-                paperwork hold up a job or a payment.
+                paperwork hold up approval or field work.
               </p>
               <div className="ss-row" style={{ marginTop: 18 }}>
                 <button type="button" className="ss-button" onClick={onUpload}>
@@ -201,14 +201,36 @@ export default function DashboardView({
                 </div>
               ))}
             </div>
-            <p className="ss-fine">Projected at an even monthly pace from your annual premium.</p>
-
-            <div className="ss-row">
-              <button type="button" className="ss-button" onClick={onReviewSavings}>
-                <PiggyBank size={16} /> Review savings with partners
+            <div className="ss-dash-action-rail" aria-label="Dashboard primary actions">
+              <button type="button" className="ss-action-tile primary" onClick={onReviewSavings}>
+                <span className="ss-action-icon">
+                  <PiggyBank size={16} />
+                </span>
+                <span>
+                  <b>Review savings</b>
+                  <small>{formatMoney(potentialSavings)}/yr identified</small>
+                </span>
+                <ArrowRight size={15} />
               </button>
-              <button type="button" className="ss-button soft" onClick={onOpenPolicies}>
-                <Shield size={16} /> View policies
+              <button type="button" className="ss-action-tile" onClick={onOpenPolicies}>
+                <span className="ss-action-icon">
+                  <Shield size={16} />
+                </span>
+                <span>
+                  <b>Open policies</b>
+                  <small>Limits, deductibles, renewals</small>
+                </span>
+                <ArrowRight size={15} />
+              </button>
+              <button type="button" className="ss-action-tile" onClick={onUpload}>
+                <span className="ss-action-icon">
+                  <Upload size={16} />
+                </span>
+                <span>
+                  <b>Upload document</b>
+                  <small>Declarations or certificates</small>
+                </span>
+                <ArrowRight size={15} />
               </button>
             </div>
           </div>

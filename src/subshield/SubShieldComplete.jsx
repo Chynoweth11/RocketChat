@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
-  buildJobs,
   countDocuments,
   dateFromToday,
   estimateSavings,
@@ -24,7 +23,6 @@ import {
   policyLabelFromType,
   readStoredData,
   savingsForOpportunity,
-  summarizeJobs,
   totalTrackedPremium,
   writeStoredData,
 } from "./utils.js";
@@ -38,7 +36,6 @@ import DashboardView from "./components/DashboardView.jsx";
 const PoliciesView = lazy(() => import("./components/PoliciesView.jsx"));
 const SavingsView = lazy(() => import("./components/SavingsView.jsx"));
 const CertificatesView = lazy(() => import("./components/CertificatesView.jsx"));
-const GetPaidView = lazy(() => import("./components/GetPaidView.jsx"));
 const DocumentsView = lazy(() => import("./components/DocumentsView.jsx"));
 const SettingsView = lazy(() => import("./components/SettingsView.jsx"));
 const ConnectionsView = lazy(() => import("./components/ConnectionsView.jsx"));
@@ -253,12 +250,6 @@ export default function SubShieldComplete() {
     return Math.max(0, holders - recentSends);
   }, [data.contractors, data.coiSends]);
 
-  const jobs = useMemo(
-    () => buildJobs(data.contractors || [], policies, data.coiSends || []),
-    [data.contractors, policies, data.coiSends]
-  );
-  const jobsSummary = useMemo(() => summarizeJobs(jobs), [jobs]);
-
   const score = useMemo(() => getComplianceScore(policies), [policies]);
   const docs = useMemo(() => countDocuments(policies), [policies]);
   const totalPremium = useMemo(() => totalTrackedPremium(policies), [policies]);
@@ -329,7 +320,6 @@ export default function SubShieldComplete() {
       policies: "Policies",
       savings: "Savings",
       certificates: "Certificates",
-      getpaid: "Get Paid",
       connections: "Connections",
       documents: "Documents",
       settings: "Settings",
@@ -1476,17 +1466,6 @@ export default function SubShieldComplete() {
               onConnect={connectCarrier}
               onDisconnect={disconnectCarrier}
               onSync={syncCarrier}
-            />
-          )}
-          {view === "getpaid" && (
-            <GetPaidView
-              jobs={jobs}
-              summary={jobsSummary}
-              hasHolders={data.contractors.length > 0}
-              onSend={(contractor, project) => openSend(contractor, project)}
-              onFixCoverage={() => setView("savings")}
-              onEditHolder={openEdit}
-              onAddHolder={() => setModal("add-gc")}
             />
           )}
           </Suspense>

@@ -1294,6 +1294,85 @@ textarea {
   flex-shrink: 0;
 }
 
+.ss-dash-action-rail {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: minmax(236px, 1.16fr) repeat(2, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.ss-action-tile {
+  position: relative;
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(30, 41, 59, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #172033;
+  padding: 16px 42px 16px 16px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.ss-action-tile:hover {
+  transform: translateY(-1px);
+  border-color: rgba(30, 41, 59, 0.18);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.ss-action-tile.primary {
+  border-color: rgba(182, 138, 75, 0.34);
+  background: linear-gradient(180deg, #253247, #111a28);
+  color: #fffdf8;
+  box-shadow: 0 16px 30px rgba(17, 24, 39, 0.18);
+}
+
+.ss-action-tile > svg:last-child {
+  position: absolute;
+  right: 15px;
+  color: currentColor;
+}
+
+.ss-action-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(47, 99, 233, 0.1);
+  color: var(--brand);
+}
+
+.ss-action-tile.primary .ss-action-icon {
+  background: rgba(255, 253, 248, 0.12);
+  color: #f4d9a7;
+}
+
+.ss-action-tile b {
+  display: block;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 760;
+}
+
+.ss-action-tile small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.ss-action-tile.primary small {
+  color: rgba(255, 253, 248, 0.68);
+}
+
 .ss-dash-account-row {
   border-top: 1px solid var(--line-soft);
   padding: 11px 0;
@@ -3399,6 +3478,112 @@ textarea {
   color: #b0bad0;
 }
 
+.ss-score-card {
+  min-width: 260px;
+  max-width: 340px;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(30, 41, 59, 0.11);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(15, 23, 42, 0.03), rgba(255, 255, 255, 0.86)),
+    #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ss-score-topline,
+.ss-score-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ss-score-topline span,
+.ss-score-foot span {
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ss-score-topline em {
+  border: 1px solid #cfe2d9;
+  border-radius: 999px;
+  background: #eef8f3;
+  color: #2f6d58;
+  padding: 4px 9px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ss-score-card.warning .ss-score-topline em {
+  border-color: #ead8b9;
+  background: #fff8ea;
+  color: #805820;
+}
+
+.ss-score-card.danger .ss-score-topline em {
+  border-color: #edd0cc;
+  background: #fff2f0;
+  color: #87413c;
+}
+
+.ss-score-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #142033;
+}
+
+.ss-score-main svg {
+  align-self: center;
+  color: #486a87;
+}
+
+.ss-score-main strong {
+  font-size: 46px;
+  line-height: 0.95;
+  font-weight: 820;
+  letter-spacing: -0.04em;
+}
+
+.ss-score-main span {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ss-score-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1f6;
+}
+
+.ss-score-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #486a87, #b68a4b);
+}
+
+.ss-score-card.success .ss-score-meter span {
+  background: linear-gradient(90deg, #486a87, #2f6d58);
+}
+
+.ss-score-card.warning .ss-score-meter span {
+  background: linear-gradient(90deg, #b68a4b, #d69b36);
+}
+
+.ss-score-card.danger .ss-score-meter span {
+  background: linear-gradient(90deg, #9e514b, #d26a5f);
+}
+
 @media (max-width: 1240px) {
   .ss-layout {
     grid-template-columns: 224px minmax(0, 1fr);
@@ -3409,6 +3594,7 @@ textarea {
   }
 
   .ss-dash-top-grid,
+  .ss-dash-action-rail,
   .ss-dash-save-grid,
   .ss-coverage-flow-grid {
     grid-template-columns: 1fr;
@@ -5483,8 +5669,8 @@ h1, h2, h3 {
   background: #ef4444;
 }
 
-/* ───── Get Paid view ───── */
-/* ── Payment Readiness (Get Paid) ──────────────────────────────────── */
+/* ───── Legacy readiness styles ───── */
+/* ── Readiness detail styles ───────────────────────────────────────── */
 
 .ss-pr-header .ss-command-metrics {
   margin-top: 16px;
@@ -6138,7 +6324,7 @@ h1, h2, h3 {
   margin-top: 4px;
 }
 
-/* ── Payment Readiness responsive ───────────────────────────────────── */
+/* ── Readiness responsive ────────────────────────────────────────────── */
 @media (max-width: 700px) {
   .ss-pr-context-inner {
     grid-template-columns: 1fr;

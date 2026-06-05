@@ -5,7 +5,6 @@ import {
   FileSignature,
   FileSpreadsheet,
   FileText,
-  Receipt,
   ScrollText,
   Search,
   Trash2,
@@ -41,7 +40,6 @@ const TYPE_ICONS = {
   certificate: FileCheck2,
   endorsement: FileSignature,
   quote: FileBadge,
-  invoice: Receipt,
   policy: FileText,
 };
 
@@ -51,7 +49,6 @@ const FILTERS = [
   { id: "certificate", label: "Certificates" },
   { id: "endorsement", label: "Endorsements" },
   { id: "quote", label: "Quotes" },
-  { id: "invoice", label: "Invoices" },
 ];
 
 export default function DocumentsView({ documents, policies, onUpload, onDelete }) {
@@ -89,7 +86,7 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
       <section className="ss-card ss-span">
         <Section
           title="Document Center"
-          sub="Declarations, certificates, endorsements, quotes, and invoices in one organized place."
+          sub="Declarations, certificates, endorsements, renewal quotes, and compliance files in one organized place."
           extra={
             <div style={{ display: "flex", gap: 8 }}>
               {documents.length > 0 && (

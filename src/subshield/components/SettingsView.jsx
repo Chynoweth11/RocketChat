@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   Building2,
-  CreditCard,
   Database,
   FileText,
   HelpCircle,
@@ -90,7 +89,7 @@ const SETTINGS_GROUPS = [
         id: "roles",
         label: "Roles & Permissions",
         icon: KeyRound,
-        description: "Role access for policies, sends, and billing controls.",
+        description: "Role access for policies, sends, documents, and settings.",
       },
       {
         id: "privacy",
@@ -107,13 +106,13 @@ const SETTINGS_GROUPS = [
     ],
   },
   {
-    label: "Billing and operations",
+    label: "Workspace operations",
     tabs: [
       {
         id: "billing",
-        label: "Billing",
-        icon: CreditCard,
-        description: "Plan, payment method, and invoice history.",
+        label: "Subscription",
+        icon: FileText,
+        description: "Workspace plan, seats, and renewal settings.",
       },
       {
         id: "documents",
@@ -137,7 +136,7 @@ const PERMISSION_LABELS = {
   sendCoi: "Send COI packages",
   manageSettings: "Edit settings",
   manageUsers: "Manage users",
-  manageBilling: "Manage billing",
+  manageBilling: "Manage subscription",
   requestQuotes: "Request quotes",
 };
 
@@ -359,10 +358,7 @@ export default function SettingsView({
         {activeTab === "billing" && (
           <BillingSettings
             billing={settings.billing}
-            paymentMethod={settings.paymentMethod}
-            invoices={settings.invoices}
             onSaveBilling={(next, info) => onSaveSection("billing", next, info)}
-            onSavePayment={(next, info) => onSaveSection("paymentMethod", next, info)}
           />
         )}
 
@@ -773,7 +769,7 @@ function EmailSettings({ initial, onSave }) {
       </div>
       <div className="ss-field-grid">
         <SettingToggle
-          label="Billing notices"
+          label="Subscription notices"
           on={form.billingNotices}
           onToggle={() => setForm((prev) => ({ ...prev, billingNotices: !prev.billingNotices }))}
         />
@@ -1270,35 +1266,9 @@ function RoleSettings({ initial, onSave }) {
   );
 }
 
-function downloadInvoice(invoice, billing) {
-  const lines = [
-    "SubShield Invoice",
-    "===================",
-    `Invoice:  ${invoice.id}`,
-    `Date:     ${formatLongDate(invoice.date)}`,
-    `Plan:     ${billing.planName || "Subscription"}`,
-    `Status:   ${invoice.status}`,
-    "",
-    `Amount due: ${formatMoney(invoice.amount)}`,
-    "",
-    `Billed to: ${billing.billingEmail || ""}`,
-  ];
-  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `subshield-invoice-${invoice.id}.txt`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSavePayment }) {
+function BillingSettings({ billing, onSaveBilling }) {
   const [billingForm, setBillingForm] = useState(billing);
-  const [paymentForm, setPaymentForm] = useState(paymentMethod);
   const [billingErrors, setBillingErrors] = useState({});
-  const [paymentErrors, setPaymentErrors] = useState({});
 
   const monthlyTotal = useMemo(() => {
     const seats = Number(billingForm.seatCount) || 0;
@@ -1310,7 +1280,7 @@ function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSa
   function saveBilling() {
     const nextErrors = {};
     if (!billingForm.planName?.trim()) nextErrors.planName = "Plan name is required.";
-    if (!isEmail(billingForm.billingEmail)) nextErrors.billingEmail = "Valid billing email is required.";
+    if (!isEmail(billingForm.billingEmail)) nextErrors.billingEmail = "Valid admin email is required.";
     if (Number(billingForm.seatCount) < 1) nextErrors.seatCount = "Seat count must be at least 1.";
     setBillingErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
@@ -1322,34 +1292,18 @@ function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSa
         basePrice: Number(billingForm.basePrice),
       },
       {
-        activityTitle: "Billing settings updated",
-        activityBody: "Plan details and billing contacts were updated.",
-        toastTitle: "Billing saved",
-        toastBody: "Subscription and billing settings updated.",
+        activityTitle: "Subscription settings updated",
+        activityBody: "Workspace plan details were updated.",
+        toastTitle: "Subscription saved",
+        toastBody: "Workspace subscription settings updated.",
       }
     );
-  }
-
-  function savePayment() {
-    const nextErrors = {};
-    if (!paymentForm.cardBrand?.trim()) nextErrors.cardBrand = "Card brand is required.";
-    if (!/^\d{4}$/.test(String(paymentForm.last4 || ""))) nextErrors.last4 = "Enter the last 4 digits.";
-    if (!paymentForm.nameOnCard?.trim()) nextErrors.nameOnCard = "Name on card is required.";
-    setPaymentErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
-
-    onSavePayment(paymentForm, {
-      activityTitle: "Payment method updated",
-      activityBody: "Default payment method was updated for future invoices.",
-      toastTitle: "Payment method saved",
-      toastBody: "Card details were updated.",
-    });
   }
 
   return (
     <div className="ss-settings-stack">
       <section className="ss-card">
-        <Section title="Subscription and Billing" sub="Manage plan, seat count, cycle, and renewal settings." />
+        <Section title="Subscription" sub="Manage workspace plan, seat count, cycle, and renewal settings." />
         <div className="ss-field-grid">
           <Field
             label="Plan Name"
@@ -1358,7 +1312,7 @@ function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSa
             onChange={(value) => setBillingForm((prev) => ({ ...prev, planName: value }))}
           />
           <SelectField
-            label="Billing Cycle"
+            label="Plan Cycle"
             value={billingForm.billingCycle}
             options={[
               { value: "monthly", label: "Monthly" },
@@ -1394,7 +1348,7 @@ function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSa
           />
         </div>
         <Field
-          label="Billing Email"
+          label="Workspace Admin Email"
           value={billingForm.billingEmail}
           error={billingErrors.billingEmail}
           onChange={(value) => setBillingForm((prev) => ({ ...prev, billingEmail: value }))}
@@ -1411,97 +1365,8 @@ function BillingSettings({ billing, paymentMethod, invoices, onSaveBilling, onSa
         <div className="ss-footer">
           <span className="ss-footer-info">Plan management updates apply immediately.</span>
           <button type="button" className="ss-button" onClick={saveBilling}>
-            Save billing
+            Save subscription
           </button>
-        </div>
-      </section>
-
-      <section className="ss-card">
-        <Section title="Payment Method" sub="Set your primary billing card." />
-        <div className="ss-field-grid">
-          <Field
-            label="Card Brand"
-            value={paymentForm.cardBrand}
-            error={paymentErrors.cardBrand}
-            onChange={(value) => setPaymentForm((prev) => ({ ...prev, cardBrand: value }))}
-          />
-          <Field
-            label="Card Last 4"
-            value={paymentForm.last4}
-            error={paymentErrors.last4}
-            onChange={(value) => setPaymentForm((prev) => ({ ...prev, last4: value.replace(/[^\d]/g, "").slice(0, 4) }))}
-          />
-        </div>
-        <div className="ss-field-grid">
-          <Field
-            label="Exp Month"
-            value={paymentForm.expMonth}
-            onChange={(value) => setPaymentForm((prev) => ({ ...prev, expMonth: value.replace(/[^\d]/g, "").slice(0, 2) }))}
-          />
-          <Field
-            label="Exp Year"
-            value={paymentForm.expYear}
-            onChange={(value) => setPaymentForm((prev) => ({ ...prev, expYear: value.replace(/[^\d]/g, "").slice(0, 4) }))}
-          />
-        </div>
-        <div className="ss-field-grid">
-          <Field
-            label="Name on Card"
-            value={paymentForm.nameOnCard}
-            error={paymentErrors.nameOnCard}
-            onChange={(value) => setPaymentForm((prev) => ({ ...prev, nameOnCard: value }))}
-          />
-          <Field
-            label="Billing ZIP"
-            value={paymentForm.billingZip}
-            onChange={(value) => setPaymentForm((prev) => ({ ...prev, billingZip: value }))}
-          />
-        </div>
-        <div className="ss-footer">
-          <span className="ss-footer-info">Card details are masked and stored securely.</span>
-          <button type="button" className="ss-button" onClick={savePayment}>
-            Save payment method
-          </button>
-        </div>
-      </section>
-
-      <section className="ss-card">
-        <Section title="Invoices and Billing History" sub="Track previous payments and invoice status." />
-        <div className="ss-settings-table-wrap">
-          <table className="ss-settings-table">
-            <thead>
-              <tr>
-                <th>Invoice</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((invoice) => (
-                <tr key={invoice.id}>
-                  <td>{invoice.id}</td>
-                  <td>{formatLongDate(invoice.date)}</td>
-                  <td>{formatMoney(invoice.amount)}</td>
-                  <td>
-                    <span className={`ss-status ${invoice.status === "paid" ? "success" : invoice.status === "pending" ? "warning" : "danger"}`}>
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="ss-settings-table-actions">
-                    <button
-                      type="button"
-                      className="ss-button soft ss-button-sm"
-                      onClick={() => downloadInvoice(invoice, billingForm)}
-                    >
-                      Download
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </section>
     </div>

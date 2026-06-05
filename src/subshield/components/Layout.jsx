@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeDollarSign,
-  CircleDollarSign,
   Bell,
   Database,
   FileCheck2,
@@ -29,7 +28,6 @@ const NAV_SECTIONS = [
     items: [
       { id: "policies", label: "Policies", icon: ShieldCheck },
       { id: "savings", label: "Savings", icon: BadgeDollarSign },
-      { id: "getpaid", label: "Get Paid", icon: CircleDollarSign },
       { id: "certificates", label: "Certificates", icon: FileCheck2 },
     ],
   },
@@ -203,7 +201,6 @@ export function Header({
     certificates: "Certificates",
     documents: "Documents",
     settings: "Settings",
-    getpaid: "Get Paid",
     connections: "Connections",
   };
   const eyebrow = {
@@ -212,8 +209,7 @@ export function Header({
     savings: "Find better rates through licensed coverage partners",
     certificates: "Send and track certificates of insurance",
     documents: "Declarations, certificates, endorsements, and quotes",
-    settings: "Account, team, billing, and product controls",
-    getpaid: "Payment readiness and coverage status",
+    settings: "Account, team, alerts, and workspace controls",
     connections: "Link carriers to sync policies and verify coverage in real time",
   };
 
