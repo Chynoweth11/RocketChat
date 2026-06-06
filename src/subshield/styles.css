@@ -1599,11 +1599,11 @@ textarea {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
-  min-height: 132px;
-  padding: 18px;
+  min-height: 118px;
+  padding: 16px;
   border: 1px dashed #c9d4e3;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+  border-radius: 16px;
+  background: #f8fbff;
   margin-bottom: 14px;
   transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
@@ -1615,9 +1615,9 @@ textarea {
 }
 
 .ss-pdf-drop-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 15px;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
   background: var(--brand-soft);
@@ -1627,7 +1627,7 @@ textarea {
 
 .ss-pdf-dropzone h3 {
   margin: 0 0 4px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 780;
 }
 
@@ -1681,7 +1681,7 @@ textarea {
 
 .ss-pdf-workspace {
   display: grid;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(250px, 330px) minmax(0, 1fr);
   gap: 14px;
   align-items: start;
 }
@@ -1743,7 +1743,7 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: #ffffff;
-  padding: 14px;
+  padding: 16px;
 }
 
 .ss-pdf-detail-head {
@@ -1751,7 +1751,7 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .ss-pdf-detail-head h3 {
@@ -1767,6 +1767,197 @@ textarea {
   color: var(--muted);
   font-size: 12.5px;
   line-height: 1.5;
+}
+
+.ss-pdf-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ss-pdf-ocr-progress {
+  position: relative;
+  overflow: hidden;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 9px 11px;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+  background: #f4f8ff;
+  color: #244d9f;
+  margin-bottom: 12px;
+}
+
+.ss-pdf-ocr-progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: rgba(37, 99, 235, 0.12);
+  transition: width 0.24s ease;
+}
+
+.ss-pdf-ocr-progress b {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.ss-pdf-review-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.ss-pdf-preview-pane,
+.ss-pdf-review-pane {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.ss-pdf-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-soft);
+}
+
+.ss-pdf-pane-head span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.ss-pdf-frame {
+  display: block;
+  width: 100%;
+  height: 640px;
+  border: 0;
+  background: #eef2f6;
+}
+
+.ss-pdf-preview-empty {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.ss-pdf-preview-empty b {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.ss-pdf-preview-empty span {
+  max-width: 250px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.ss-pdf-review-pane {
+  padding: 14px;
+}
+
+.ss-pdf-review-pane .ss-chip-group {
+  margin-bottom: 12px;
+}
+
+.ss-pdf-field-editor {
+  display: grid;
+  gap: 13px;
+}
+
+.ss-pdf-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ss-pdf-editor-head b {
+  font-size: 14px;
+  font-weight: 780;
+}
+
+.ss-pdf-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ss-pdf-edit-field {
+  display: grid;
+  gap: 6px;
+}
+
+.ss-pdf-edit-field span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 760;
+}
+
+.ss-pdf-edit-field em {
+  font-style: normal;
+  color: #49627f;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 10.5px;
+}
+
+.ss-pdf-edit-field input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 9px 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 610;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-pdf-edit-field input:focus {
+  border-color: #b7c5dd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.ss-pdf-extra-data {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 13px;
+}
+
+.ss-pdf-extra-data > b {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 13px;
+  font-weight: 780;
 }
 
 .ss-pdf-kv {
@@ -1806,7 +1997,7 @@ textarea {
 
 .ss-pdf-text {
   margin: 0;
-  max-height: 560px;
+  max-height: 580px;
   overflow: auto;
   white-space: pre-wrap;
   border: 1px solid var(--line);
@@ -3150,13 +3341,18 @@ textarea {
   }
 
   .ss-pdf-dropzone,
-  .ss-pdf-workspace {
+  .ss-pdf-workspace,
+  .ss-pdf-review-shell {
     grid-template-columns: 1fr;
   }
 
   .ss-pdf-dropzone {
     justify-items: center;
     text-align: center;
+  }
+
+  .ss-pdf-frame {
+    height: 520px;
   }
 
   .ss-pdf-list {
@@ -3349,6 +3545,23 @@ textarea {
   .ss-pdf-kv-row {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .ss-pdf-detail-head {
+    flex-direction: column;
+  }
+
+  .ss-pdf-detail-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ss-pdf-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-pdf-frame {
+    height: 430px;
   }
 
   .ss-modal {

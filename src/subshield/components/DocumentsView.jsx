@@ -36,6 +36,7 @@ export default function DocumentsView({
   onUpload,
   onDelete,
   onExtracted,
+  onUpdateExtraction,
   onDeleteExtraction,
 }) {
   const [query, setQuery] = useState("");
@@ -72,6 +73,7 @@ export default function DocumentsView({
       <PdfExtractorPanel
         extractions={extractions}
         onExtracted={onExtracted}
+        onUpdateExtraction={onUpdateExtraction}
         onDeleteExtraction={onDeleteExtraction}
       />
 

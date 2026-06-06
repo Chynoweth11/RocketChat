@@ -985,7 +985,9 @@ export default function SubShieldComplete() {
           carrier: result.fields?.carrier || "",
           fileType: "PDF",
           sizeKb: Math.max(1, Math.round((result.fileSize || 0) / 1024)),
-          status: result.status === "extracted" ? "verified" : "pending",
+          status: ["extracted", "ocr_extracted"].includes(result.status)
+            ? "verified"
+            : "pending",
           addedBy: firstName || "You",
           uploadedAt: result.extractedAt,
           extractionId: result.id,
@@ -1013,6 +1015,44 @@ export default function SubShieldComplete() {
       "PDF scan complete",
       `${extracted} extracted, ${needsOcr} need OCR, ${failed} failed.`
     );
+  }
+
+  function updatePdfExtraction(id, patch) {
+    const previous = pdfExtractions.find((item) => item.id === id);
+    const nextExtraction = {
+      ...(previous || {}),
+      ...patch,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    const verifiedStatus = ["extracted", "ocr_extracted"].includes(nextExtraction.status)
+      ? "verified"
+      : "pending";
+
+    commit({
+      ...data,
+      pdfExtractions: (data.pdfExtractions || []).map((item) =>
+        item.id === id ? nextExtraction : item
+      ),
+      documents: (data.documents || []).map((doc) =>
+        doc.extractionId === id
+          ? normalizeDocument({
+              ...doc,
+              docType: nextExtraction.docType || doc.docType,
+              carrier: nextExtraction.fields?.carrier || doc.carrier,
+              status: verifiedStatus,
+              extractedWords: nextExtraction.words || doc.extractedWords,
+            })
+          : doc
+      ),
+      activity: prependActivity(
+        data.activity,
+        "PDF extraction updated",
+        `${nextExtraction.fileName || "PDF result"} reviewed and saved.`
+      ),
+    });
+
+    fireToast("Extraction updated", `${nextExtraction.fileName || "PDF result"} saved.`);
   }
 
   function deletePdfExtraction(id) {
@@ -1251,6 +1291,7 @@ export default function SubShieldComplete() {
               onUpload={() => setModal("scan")}
               onDelete={deleteDocument}
               onExtracted={savePdfExtractions}
+              onUpdateExtraction={updatePdfExtraction}
               onDeleteExtraction={deletePdfExtraction}
             />
           )}

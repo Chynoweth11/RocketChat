@@ -8,6 +8,8 @@ if (typeof window !== "undefined") {
   ).toString();
 }
 
+const OCR_SCALE = 2.2;
+
 const DOCUMENT_TYPE_RULES = [
   {
     id: "certificate",
@@ -16,7 +18,6 @@ const DOCUMENT_TYPE_RULES = [
       "certificate of liability insurance",
       "certificate holder",
       "producer",
-      "accord",
       "acord",
     ],
   },
@@ -47,14 +48,40 @@ const DOCUMENT_TYPE_RULES = [
     terms: ["quote", "proposal", "estimated premium", "bindable", "quotation"],
   },
   {
+    id: "invoice",
+    label: "Invoice",
+    terms: ["invoice", "amount due", "balance due", "payment due", "bill to"],
+  },
+  {
     id: "policy",
     label: "Policy",
     terms: ["policy", "coverage", "insured", "premium"],
   },
 ];
 
+const DIRECT_FIELD_KEYS = new Set([
+  "carrier",
+  "policyNumber",
+  "insuredName",
+  "certificateHolder",
+  "effectiveDate",
+  "expirationDate",
+  "premium",
+  "deductible",
+  "coverageLimit",
+  "invoiceNumber",
+]);
+
 function normalizeSpaces(value = "") {
   return String(value).replace(/\s+/g, " ").trim();
+}
+
+function normalizeTextBlock(value = "") {
+  return String(value)
+    .replace(/\r/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function unique(values = [], limit = 20) {
@@ -81,7 +108,7 @@ function firstMatch(text, patterns) {
 
 function cleanFieldValue(value = "") {
   return normalizeSpaces(value)
-    .replace(/\s+(policy|certificate)\s*$/i, "")
+    .replace(/\s+(policy|certificate|invoice)\s*$/i, "")
     .replace(/[.,;:\s]+$/g, "")
     .trim();
 }
@@ -127,6 +154,13 @@ function extractLines(textContent) {
         .replace(/\s+/g, " ")
         .trim()
     )
+    .filter(Boolean);
+}
+
+function linesFromPlainText(text = "") {
+  return normalizeTextBlock(text)
+    .split(/\n+/g)
+    .map((line) => normalizeSpaces(line))
     .filter(Boolean);
 }
 
@@ -197,6 +231,7 @@ function extractKnownFields(text) {
     premium: firstMatch(text, [
       /\btotal(?: annual)? premium\s*[:#-]?\s*(\$?\s?\d[\d,]*(?:\.\d{2})?)/i,
       /\bpremium\s*[:#-]?\s*(\$?\s?\d[\d,]*(?:\.\d{2})?)/i,
+      /\bamount due\s*[:#-]?\s*(\$?\s?\d[\d,]*(?:\.\d{2})?)/i,
     ]),
     deductible: firstMatch(text, [
       /\bdeductible\s*[:#-]?\s*(\$?\s?\d[\d,]*(?:\.\d{2})?|none|n\/a)/i,
@@ -206,6 +241,12 @@ function extractKnownFields(text) {
         /\beach occurrence\s*[:#-]?\s*([^\n]{3,90})/i,
         /\bgeneral aggregate\s*[:#-]?\s*([^\n]{3,90})/i,
         /\blimit(?:s| of insurance)?\s*[:#-]?\s*([^\n]{3,110})/i,
+      ])
+    ),
+    invoiceNumber: cleanFieldValue(
+      firstMatch(text, [
+        /\binvoice\s*(?:number|no\.?|#)\s*[:#-]?\s*([A-Z0-9][A-Z0-9 ./-]{2,40})/i,
+        /\binv\s*#\s*([A-Z0-9][A-Z0-9 ./-]{2,40})/i,
       ])
     ),
     emails: unique(text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [], 12),
@@ -227,6 +268,18 @@ function extractKnownFields(text) {
     Object.entries(fields).filter(([, value]) =>
       Array.isArray(value) ? value.length > 0 : Boolean(value)
     )
+  );
+}
+
+function confidenceForFields(fields, source) {
+  const directBase = source === "ocr" ? 68 : 86;
+  const arrayBase = source === "ocr" ? 58 : 72;
+  return Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => {
+      if (Array.isArray(value)) return [key, arrayBase];
+      if (DIRECT_FIELD_KEYS.has(key)) return [key, directBase];
+      return [key, Math.max(55, directBase - 10)];
+    })
   );
 }
 
@@ -269,8 +322,7 @@ function normalizeMetadata(raw = {}) {
   );
 }
 
-export async function extractPdfFile(file) {
-  const startedAt = new Date().toISOString();
+async function loadPdf(file) {
   const buffer = await file.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(buffer),
@@ -278,7 +330,64 @@ export async function extractPdfFile(file) {
   });
   const pdf = await loadingTask.promise;
   const metadataResult = await pdf.getMetadata().catch(() => ({}));
-  const metadata = normalizeMetadata(metadataResult.info || {});
+  return {
+    pdf,
+    metadata: normalizeMetadata(metadataResult.info || {}),
+  };
+}
+
+function buildResult({ file, pdf, metadata, pages, source, extractedAt }) {
+  const text = normalizeTextBlock(pages.map((page) => page.text).join("\n\n"));
+  const type = detectDocumentType(text || file.name);
+  const fields = extractKnownFields(text);
+  const tables = extractTables(pages);
+  const warnings = [];
+  const hasText = text.length >= 30;
+
+  if (!hasText && source === "embedded") {
+    warnings.push(
+      "No embedded text was found. This PDF may be image-only and needs OCR."
+    );
+  }
+
+  if (!hasText && source === "ocr") {
+    warnings.push("OCR finished, but no readable text was detected.");
+  }
+
+  if (hasText && source === "ocr") {
+    warnings.push("OCR text was generated from page images. Review before saving.");
+  }
+
+  return {
+    id: makeId("pdf"),
+    fileName: file.name,
+    fileSize: file.size,
+    pages: pdf.numPages,
+    characters: text.length,
+    words: text ? text.split(/\s+/).filter(Boolean).length : 0,
+    status: hasText ? (source === "ocr" ? "ocr_extracted" : "extracted") : "needs_ocr",
+    source,
+    docType: type.id,
+    docTypeLabel: type.label,
+    confidence: type.confidence,
+    fields,
+    fieldConfidence: confidenceForFields(fields, source),
+    tables,
+    metadata,
+    text,
+    pageText: pages.map(({ pageNumber, lineCount, text: pageText }) => ({
+      pageNumber,
+      lineCount,
+      text: pageText,
+    })),
+    warnings,
+    extractedAt,
+  };
+}
+
+export async function extractPdfFile(file) {
+  const extractedAt = new Date().toISOString();
+  const { pdf, metadata } = await loadPdf(file);
   const pages = [];
 
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
@@ -293,41 +402,95 @@ export async function extractPdfFile(file) {
     });
   }
 
-  const text = pages.map((page) => page.text).join("\n\n").trim();
-  const type = detectDocumentType(text || file.name);
-  const fields = extractKnownFields(text);
-  const tables = extractTables(pages);
-  const warnings = [];
+  return buildResult({
+    file,
+    pdf,
+    metadata,
+    pages,
+    source: "embedded",
+    extractedAt,
+  });
+}
 
-  if (text.length < 30) {
-    warnings.push(
-      "No embedded text was found. This PDF may be image-only and needs OCR."
-    );
+async function renderPageToCanvas(page) {
+  if (typeof document === "undefined") {
+    throw new Error("OCR rendering is available in the browser only.");
   }
 
-  return {
-    id: makeId("pdf"),
-    fileName: file.name,
-    fileSize: file.size,
-    pages: pdf.numPages,
-    characters: text.length,
-    words: text ? text.split(/\s+/).filter(Boolean).length : 0,
-    status: text.length < 30 ? "needs_ocr" : "extracted",
-    docType: type.id,
-    docTypeLabel: type.label,
-    confidence: type.confidence,
-    fields,
-    tables,
+  const viewport = page.getViewport({ scale: OCR_SCALE });
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { alpha: false });
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+
+  await page.render({
+    canvasContext: context,
+    viewport,
+  }).promise;
+
+  return canvas;
+}
+
+export async function ocrPdfFile(file, onProgress = () => {}) {
+  const extractedAt = new Date().toISOString();
+  const { pdf, metadata } = await loadPdf(file);
+  const { createWorker } = await import("tesseract.js");
+  const worker = await createWorker("eng", 1, {
+    logger: (message) =>
+      onProgress({
+        phase: "recognizing",
+        status: message.status || "recognizing",
+        progress: Number(message.progress || 0),
+      }),
+  });
+  const pages = [];
+
+  try {
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      onProgress({
+        phase: "rendering",
+        status: "rendering page",
+        pageNumber,
+        totalPages: pdf.numPages,
+        progress: (pageNumber - 1) / pdf.numPages,
+      });
+
+      const page = await pdf.getPage(pageNumber);
+      const canvas = await renderPageToCanvas(page);
+
+      onProgress({
+        phase: "recognizing",
+        status: "reading page",
+        pageNumber,
+        totalPages: pdf.numPages,
+        progress: (pageNumber - 1) / pdf.numPages,
+      });
+
+      const { data } = await worker.recognize(canvas);
+      canvas.width = 0;
+      canvas.height = 0;
+
+      const text = normalizeTextBlock(data?.text || "");
+      const lines = linesFromPlainText(text);
+      pages.push({
+        pageNumber,
+        lineCount: lines.length,
+        text,
+        lines,
+      });
+    }
+  } finally {
+    await worker.terminate();
+  }
+
+  return buildResult({
+    file,
+    pdf,
     metadata,
-    text,
-    pageText: pages.map(({ pageNumber, lineCount, text: pageText }) => ({
-      pageNumber,
-      lineCount,
-      text: pageText,
-    })),
-    warnings,
-    extractedAt: startedAt,
-  };
+    pages,
+    source: "ocr",
+    extractedAt,
+  });
 }
 
 export function makeFailedExtraction(file, error) {
@@ -339,10 +502,12 @@ export function makeFailedExtraction(file, error) {
     characters: 0,
     words: 0,
     status: "failed",
+    source: "embedded",
     docType: "policy",
     docTypeLabel: "Policy",
     confidence: 0,
     fields: {},
+    fieldConfidence: {},
     tables: [],
     metadata: {},
     text: "",
