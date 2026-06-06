@@ -222,7 +222,12 @@ describe("daysUntil", () => {
   it("returns positive for future date", () => {
     const future = new Date();
     future.setDate(future.getDate() + 10);
-    expect(daysUntil(future.toISOString().slice(0, 10))).toBe(10);
+    const futureDate = [
+      future.getFullYear(),
+      String(future.getMonth() + 1).padStart(2, "0"),
+      String(future.getDate()).padStart(2, "0"),
+    ].join("-");
+    expect(daysUntil(futureDate)).toBe(10);
   });
 });
 

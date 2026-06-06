@@ -7,7 +7,7 @@
  * preserved for insuranceParser.js to read.
  *
  * It is imported solely by the lazily-loaded ScanModal, so pdf.js never lands
- * in the initial bundle — it downloads only when a user opens the uploader.
+ * in the initial bundle - it downloads only when a user opens the uploader.
  */
 
 import * as pdfjsLib from "pdfjs-dist";
@@ -114,7 +114,7 @@ export function fileSizeKb(file) {
 }
 
 /**
- * True when a PDF yielded essentially no extractable text — the hallmark of a
+ * True when a PDF yielded essentially no extractable text - the hallmark of a
  * scanned/photographed document that would need OCR rather than text parsing.
  */
 export function looksLikeScannedImage(text) {

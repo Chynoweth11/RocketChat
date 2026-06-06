@@ -62,7 +62,7 @@ export function CompliancePanel({ result, compact = false }) {
             {req.checks.map((check, index) => (
               <span key={index} className={`ss-comply-check ${check.ok ? "ok" : "no"}`}>
                 {check.ok ? "✓" : "✗"} {check.label}
-                {check.detail ? <em> — {check.detail}</em> : null}
+                {check.detail ? <em>, {check.detail}</em> : null}
               </span>
             ))}
           </div>

@@ -1,7 +1,7 @@
 /**
  * Insurance document parser for SubShield.
  *
- * Pure functions only — no PDF library, no DOM. Given the plain text extracted
+ * Pure functions only - no PDF library, no DOM. Given the plain text extracted
  * from a PDF (see pdfText.js), this turns it into structured insurance data:
  * carrier, policy number, coverage type, limits, effective / expiration dates,
  * and endorsements (Additional Insured, Waiver of Subrogation, Primary &
@@ -12,7 +12,7 @@
  *   2. A multi-policy ACORD 25 CERTIFICATE OF LIABILITY INSURANCE, which lists
  *      General Liability, Auto, Umbrella, and Workers' Comp on one form.
  *
- * Nothing here is assumed to be perfect — every field carries a confidence
+ * Nothing here is assumed to be perfect - every field carries a confidence
  * level so the upload UI can highlight what to double-check, and every value is
  * editable before it is saved. Keeping the logic pure means it is exhaustively
  * unit-tested (see __tests__/insuranceParser.test.js).
@@ -184,11 +184,11 @@ function nearestAmount(blockText, labelRe) {
 
 /* ---------- Policy numbers ---------- */
 
-// Candidate policy numbers: a short letter prefix followed by 5–14 digits,
+// Candidate policy numbers: a short letter prefix followed by 5-14 digits,
 // optionally separated by a dash or space (GL-44827193, WC 90183321, UM7740921).
 export function findPolicyNumbers(str) {
   const out = [];
-  // Uppercase letter prefix + 5–14 digits, optionally dash/space separated.
+  // Uppercase letter prefix + 5-14 digits, optionally dash/space separated.
   const re = /\b([A-Z]{1,6})[-\s]?(\d{5,14})\b/g;
   let m;
   while ((m = re.exec(str)) !== null) {
@@ -277,7 +277,7 @@ function parseInsurerMap(text) {
   return map;
 }
 
-// The ACORD row letter (A–F) that precedes a coverage anchor on its line.
+// The ACORD row letter (A-F) that precedes a coverage anchor on its line.
 function rowLetterBefore(text, index) {
   const lineStart = text.lastIndexOf("\n", index - 1) + 1;
   const prefix = text.slice(lineStart, index).trim();

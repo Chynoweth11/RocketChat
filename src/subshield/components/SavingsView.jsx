@@ -66,11 +66,11 @@ const MONTHS = [
 ];
 
 const REQUEST_TYPES = [
-  { value: "renewal_review", label: "Renewal review — check this renewal for better options" },
-  { value: "compare_quotes", label: "Better quote options — compare new quotes" },
-  { value: "savings_review", label: "Savings review — look for lower-cost coverage" },
-  { value: "missing_coverage", label: "Missing coverage — add a coverage type I don't have" },
-  { value: "certificate_need", label: "Certificate need — I need a COI for a project" },
+  { value: "renewal_review", label: "Renewal review: check this renewal for better options" },
+  { value: "compare_quotes", label: "Better quote options: compare new quotes" },
+  { value: "savings_review", label: "Savings review: look for lower-cost coverage" },
+  { value: "missing_coverage", label: "Missing coverage: add a coverage type I don't have" },
+  { value: "certificate_need", label: "Certificate need: I need a COI for a project" },
 ];
 
 const CERTIFICATE_SUPPORT = [
@@ -160,7 +160,7 @@ export default function SavingsView({
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <Section
-          title="Coverage review — powered by licensed partners"
+          title="Coverage review through licensed partners"
           sub="Prepare your business and policy details in SubShield, then submit them to licensed insurance partners for review, quotes, and issuance."
         />
 
@@ -462,7 +462,7 @@ function CoverageApplicationCard({
 
   function submit() {
     // Validate every required field across the whole wizard, not just the
-    // final step — a user can reach the last step without completing an
+    // final step - a user can reach the last step without completing an
     // earlier one (e.g. by navigating back). Jump to the first step with an
     // error so the user can see and fix it.
     const stepErrors = [
@@ -508,7 +508,7 @@ function CoverageApplicationCard({
         ))}
       </ol>
 
-      {/* Step 0 — Start: policy type + carrier */}
+      {/* Step 0 - Start: policy type + carrier */}
       {stepIndex === 0 && (
         <>
           <div className="ss-note success" style={{ marginTop: 0 }}>
@@ -562,7 +562,7 @@ function CoverageApplicationCard({
         </>
       )}
 
-      {/* Step 1 — Coverage: renewal dates, trade, state */}
+      {/* Step 1 - Coverage: renewal dates, trade, state */}
       {stepIndex === 1 && (
         <>
           <div className="ss-note success" style={{ marginTop: 0 }}>
@@ -636,7 +636,7 @@ function CoverageApplicationCard({
         </>
       )}
 
-      {/* Step 2 — Application: contact, partner, request type */}
+      {/* Step 2 - Application: contact, partner, request type */}
       {stepIndex === 2 && (
         <>
           <div className="ss-note success" style={{ marginTop: 0 }}>
@@ -687,7 +687,7 @@ function CoverageApplicationCard({
         </>
       )}
 
-      {/* Step 3 — Quote: certificate support + notes */}
+      {/* Step 3 - Quote: certificate support + notes */}
       {stepIndex === 3 && (
         <>
           <div className="ss-note success" style={{ marginTop: 0 }}>
@@ -728,14 +728,14 @@ function CoverageApplicationCard({
         </>
       )}
 
-      {/* Step 4 — Purchase: review summary before submit */}
+      {/* Step 4 - Purchase: review summary before submit */}
       {stepIndex === 4 && (
         <div className="ss-coverage-estimate" style={{ marginTop: 8 }}>
-          <div className="ss-coverage-estimate-row"><span>Policy type</span><strong>{form.policyType ? policyLabelFromType(form.policyType) : "—"}</strong></div>
-          <div className="ss-coverage-estimate-row"><span>Current carrier</span><strong>{form.currentCarrier || "—"}</strong></div>
-          <div className="ss-coverage-estimate-row"><span>Renewal</span><strong>{form.renewalMonth && form.renewalYear ? `${form.renewalMonth} ${form.renewalYear}` : "—"}</strong></div>
-          <div className="ss-coverage-estimate-row"><span>State</span><strong>{form.state || "—"}</strong></div>
-          <div className="ss-coverage-estimate-row"><span>Contact email</span><strong>{form.contactEmail || "—"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Policy type</span><strong>{form.policyType ? policyLabelFromType(form.policyType) : "Not set"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Current carrier</span><strong>{form.currentCarrier || "Not set"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Renewal</span><strong>{form.renewalMonth && form.renewalYear ? `${form.renewalMonth} ${form.renewalYear}` : "Not set"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>State</span><strong>{form.state || "Not set"}</strong></div>
+          <div className="ss-coverage-estimate-row"><span>Contact email</span><strong>{form.contactEmail || "Not set"}</strong></div>
           {selectedPolicy && (
             <div className="ss-coverage-estimate-row total">
               <span>Est. savings to confirm with partner</span>
@@ -746,7 +746,7 @@ function CoverageApplicationCard({
           )}
           <p className="ss-fine">
             When you submit, SubShield sends these details to a licensed insurance
-            partner for review. The partner — not SubShield — provides any quotes,
+            partner for review. The partner, not SubShield, provides any quotes,
             handles the application, and issues coverage. Returned documents are
             saved back into your SubShield account.
           </p>
@@ -888,7 +888,7 @@ function OpportunityCard({
   const quote = opportunity.alternateQuote;
   const partnerName = quote?.carrier || partner?.name || "Licensed partner";
 
-  // ── Purchased via partner ──────────────────────────────────────────────────
+  // -- Purchased via partner --------------------------------------------------
   if (status === "accepted") {
     return (
       <article className="ss-savings-card accepted">
@@ -916,7 +916,7 @@ function OpportunityCard({
     );
   }
 
-  // ── Snoozed or dismissed ──────────────────────────────────────────────────
+  // -- Snoozed or dismissed --------------------------------------------------
   if (status === "dismissed" || status === "remind_later") {
     return (
       <article className="ss-savings-card muted">
@@ -938,7 +938,7 @@ function OpportunityCard({
     );
   }
 
-  // ── Awaiting partner response ─────────────────────────────────────────────
+  // -- Awaiting partner response ---------------------------------------------
   if (status === "pending_partner") {
     return (
       <article className="ss-savings-card pending">
@@ -965,13 +965,13 @@ function OpportunityCard({
     );
   }
 
-  // ── Partner sent offer — user clicks through to purchase ─────────────────
+  // -- Partner sent offer - user clicks through to purchase -----------------
   if (status === "at_partner") {
     return (
       <article className="ss-savings-card at-partner">
         <div className="ss-savings-head">
           <div>
-            <span className="ss-eyebrow">Sent to partner — complete purchase there</span>
+            <span className="ss-eyebrow">Sent to partner. Complete purchase there</span>
             <h2>{name}</h2>
             <p className="ss-muted">
               You were redirected to {partnerName} to finalize. Once you've purchased, come back here to save your new policy.
@@ -992,7 +992,7 @@ function OpportunityCard({
         </div>
         <div className="ss-row">
           <button type="button" className="ss-button" onClick={onConfirmPurchase}>
-            <BadgeCheck size={16} /> I've purchased — save my policy
+            <BadgeCheck size={16} /> I've purchased. Save my policy
           </button>
           <button type="button" className="ss-button soft" onClick={onGoToPurchase}>
             Re-open {partnerName}
@@ -1005,7 +1005,7 @@ function OpportunityCard({
     );
   }
 
-  // ── Partner offer received — show comparison ──────────────────────────────
+  // -- Partner offer received - show comparison ------------------------------
   if (status === "quote_received" && quote) {
     return (
       <article className="ss-savings-card">
@@ -1085,14 +1085,14 @@ function OpportunityCard({
         <p className="ss-fine">
           This offer was provided by {partnerName}, a licensed insurance partner. Clicking "Go purchase"
           will open their site in a new tab. Coverage is applied for, bound, and issued entirely
-          by the partner — not by SubShield. Return here to upload your new policy document.
+          by the partner, not by SubShield. Return here to upload your new policy document.
           {quote.bindableUntil && ` Offer valid through ${formatLongDate(quote.bindableUntil)}.`}
         </p>
       </article>
     );
   }
 
-  // ── Available: no quote yet ───────────────────────────────────────────────
+  // -- Available: no quote yet -----------------------------------------------
   return (
     <article className="ss-savings-card">
       <div className="ss-savings-head">
@@ -1136,7 +1136,7 @@ function OpportunityCard({
       </div>
       <p className="ss-fine">
         Submitting sends your policy details to a licensed insurance partner for review.
-        SubShield does not sell or quote insurance — the partner handles review, quotes, and issuance.
+        SubShield does not sell or quote insurance. The partner handles review, quotes, and issuance.
       </p>
     </article>
   );

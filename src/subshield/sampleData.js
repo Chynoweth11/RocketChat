@@ -1,7 +1,7 @@
 /**
  * Sample demo data for SubShield.
  *
- * This is NOT loaded by default — new accounts start empty (see data.js).
+ * This is NOT loaded by default - new accounts start empty (see data.js).
  * It exists so reviewers and demos can populate the app with a realistic,
  * fully-worked example account on demand via the "Load sample data" control
  * in Settings. The data is structured like a production model (carriers,
@@ -548,9 +548,9 @@ export const sampleData = {
       uploadedAt: isoDaysAgo(200),
     },
     {
-      id: "doc-inv-growth",
-      name: "SubShield Invoice | INV-2026-004",
-      docType: "invoice",
+      id: "doc-subshield-compliance",
+      name: "SubShield Compliance Record | SUB-2026-004",
+      docType: "endorsement",
       policyId: null,
       policyType: null,
       carrier: "SubShield",
@@ -678,7 +678,7 @@ export const sampleData = {
       {
         id: "role-owner",
         name: "Owner",
-        description: "Full account and billing control",
+        description: "Full account and workspace plan control",
         permissions: {
           vault: true,
           sendCoi: true,
@@ -723,7 +723,7 @@ export const sampleData = {
       basePrice: 129,
       renewalDate: isoDaysFromNow(48),
       autoRenew: true,
-      billingEmail: "billing@subshieldtile.com",
+      billingEmail: "owner@subshieldtile.com",
     },
     paymentMethod: {
       cardBrand: "Visa",

@@ -5,7 +5,7 @@
 **Rocket Money for business insurance.** Review a company's commercial insurance,
 track renewals, surface savings, compare current vs. better options, switch carriers,
 send certificates, and keep all paperwork organized. Brokers/partners are a
-background network — not the headline feature.
+background network, not the headline feature.
 
 ## Current app
 
@@ -13,13 +13,13 @@ Main entry: `src/subshield/SubShieldComplete.jsx`
 
 ## Navigation / surfaces
 
-1. **Dashboard** (`DashboardView`) — savings-forward executive overview + priority queue
-2. **Policies** (`PoliciesView`) — coverage, premium, deductible, limits, renewals
-3. **Savings** (`SavingsView`) — instant rate check + current-vs-recommended comparison + accept/switch
-4. **Certificates** (`CertificatesView`) — COI sends, holders, delivery history
-5. **Documents** (`DocumentsView`) — declarations, certificates, endorsements, quotes, invoices
-6. **Activity** (`ActivityView`) — audit trail
-7. **Settings** (`SettingsView`) — full SaaS settings center
+1. **Dashboard** (`DashboardView`): executive overview and priority queue
+2. **Policies** (`PoliciesView`): coverage, premium, deductible, limits, renewals
+3. **Savings** (`SavingsView`): partner-routed quote review
+4. **Certificates** (`CertificatesView`): COI sends, holders, delivery history
+5. **Documents** (`DocumentsView`): declarations, certificates, endorsements, quotes, compliance files
+6. **Activity** (`ActivityView`): audit trail
+7. **Settings** (`SettingsView`): SaaS settings center
 
 ## Key workflows (end-to-end)
 

@@ -31,7 +31,7 @@ import { sampleData } from "./sampleData.js";
 import { Header, Sidebar } from "./components/Layout.jsx";
 // Dashboard is the initial view, so it loads eagerly. Every other view and
 // all modals are code-split with React.lazy so they download only when first
-// opened — keeping the initial bundle small.
+// opened - keeping the initial bundle small.
 import DashboardView from "./components/DashboardView.jsx";
 const PoliciesView = lazy(() => import("./components/PoliciesView.jsx"));
 const SavingsView = lazy(() => import("./components/SavingsView.jsx"));
@@ -325,7 +325,7 @@ export default function SubShieldComplete() {
       settings: "Settings",
     };
     const label = titles[view] || "SubShield";
-    document.title = `${label} — SubShield`;
+    document.title = `${label} | SubShield`;
   }, [view]);
 
   function commit(next) {
@@ -508,7 +508,7 @@ export default function SubShieldComplete() {
       newDocuments.push(
         normalizeDocument({
           name: meta.fileName
-            ? `${meta.fileName.replace(/\.pdf$/i, "")} — ${normalized.name}`
+            ? `${meta.fileName.replace(/\.pdf$/i, "")} - ${normalized.name}`
             : `${normalized.name} document`,
           docType: meta.kind === "coi" ? "certificate" : "declaration",
           policyId: targetId,
@@ -575,7 +575,7 @@ export default function SubShieldComplete() {
       documents: [...newDocuments, ...(data.documents || [])],
       activity: prependActivity(
         data.activity,
-        `Scanned ${meta.kind === "coi" ? "certificate" : "document"} — ${summary}`,
+        `Scanned ${meta.kind === "coi" ? "certificate" : "document"} - ${summary}`,
         `${scanned.map((policy) => policyLabelFromType(policy.policyType)).join(", ")} filed from ${
           meta.fileName || "your upload"
         }.`
@@ -611,7 +611,7 @@ export default function SubShieldComplete() {
         routeType: "partner",
         status: "pending_partner",
         submittedAt: new Date().toISOString(),
-        notes: "Coverage review request submitted — awaiting partner response.",
+        notes: "Coverage review request submitted - awaiting partner response.",
       },
       company.id
     );
@@ -677,7 +677,7 @@ export default function SubShieldComplete() {
         activity: prependActivity(
           data.activity,
           `${partner?.name || "Partner"} returned an offer for ${policyLabelFromType(opportunity.policyType)}`,
-          `${formatMoney(partnerPremium)}/yr — est. ${formatMoney(base - partnerPremium)}/yr below your current premium.`
+          `${formatMoney(partnerPremium)}/yr - est. ${formatMoney(base - partnerPremium)}/yr below your current premium.`
         ),
       });
       setFindingId(null);
@@ -761,7 +761,7 @@ export default function SubShieldComplete() {
     // Open the scan/upload modal so the user can save their new policy document
     setModal("scan");
     fireToast(
-      "Purchase confirmed — upload your policy",
+      "Purchase confirmed - upload your policy",
       "SubShield is ready to store your new declarations page."
     );
   }

@@ -107,7 +107,7 @@ export default function ScanModal({ onClose, onSave, existingPolicies = [] }) {
 
       if (looksLikeScannedImage(text)) {
         setError(
-          "We couldn't find readable text in this PDF — it looks like a scan or photo. You can still enter the details by hand."
+          "We couldn't find readable text in this PDF. It looks like a scan or photo. You can still enter the details by hand."
         );
         setPhase("error");
         return;
@@ -205,7 +205,7 @@ export default function ScanModal({ onClose, onSave, existingPolicies = [] }) {
   return (
     <Modal
       title="Upload & scan your insurance"
-      subtitle="Drop a PDF certificate or declarations page. SubShield reads the carrier, policy number, limits, dates, and endorsements — then you confirm."
+      subtitle="Drop a PDF certificate or declarations page. SubShield reads the carrier, policy number, limits, dates, and endorsements. Then you confirm."
       onClose={onClose}
       className={phase === "review" || phase === "error" ? "ss-modal--wide" : ""}
     >
@@ -366,7 +366,7 @@ function Dropzone({ dragging, inputRef, onDragOver, onDragLeave, onDrop, onPick,
         </li>
       </ul>
       <p className="ss-scan-privacy">
-        Your file is read in your browser — nothing is uploaded to a server.
+        Your file is read in your browser. Nothing is uploaded to a server.
       </p>
     </div>
   );
@@ -611,7 +611,7 @@ function PolicyEditor({
       <div className="ss-policy-editor-foot">
         {dateProblem ? (
           <span className="ss-policy-editor-warn">
-            <AlertTriangle size={13} /> Expiration is on or before the effective date — check the dates.
+            <AlertTriangle size={13} /> Expiration is on or before the effective date. Check the dates.
           </span>
         ) : renews !== null ? (
           <span className="ss-muted">

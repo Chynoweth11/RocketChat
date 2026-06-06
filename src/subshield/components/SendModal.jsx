@@ -42,14 +42,14 @@ export default function SendModal({
   const firstName = contractor.contact?.split(" ")[0] || "team";
   const coverEmail =
     `To: ${contractor.email}\n` +
-    `Subject: COI Package - ${finalProject}\n\n` +
+    `Subject: COI Package: ${finalProject}\n\n` +
     `Hello ${firstName}, please find the attached certificate of insurance for ${finalProject}. ` +
     "All documents are originals issued by our carriers and licensed insurance partners.";
 
   return (
     <Modal
       title="Send COI Package"
-      subtitle={`${docs} verified file${docs !== 1 ? "s" : ""} — delivered to ${contractor.email}`}
+      subtitle={`${docs} verified file${docs !== 1 ? "s" : ""} ready for ${contractor.email}`}
       onClose={onClose}
     >
       {lastSend && (
@@ -78,7 +78,7 @@ export default function SendModal({
               </b>
               <small>
                 {compliance.compliant
-                  ? `${compliance.metCount} of ${compliance.total} requirements met — safe to send.`
+                  ? `${compliance.metCount} of ${compliance.total} requirements met. Safe to send.`
                   : "This certificate may be rejected. Review the gaps before sending."}
               </small>
             </div>
@@ -174,7 +174,7 @@ export default function SendModal({
           <strong>To:</strong> {contractor.email}
         </p>
         <p>
-          <strong>Subject:</strong> COI Package — {finalProject || "your project"}
+          <strong>Subject:</strong> COI Package: {finalProject || "your project"}
         </p>
         <p style={{ marginTop: 8 }}>
           Hello {firstName}, please find the attached certificate of insurance for{" "}
@@ -186,7 +186,7 @@ export default function SendModal({
       <div className="ss-send-docs-list">
         {policies.map((policy) =>
           policy.documents.map((doc) => (
-            <DocumentRow key={`${policy.id}-${doc}`} name={`${policy.name} — ${doc}`} />
+            <DocumentRow key={`${policy.id}-${doc}`} name={`${policy.name}: ${doc}`} />
           ))
         )}
         {docs === 0 && (
@@ -202,7 +202,7 @@ export default function SendModal({
           {compliance.hasRequirements && !compliance.compliant ? (
             <>
               <ShieldAlert size={14} style={{ verticalAlign: -2, marginRight: 4, color: "var(--warning)" }} />
-              {compliance.unmetCount} unmet requirement{compliance.unmetCount !== 1 ? "s" : ""} — send anyway?
+              {compliance.unmetCount} unmet requirement{compliance.unmetCount !== 1 ? "s" : ""}. Send anyway?
             </>
           ) : (
             <>{docs} verified file{docs !== 1 ? "s" : ""} ready for delivery</>
@@ -237,7 +237,7 @@ function DocumentRow({ name }) {
       </span>
       <div className="ss-doc-body">
         <b>{name}</b>
-        <small>Original carrier-issued document — verified</small>
+        <small>Original carrier-issued document. Verified</small>
       </div>
       <em className="ss-verified">
         <Check size={13} /> Verified

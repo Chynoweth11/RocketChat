@@ -655,9 +655,9 @@ const NOTIFICATION_GROUPS = [
     heading: "Renewal reminders",
     description: "Get ahead of expiring policies before they become urgent.",
     items: [
-      { key: "renewal90Day", label: "90-day reminder", detail: "Early heads-up — time to compare rates with partners." },
+      { key: "renewal90Day", label: "90-day reminder", detail: "Early heads-up. Time to compare rates with partners." },
       { key: "renewal60Day", label: "60-day reminder", detail: "Good window to start renewal conversations." },
-      { key: "renewal30Day", label: "30-day reminder", detail: "Urgent — most carriers require 30 days to renew." },
+      { key: "renewal30Day", label: "30-day reminder", detail: "Urgent. Most carriers require 30 days to renew." },
       { key: "renewal10Day", label: "10-day critical alert", detail: "Final warning before coverage gaps." },
       { key: "expirationDay", label: "Expiration day alert", detail: "Same-day notice when a policy expires." },
       { key: "expiredNotice", label: "Expired policy notice", detail: "Confirmation after a policy has lapsed." },
@@ -1796,8 +1796,8 @@ function LogoutSettings({ onLogout, onReset, onLoadSample }) {
         />
         <PartnerDisclaimer />
         <p className="ss-muted" style={{ marginTop: 4 }}>
-          SubShield earns revenue through partner arrangements — such as referral
-          fees, affiliate commissions, or revenue share — when you connect with a
+          SubShield earns revenue through partner arrangements, such as referral
+          fees, affiliate commissions, or revenue share, when you connect with a
           licensed insurance partner. This never changes the price you pay. You are
           always free to purchase coverage from any provider you choose.
         </p>

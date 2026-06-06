@@ -3,7 +3,7 @@
  *
  * Product model: "Rocket Money for business insurance."
  *
- * A brand-new account starts EMPTY — no policies, contractors, documents,
+ * A brand-new account starts EMPTY - no policies, contractors, documents,
  * savings opportunities, quote requests, or activity. Users build their own
  * data by uploading policies and using the app, so nothing fabricated is ever
  * presented as if it were real.
@@ -37,7 +37,7 @@ export const initialData = {
 
   brokers: [],
 
-  // Platform marketplace — the licensed carriers/brokers SubShield routes
+  // Platform marketplace - the licensed carriers/brokers SubShield routes
   // savings and coverage requests to. Not user content.
   partners: [
     {
@@ -176,7 +176,7 @@ export const initialData = {
       {
         id: "role-owner",
         name: "Owner",
-        description: "Full account and billing control",
+        description: "Full account and workspace plan control",
         permissions: {
           vault: true,
           sendCoi: true,

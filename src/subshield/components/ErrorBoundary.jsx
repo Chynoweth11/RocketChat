@@ -3,7 +3,7 @@ import { clearStoredData } from "../utils.js";
 
 /**
  * App-wide error boundary. Prevents a single render error from white-screening
- * the entire workspace — instead the user sees a recoverable fallback and the
+ * the entire workspace - instead the user sees a recoverable fallback and the
  * option to reload or restore local data.
  */
 export default class ErrorBoundary extends Component {
@@ -45,7 +45,7 @@ export default class ErrorBoundary extends Component {
           <h1>Something went wrong</h1>
           <p>
             The workspace hit an unexpected error. Your saved data is still on this
-            device — try reloading. If the problem keeps happening, restoring will
+            device - try reloading. If the problem keeps happening, restoring will
             clear local data and start fresh.
           </p>
           {this.state.error?.message && (

@@ -135,7 +135,7 @@ export default function DashboardView({
               <span className="ss-eyebrow">{firstName ? `${greetingFor()}, ${firstName}` : "Welcome to SubShield"}</span>
               <h2>Your insurance command center</h2>
               <p className="ss-muted">
-                Keep every policy, certificate, and renewal in one place — so you can
+                Keep every policy, certificate, and renewal in one place so you can
                 prove coverage in seconds, never miss an expiration, and never let
                 paperwork hold up approval or field work.
               </p>
@@ -167,7 +167,7 @@ export default function DashboardView({
                 <span className="ss-dash-onboard-num">3</span>
                 <div>
                   <b>Stay ahead of renewals</b>
-                  <small>Get reminders before coverage expires — and compare options with licensed partners when you want.</small>
+                  <small>Get reminders before coverage expires and compare options with licensed partners when you want.</small>
                 </div>
               </div>
             </div>
@@ -498,7 +498,7 @@ function COIStatusCard({ contractors, coiSends, onOpenCertificates }) {
   const needsAction = statuses.filter((s) => s.status !== "current");
 
   return (
-    <section className="ss-card">
+    <section className="ss-card ss-span ss-coi-card">
       <Section
         title="COI status"
         sub="Who has a current certificate on file"
@@ -547,7 +547,7 @@ function COIStatusCard({ contractors, coiSends, onOpenCertificates }) {
       {needsAction.length === 0 && (
         <div className="ss-note success">
           <CheckCircle2 size={16} />
-          <span>All certificate holders have a current COI on file — you're good.</span>
+          <span>All certificate holders have a current COI on file. You're good.</span>
         </div>
       )}
 

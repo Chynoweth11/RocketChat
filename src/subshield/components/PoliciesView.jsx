@@ -229,7 +229,7 @@ export default function PoliciesView({
         <section className="ss-card ss-span">
           <Section
             title="Renewal timeline"
-            sub="Policies ordered by urgency — take action before the critical window"
+            sub="Policies ordered by urgency. Take action before the critical window."
             extra={<CalendarClock size={16} style={{ color: "var(--muted)" }} />}
           />
           <div className="ss-renewal-grid">
@@ -288,7 +288,7 @@ function PolicyRow({ policy, selected, onClick }) {
         <em className={`ss-status ${status.className}`}>{status.label}</em>
         <span
           className={`ss-policy-health-dot ${hClass}`}
-          title={`Health: ${health.score}/100 — ${health.grade}`}
+          title={`Health: ${health.score}/100, ${health.grade}`}
           aria-label={`Health score ${health.score}`}
         />
       </div>
@@ -325,7 +325,7 @@ function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing, carr
             </span>
           ) : (
             <button type="button" className="ss-link-btn" style={{ fontSize: 12, marginTop: 2 }} onClick={onManageConnections}>
-              Connect carrier for real-time verification →
+              Connect carrier for real-time verification
             </button>
           )}
         </div>
@@ -497,7 +497,7 @@ function ServiceLink({ icon: Icon, title, detail, onClick }) {
 
 function downloadPolicySummary(policy) {
   const lines = [
-    "SubShield — Policy Client Summary",
+    "SubShield Policy Client Summary",
     "==================================",
     `Policy: ${policy.name}`,
     `Carrier: ${policy.carrier}`,

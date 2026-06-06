@@ -114,7 +114,7 @@ describe("detectEndorsements", () => {
   });
 });
 
-describe("parseInsuranceDocument — ACORD 25 COI", () => {
+describe("parseInsuranceDocument - ACORD 25 COI", () => {
   const result = parseInsuranceDocument(ACORD_25);
 
   it("classifies the document as a COI", () => {
@@ -167,7 +167,7 @@ describe("parseInsuranceDocument — ACORD 25 COI", () => {
   });
 });
 
-describe("parseInsuranceDocument — declarations page", () => {
+describe("parseInsuranceDocument - declarations page", () => {
   const result = parseInsuranceDocument(DEC_PAGE);
 
   it("classifies as a declaration", () => {
@@ -201,7 +201,7 @@ describe("parseInsuranceDocument — declarations page", () => {
   });
 });
 
-describe("parseInsuranceDocument — empty and junk input", () => {
+describe("parseInsuranceDocument - empty and junk input", () => {
   it("returns an empty policy list for blank text", () => {
     const result = parseInsuranceDocument("");
     expect(result.policies).toHaveLength(0);

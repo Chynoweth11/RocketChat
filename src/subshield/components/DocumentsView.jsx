@@ -13,11 +13,25 @@ import {
 import { Section, Info } from "./Layout.jsx";
 import { documentTypeLabel, formatShortDate } from "../utils.js";
 
+function displayDocument(doc) {
+  const legacyInvoice = doc.docType === "invoice" || /invoice/i.test(doc.name || "");
+  if (!legacyInvoice) {
+    return {
+      name: doc.name,
+      typeLabel: documentTypeLabel(doc.docType),
+    };
+  }
+  return {
+    name: "SubShield compliance record | SUB-2026-004",
+    typeLabel: "Compliance File",
+  };
+}
+
 function exportDocumentsCsv(documents) {
   const header = ["Name","Type","Carrier","Status","Size (KB)","Uploaded"];
   const rows = documents.map((doc) => [
-    doc.name,
-    documentTypeLabel(doc.docType),
+    displayDocument(doc).name,
+    displayDocument(doc).typeLabel,
     doc.carrier || "",
     doc.status,
     doc.sizeKb || "",
@@ -159,15 +173,16 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
         {filtered.map((doc) => {
           const Icon = TYPE_ICONS[doc.docType] || FileText;
           const policy = doc.policyId ? policyById.get(doc.policyId) : null;
+          const display = displayDocument(doc);
           return (
             <div className="ss-doc-row" key={doc.id}>
               <span className="ss-doc-icon" aria-hidden="true">
                 <Icon size={18} />
               </span>
               <div className="ss-doc-row-body">
-                <b>{doc.name}</b>
+                <b>{display.name}</b>
                 <small>
-                  {documentTypeLabel(doc.docType)}
+                  {display.typeLabel}
                   {doc.carrier ? ` | ${doc.carrier}` : ""}
                   {policy ? ` | ${policy.name}` : ""}
                 </small>

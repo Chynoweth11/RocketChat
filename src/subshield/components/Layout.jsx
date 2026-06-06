@@ -305,7 +305,7 @@ export function Spinner() {
 }
 
 /**
- * Compliance disclaimer. SubShield is a workflow/platform layer — it does not
+ * Compliance disclaimer. SubShield is a workflow/platform layer - it does not
  * sell, bind, or underwrite insurance. Coverage is quoted and issued by
  * licensed insurance partners. Shown anywhere the user is reviewing coverage
  * or savings so the business model is unambiguous and legally safer.

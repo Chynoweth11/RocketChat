@@ -82,7 +82,7 @@ function ConnectModal({ carrier, onClose, onConnect }) {
               <CarrierLogo carrier={carrier} size={52} />
               <div>
                 <h2 id="connect-title">Connect {carrier.name}</h2>
-                <p>Sync your policies, verify coverage in real time, and get renewal alerts — automatically.</p>
+                <p>Sync policies, verify coverage in real time, and receive renewal alerts automatically.</p>
               </div>
             </div>
 
@@ -301,7 +301,7 @@ export default function ConnectionsView({ connections, onConnect, onDisconnect, 
             </div>
             <h2>Connect your carriers</h2>
             <p>
-              Link your insurance carriers and your policies sync automatically — no more manual entry, no more hunting through emails for your dec pages.
+              Link your insurance carriers and your policies sync automatically. No manual entry, and no hunting through emails for dec pages.
             </p>
             <div className="ss-connections-hero-points">
               <div><ShieldCheck size={15} /> Verify coverage in real time when GCs request a COI</div>

@@ -97,7 +97,7 @@ const DOCUMENT_TYPE_LABELS = {
   certificate: "Certificate (COI)",
   endorsement: "Endorsement",
   quote: "Renewal Quote",
-  invoice: "Invoice",
+  invoice: "Compliance File",
   policy: "Policy Document",
 };
 
@@ -142,7 +142,11 @@ export function makeId(prefix = "id") {
 export function dateFromToday(days) {
   const d = new Date();
   d.setDate(d.getDate() + Number(days || 0));
-  return d.toISOString().slice(0, 10);
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
 function parseIso(iso) {
@@ -296,7 +300,7 @@ export function scoreClass(score) {
 }
 
 /**
- * Compute a 0–100 health score for a single policy and a list of what's
+ * Compute a 0-100 health score for a single policy and a list of what's
  * bringing the score down so the UI can show a Good / Needs Work breakdown.
  */
 export function policyHealthScore(policy) {
@@ -525,11 +529,11 @@ export function checkCompliance(requirements, policies) {
   };
 }
 
-/* ---------- "Get Paid" jobs ----------
+/* ---------- Project readiness ----------
  * A job is one GC + project pairing. For each, we combine the GC's coverage
  * requirements, the contractor's real policies, and the COI delivery history to
- * answer the only question that matters on a job site: is anything stopping
- * this from getting paid? Everything here is derived — jobs are never stored.
+ * answer the operational question that matters on a job site: is anything
+ * missing from the insurance file? Everything here is derived. Jobs are never stored.
  */
 
 const COI_STALE_DAYS = 90;
@@ -554,8 +558,8 @@ function sendsForContractor(contractor, coiSends = []) {
 }
 
 /**
- * Payment-readiness verdict for a single job. Combines coverage compliance with
- * COI delivery state into a status, a "what's blocking payment" checklist, and
+ * Project-readiness verdict for a single job. Combines coverage compliance with
+ * COI delivery state into a status, a document blocker checklist, and
  * the recommended next action.
  */
 export function jobPaymentStatus({ compliance, lastSend, daysSinceSend }) {
@@ -592,7 +596,7 @@ export function jobPaymentStatus({ compliance, lastSend, daysSinceSend }) {
     {
       label: "COI is current",
       done: current,
-      detail: sent ? (current ? `${daysSinceSend}d ago` : "Older than 90 days") : "—",
+      detail: sent ? (current ? `${daysSinceSend}d ago` : "Not sent yet") : "Not sent yet",
     },
   ];
 
@@ -603,19 +607,19 @@ export function jobPaymentStatus({ compliance, lastSend, daysSinceSend }) {
   let sortRank;
   if (hasReqs && !compliance.compliant) {
     status = "not_covered";
-    statusLabel = "Coverage gap — fix before billing";
+    statusLabel = "Coverage gap. Fix before sending";
     tone = "danger";
     primaryAction = "fix";
     sortRank = 0;
   } else if (!sent) {
     status = "ready_to_send";
-    statusLabel = "Covered — send the COI to bill";
+    statusLabel = "Covered. Send the COI";
     tone = "warning";
     primaryAction = "send";
     sortRank = 1;
   } else if (!current) {
     status = "needs_resend";
-    statusLabel = "Certificate may be outdated — resend";
+    statusLabel = "Certificate may be outdated. Resend";
     tone = "warning";
     primaryAction = "resend";
     sortRank = 2;
@@ -639,7 +643,7 @@ export function jobPaymentStatus({ compliance, lastSend, daysSinceSend }) {
   };
 }
 
-/** Build the list of jobs (GC × project) with their payment-readiness verdicts. */
+/** Build the list of jobs (GC x project) with their project-readiness verdicts. */
 export function buildJobs(contractors = [], policies = [], coiSends = []) {
   const jobs = [];
   contractors.forEach((gc) => {
@@ -681,7 +685,7 @@ export function buildJobs(contractors = [], policies = [], coiSends = []) {
   );
 }
 
-/** Headline counts for the Get Paid view. */
+/** Headline counts for project readiness. */
 export function summarizeJobs(jobs = []) {
   return {
     total: jobs.length,

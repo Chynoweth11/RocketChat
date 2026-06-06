@@ -24,7 +24,7 @@ const VIEW_ICONS = {
 /**
  * Global command palette (Cmd/Ctrl+K). Lets users jump to any page, run key
  * actions, or search across policies, certificate holders, and documents from
- * a single keyboard-driven surface — no clicking through the sidebar.
+ * a single keyboard-driven surface - no clicking through the sidebar.
  */
 export default function CommandPalette({
   onClose,

@@ -118,10 +118,10 @@ export default function CertificatesView({
         </div>
       </section>
 
-      <section className="ss-card ss-cert-holders">
+      <section className="ss-card ss-span ss-cert-holders">
         <Section
           title="Certificate holders"
-          sub="Saved GCs and clients — send a COI in a few clicks, no digging through emails"
+          sub="Saved GCs and clients. Send a COI in a few clicks with clean holder records."
           extra={
             <button type="button" className="ss-button soft ss-button-sm" onClick={onAdd}>
               <Plus size={14} /> Add holder
@@ -148,7 +148,7 @@ export default function CertificatesView({
             <h2>No holders saved yet</h2>
             <p>
               Add a GC or client as a certificate holder to store their legal wording and delivery
-              rules — then send a COI package in a few clicks, with a complete delivery record.
+              rules, then send a COI package in a few clicks with a complete delivery record.
             </p>
             <button type="button" className="ss-button" onClick={onAdd}>
               <Plus size={15} /> Add first holder
@@ -182,7 +182,7 @@ export default function CertificatesView({
         })}
       </section>
 
-      <section className="ss-card ss-cert-recent">
+      <section className="ss-card ss-span ss-cert-recent">
         <Section title="Delivery log" sub="Full delivery history across all holders" />
 
         {totalSends === 0 ? (
@@ -205,7 +205,7 @@ export default function CertificatesView({
           <div className="ss-note success" style={{ marginTop: 14 }}>
             <CheckCircle2 size={16} />
             <span>
-              Saved holder wording and project details mean every resend is a few clicks —
+              Saved holder wording and project details mean every resend is a few clicks.
               no searching old emails.
             </span>
           </div>

@@ -5,6 +5,7 @@ dist/
 .env
 .env.*
 coverage/
+qa-main-screenshots/
 
 # Editor / harness temp artifacts
 ss-cphd.*
