@@ -2676,6 +2676,229 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr);
   gap: 12px;
+}
+
+.ss-field-error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 640;
+}
+
+.ss-review {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ss-review-box {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-soft);
+  padding: 13px;
+}
+
+.ss-review-box b {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.ss-review-box p,
+.ss-review-box pre {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  font-family: inherit;
+}
+
+.ss-email {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-soft);
+  padding: 13px;
+  margin-bottom: 14px;
+}
+
+.ss-email b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.ss-email p {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 12.8px;
+  line-height: 1.55;
+}
+
+.ss-email strong {
+  color: var(--text);
+}
+
+.ss-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.ss-footer-info {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 640;
+}
+
+/* ---------- 12. Upload, chips, savings ---------- */
+
+.ss-upload {
+  min-height: 210px;
+  padding: 22px;
+  border: 1px dashed #cfd7e4;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ss-upload h3 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.ss-upload p {
+  margin: 0;
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ss-upload-pdf {
+  width: 62px;
+  height: 78px;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #32589f;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 840;
+  box-shadow: var(--shadow-sm);
+}
+
+.ss-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ss-pdf-dropzone {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 118px;
+  padding: 16px;
+  border: 1px dashed #c9d4e3;
+  border-radius: 16px;
+  background: #f8fbff;
+  margin-bottom: 14px;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-pdf-dropzone.active {
+  border-color: #7ea2ef;
+  background: #f0f6ff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.ss-pdf-drop-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 1px solid #cfe0ff;
+}
+
+.ss-pdf-dropzone h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 780;
+}
+
+.ss-pdf-dropzone p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ss-pdf-progress {
+  min-width: 170px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #ffffff;
+  padding: 10px 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.ss-pdf-progress span {
+  color: var(--brand);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 780;
+}
+
+.ss-pdf-progress b {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+
+.ss-pdf-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ss-pdf-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ss-pdf-workspace {
+  display: grid;
+  grid-template-columns: minmax(250px, 330px) minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
 }
 
@@ -2696,6 +2919,348 @@ textarea {
 .ss-coverage-stepper {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: #ffffff;
+  padding: 16px;
+}
+
+.ss-pdf-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ss-pdf-detail-head h3 {
+  margin: 4px 0;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.ss-pdf-detail-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.ss-pdf-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ss-pdf-ocr-progress {
+  position: relative;
+  overflow: hidden;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 9px 11px;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+  background: #f4f8ff;
+  color: #244d9f;
+  margin-bottom: 12px;
+}
+
+.ss-pdf-ocr-progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: rgba(37, 99, 235, 0.12);
+  transition: width 0.24s ease;
+}
+
+.ss-pdf-ocr-progress b {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.ss-pdf-review-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.ss-pdf-preview-pane,
+.ss-pdf-review-pane {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.ss-pdf-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-soft);
+}
+
+.ss-pdf-pane-head span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.ss-pdf-frame {
+  display: block;
+  width: 100%;
+  height: 640px;
+  border: 0;
+  background: #eef2f6;
+}
+
+.ss-pdf-preview-empty {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.ss-pdf-preview-empty b {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.ss-pdf-preview-empty span {
+  max-width: 250px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.ss-pdf-review-pane {
+  padding: 14px;
+}
+
+.ss-pdf-review-pane .ss-chip-group {
+  margin-bottom: 12px;
+}
+
+.ss-pdf-field-editor {
+  display: grid;
+  gap: 13px;
+}
+
+.ss-pdf-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ss-pdf-editor-head b {
+  font-size: 14px;
+  font-weight: 780;
+}
+
+.ss-pdf-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ss-pdf-edit-field {
+  display: grid;
+  gap: 6px;
+}
+
+.ss-pdf-edit-field span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 760;
+}
+
+.ss-pdf-edit-field em {
+  font-style: normal;
+  color: #49627f;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 10.5px;
+}
+
+.ss-pdf-edit-field input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 9px 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 610;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.ss-pdf-edit-field input:focus {
+  border-color: #b7c5dd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.ss-pdf-extra-data {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 13px;
+}
+
+.ss-pdf-extra-data > b {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 13px;
+  font-weight: 780;
+}
+
+.ss-pdf-kv {
+  display: grid;
+  gap: 8px;
+}
+
+.ss-pdf-kv-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.ss-pdf-kv-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ss-pdf-kv-row b {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 760;
+}
+
+.ss-pdf-kv-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 650;
+}
+
+.ss-pdf-text {
+  margin: 0;
+  max-height: 580px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #0f172a;
+  color: #e5edf8;
+  padding: 14px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ss-pdf-tables {
+  display: grid;
+  gap: 12px;
+}
+
+.ss-pdf-table {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.ss-pdf-table > b {
+  display: block;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-soft);
+  font-size: 12px;
+}
+
+.ss-pdf-table-scroll {
+  overflow: auto;
+}
+
+.ss-pdf-table table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.ss-pdf-table td {
+  border-right: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  vertical-align: top;
+}
+
+.ss-pdf-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.ss-pdf-table td:last-child {
+  border-right: 0;
+}
+
+.ss-empty.compact {
+  min-height: 150px;
+  padding: 18px;
+}
+
+.ss-empty.compact h2 {
+  font-size: 18px;
+}
+
+.ss-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.ss-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 8px 13px;
+  font-size: 12.5px;
+  font-weight: 680;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
   margin-bottom: 10px;
   list-style: none;
@@ -3608,6 +4173,61 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .ss-dash-metrics,
+  .ss-dash-save-footer,
+  .ss-renewals-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-dash-trend {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ss-dash-trend-bars {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ss-renewals-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Two-column metrics grid fits well at tablet widths */
+  .ss-command-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-pdf-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-info-grid,
+  .ss-review,
+  .ss-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-pdf-dropzone,
+  .ss-pdf-workspace,
+  .ss-pdf-review-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-pdf-dropzone {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .ss-pdf-frame {
+    height: 520px;
+  }
+
+  .ss-pdf-list {
+    max-height: none;
+  }
+
   .ss-settings-layout {
     grid-template-columns: 1fr;
   }
@@ -3796,6 +4416,158 @@ textarea {
   .ss-footer {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .ss-footer .ss-button {
+    width: 100%;
+  }
+
+  .ss-pdf-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .ss-pdf-actions .ss-button {
+    flex: 1;
+    min-width: 92px;
+  }
+
+  .ss-pdf-result {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .ss-pdf-result .ss-status {
+    grid-column: 2;
+    justify-self: flex-start;
+  }
+
+  .ss-pdf-kv-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .ss-pdf-detail-head {
+    flex-direction: column;
+  }
+
+  .ss-pdf-detail-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ss-pdf-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-pdf-frame {
+    height: 430px;
+  }
+
+  .ss-modal {
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .ss-savings-head {
+    flex-direction: column;
+  }
+
+  .ss-savings-amount {
+    text-align: left;
+    min-width: 0;
+  }
+
+  .ss-section {
+    flex-wrap: wrap;
+  }
+
+  .ss-command-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-pdf-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-dash-metrics,
+  .ss-renewals-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ss-dash-save-footer {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ss-dash-save-footer .ss-copy-btn {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+
+  .ss-renewal-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ss-renewal-meta {
+    width: 100%;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    justify-items: start;
+  }
+
+  .ss-task-row .ss-button {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* --- Small phones (≤ 420px) --- */
+@media (max-width: 420px) {
+  .ss-sidebar {
+    padding: 10px;
+  }
+
+  .ss-sidebar nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ss-nav {
+    font-size: 10px;
+    padding: 8px 3px;
+  }
+
+  .ss-nav span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .ss-brand b {
+    font-size: 17px;
+  }
+
+  .ss-top h1 {
+    font-size: 22px;
+  }
+
+  .ss-hero h2 {
+    font-size: 28px;
+  }
+
+  .ss-command-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ss-coverage-stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-dash-metrics,
+  .ss-renewals-metrics,
+  .ss-dash-save-footer {
+    grid-template-columns: 1fr;
   }
 
   .ss-modal {

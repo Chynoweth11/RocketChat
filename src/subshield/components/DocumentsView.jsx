@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Section, Info } from "./Layout.jsx";
 import { documentTypeLabel, formatShortDate } from "../utils.js";
+import PdfExtractorPanel from "./PdfExtractorPanel.jsx";
 
 function displayDocument(doc) {
   const legacyInvoice = doc.docType === "invoice" || /invoice/i.test(doc.name || "");
@@ -65,7 +66,16 @@ const FILTERS = [
   { id: "quote", label: "Quotes" },
 ];
 
-export default function DocumentsView({ documents, policies, onUpload, onDelete }) {
+export default function DocumentsView({
+  documents,
+  policies,
+  extractions,
+  onUpload,
+  onDelete,
+  onExtracted,
+  onUpdateExtraction,
+  onDeleteExtraction,
+}) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
 
@@ -97,6 +107,13 @@ export default function DocumentsView({ documents, policies, onUpload, onDelete 
 
   return (
     <div className="ss-grid">
+      <PdfExtractorPanel
+        extractions={extractions}
+        onExtracted={onExtracted}
+        onUpdateExtraction={onUpdateExtraction}
+        onDeleteExtraction={onDeleteExtraction}
+      />
+
       <section className="ss-card ss-span">
         <Section
           title="Document Center"

@@ -236,6 +236,10 @@ export default function SubShieldComplete() {
     () => (data.documents || []).map((item) => normalizeDocument(item)),
     [data.documents]
   );
+  const pdfExtractions = useMemo(
+    () => (Array.isArray(data.pdfExtractions) ? data.pdfExtractions : []),
+    [data.pdfExtractions]
+  );
   const openQuoteRequests = useMemo(
     () => getOpenQuoteRequests(quoteRequests),
     [quoteRequests]
@@ -1182,6 +1186,103 @@ export default function SubShieldComplete() {
     fireToast("Document removed", `${removed?.name || "Document"} deleted.`);
   }
 
+  function savePdfExtractions(results) {
+    const cleanResults = Array.isArray(results) ? results : [];
+    if (!cleanResults.length) return;
+
+    const documentRecords = cleanResults
+      .filter((result) => result.status !== "failed")
+      .map((result) =>
+        normalizeDocument({
+          name: result.fileName,
+          docType: result.docType,
+          carrier: result.fields?.carrier || "",
+          fileType: "PDF",
+          sizeKb: Math.max(1, Math.round((result.fileSize || 0) / 1024)),
+          status: ["extracted", "ocr_extracted"].includes(result.status)
+            ? "verified"
+            : "pending",
+          addedBy: firstName || "You",
+          uploadedAt: result.extractedAt,
+          extractionId: result.id,
+          extractedWords: result.words,
+        })
+      );
+
+    const extracted = cleanResults.filter((item) => item.status === "extracted").length;
+    const needsOcr = cleanResults.filter((item) => item.status === "needs_ocr").length;
+    const failed = cleanResults.filter((item) => item.status === "failed").length;
+    const plural = cleanResults.length === 1 ? "" : "s";
+
+    commit({
+      ...data,
+      pdfExtractions: [...cleanResults, ...(data.pdfExtractions || [])].slice(0, 100),
+      documents: [...documentRecords, ...(data.documents || [])],
+      activity: prependActivity(
+        data.activity,
+        `${cleanResults.length} PDF${plural} scanned`,
+        `${extracted} extracted, ${needsOcr} need OCR, ${failed} failed.`
+      ),
+    });
+
+    fireToast(
+      "PDF scan complete",
+      `${extracted} extracted, ${needsOcr} need OCR, ${failed} failed.`
+    );
+  }
+
+  function updatePdfExtraction(id, patch) {
+    const previous = pdfExtractions.find((item) => item.id === id);
+    const nextExtraction = {
+      ...(previous || {}),
+      ...patch,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    const verifiedStatus = ["extracted", "ocr_extracted"].includes(nextExtraction.status)
+      ? "verified"
+      : "pending";
+
+    commit({
+      ...data,
+      pdfExtractions: (data.pdfExtractions || []).map((item) =>
+        item.id === id ? nextExtraction : item
+      ),
+      documents: (data.documents || []).map((doc) =>
+        doc.extractionId === id
+          ? normalizeDocument({
+              ...doc,
+              docType: nextExtraction.docType || doc.docType,
+              carrier: nextExtraction.fields?.carrier || doc.carrier,
+              status: verifiedStatus,
+              extractedWords: nextExtraction.words || doc.extractedWords,
+            })
+          : doc
+      ),
+      activity: prependActivity(
+        data.activity,
+        "PDF extraction updated",
+        `${nextExtraction.fileName || "PDF result"} reviewed and saved.`
+      ),
+    });
+
+    fireToast("Extraction updated", `${nextExtraction.fileName || "PDF result"} saved.`);
+  }
+
+  function deletePdfExtraction(id) {
+    const removed = pdfExtractions.find((item) => item.id === id);
+    commit({
+      ...data,
+      pdfExtractions: (data.pdfExtractions || []).filter((item) => item.id !== id),
+      activity: prependActivity(
+        data.activity,
+        "PDF extraction deleted",
+        `${removed?.fileName || "A parsed PDF"} was removed from extraction history.`
+      ),
+    });
+    fireToast("Extraction deleted", `${removed?.fileName || "PDF result"} removed.`);
+  }
+
   /* ---------- Settings ---------- */
 
   function saveSettingsSection(sectionKey, value, meta = {}) {
@@ -1443,8 +1544,12 @@ export default function SubShieldComplete() {
             <DocumentsView
               documents={documents}
               policies={policies}
+              extractions={pdfExtractions}
               onUpload={() => setModal("scan")}
               onDelete={deleteDocument}
+              onExtracted={savePdfExtractions}
+              onUpdateExtraction={updatePdfExtraction}
+              onDeleteExtraction={deletePdfExtraction}
             />
           )}
 
