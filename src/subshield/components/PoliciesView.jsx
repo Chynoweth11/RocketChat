@@ -202,62 +202,75 @@ export default function PoliciesView({
               onClick={() => onSelectPolicy(policy.id)}
             />
           ))}
-        </section>
 
-        <section className="ss-card ss-policies-detail">
-          {policyForDetail ? (
-            <PolicyDetail
-              policy={policyForDetail}
-              onRenew={() => onRenew(policyForDetail.id)}
-              onFindSavings={() => onFindSavings(policyForDetail.id)}
-              onSend={onSend}
-              isRenewing={renewingId === policyForDetail.id}
-              carrierConnections={carrierConnections}
-              onManageConnections={onManageConnections}
-            />
-          ) : (
-            <div className="ss-empty" style={{ minHeight: 220 }}>
-              <AlertTriangle size={28} />
-              <h2>No policy selected</h2>
-              <p>Add or select a policy to view full coverage details.</p>
+          {upcoming.length > 0 && (
+            <div className="ss-policy-list-footer">
+              <span className="ss-eyebrow">Next renewal</span>
+              <b>{upcoming[0].name}</b>
+              <small>
+                {formatShortDate(upcoming[0].renewalDate || upcoming[0].expires)} |
+                {" "}{upcoming[0].daysRemaining} days left
+              </small>
             </div>
           )}
         </section>
-      </div>
 
-      {upcoming.length > 0 && (
-        <section className="ss-card ss-span">
-          <Section
-            title="Renewal timeline"
-            sub="Policies ordered by urgency. Take action before the critical window."
-            extra={<CalendarClock size={16} style={{ color: "var(--muted)" }} />}
-          />
-          <div className="ss-renewal-grid">
-            {upcoming.map((policy) => {
-              const status = getStatus(policy.daysRemaining);
-              return (
-                <button
-                  key={policy.id}
-                  type="button"
-                  className="ss-renewal-card"
-                  onClick={() => onSelectPolicy(policy.id)}
-                >
-                  <div className="ss-renewal-header">
-                    <span className={`ss-status ${status.className}`}>{status.label}</span>
-                    <b className="ss-renewal-days">{policy.daysRemaining}d</b>
-                  </div>
-                  <b>{policy.name}</b>
-                  <small>{policy.carrier}</small>
-                  <div className="ss-renewal-meta">
-                    <span>{formatShortDate(policy.renewalDate || policy.expires)}</span>
-                    <span>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
+        <div className="ss-policies-content">
+          <section className="ss-card ss-policies-detail">
+            {policyForDetail ? (
+              <PolicyDetail
+                policy={policyForDetail}
+                onRenew={() => onRenew(policyForDetail.id)}
+                onFindSavings={() => onFindSavings(policyForDetail.id)}
+                onSend={onSend}
+                isRenewing={renewingId === policyForDetail.id}
+                carrierConnections={carrierConnections}
+                onManageConnections={onManageConnections}
+              />
+            ) : (
+              <div className="ss-empty" style={{ minHeight: 220 }}>
+                <AlertTriangle size={28} />
+                <h2>No policy selected</h2>
+                <p>Add or select a policy to view full coverage details.</p>
+              </div>
+            )}
+          </section>
+
+          {upcoming.length > 0 && (
+            <section className="ss-card">
+              <Section
+                title="Renewal timeline"
+                sub="Policies ordered by urgency. Take action before the critical window."
+                extra={<CalendarClock size={16} style={{ color: "var(--muted)" }} />}
+              />
+              <div className="ss-renewal-grid">
+                {upcoming.map((policy) => {
+                  const status = getStatus(policy.daysRemaining);
+                  return (
+                    <button
+                      key={policy.id}
+                      type="button"
+                      className="ss-renewal-card"
+                      onClick={() => onSelectPolicy(policy.id)}
+                    >
+                      <div className="ss-renewal-header">
+                        <span className={`ss-status ${status.className}`}>{status.label}</span>
+                        <b className="ss-renewal-days">{policy.daysRemaining}d</b>
+                      </div>
+                      <b>{policy.name}</b>
+                      <small>{policy.carrier}</small>
+                      <div className="ss-renewal-meta">
+                        <span>{formatShortDate(policy.renewalDate || policy.expires)}</span>
+                        <span>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

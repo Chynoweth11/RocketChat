@@ -157,7 +157,7 @@ export default function SavingsView({
   }, [switchedCount, opportunities, quoteRequests, coverageApplication]);
 
   return (
-    <div className="ss-grid">
+    <div className="ss-grid ss-savings-grid">
       <section className="ss-card ss-span">
         <Section
           title="Coverage review through licensed partners"
@@ -262,95 +262,99 @@ export default function SavingsView({
         </div>
       </section>
 
-      <section className="ss-card">
-        <Section title="Quote requests & partner status" sub="What you submitted, when, and which licensed partner it routed to" />
-        {quoteRequests.length === 0 && (
-          <div className="ss-empty" style={{ minHeight: 160 }}>
-            <History size={28} />
-            <h2>No quote requests yet</h2>
-            <p>Complete the coverage review above to submit your first request to a licensed partner.</p>
-          </div>
-        )}
-        {quoteRequests.map((request) => {
-          const partner = request.partnerId ? partnerById.get(request.partnerId) : null;
-          const broker = request.brokerId ? brokerById.get(request.brokerId) : null;
-          const tone =
-            request.status === "quote_received" || request.status === "accepted"
-              ? "success"
-              : request.status === "declined"
-              ? "danger"
-              : "warning";
-          return (
-            <div className="ss-insight" key={request.id}>
+      <div className="ss-savings-lower">
+        <div className="ss-savings-lower-main">
+          <section className="ss-card">
+            <Section title="Quote requests & partner status" sub="What you submitted, when, and which licensed partner it routed to" />
+            {quoteRequests.length === 0 && (
+              <div className="ss-empty" style={{ minHeight: 160 }}>
+                <History size={28} />
+                <h2>No quote requests yet</h2>
+                <p>Complete the coverage review above to submit your first request to a licensed partner.</p>
+              </div>
+            )}
+            {quoteRequests.map((request) => {
+              const partner = request.partnerId ? partnerById.get(request.partnerId) : null;
+              const broker = request.brokerId ? brokerById.get(request.brokerId) : null;
+              const tone =
+                request.status === "quote_received" || request.status === "accepted"
+                  ? "success"
+                  : request.status === "declined"
+                  ? "danger"
+                  : "warning";
+              return (
+                <div className="ss-insight" key={request.id}>
+                  <div>
+                    <b>{policyById.get(request.policyId)?.name || "Policy request"}</b>
+                    <small>
+                      {request.routeType === "partner"
+                        ? `Partner: ${partner?.name || "Unassigned"}`
+                        : `Advisor: ${broker?.name || "Unassigned"}`}
+                      <br />
+                      Submitted {formatLongDate(request.submittedAt)}
+                    </small>
+                  </div>
+                  <em className={`ss-status ${tone}`}>{quoteStatusLabel(request.status)}</em>
+                </div>
+              );
+            })}
+          </section>
+
+          <section className="ss-card">
+            <Section title="Savings summary" sub="How much has been found and realized" />
+            <div className="ss-info-grid">
+              <Info label="Potential savings" value={`${formatMoney(potentialSavings)}/yr`} />
+              <Info label="Realized savings" value={`${formatMoney(realizedSavings)}/yr`} />
+              <Info label="Open opportunities" value={availableCount} />
+              <Info label="Purchased via partner" value={switchedCount} />
+            </div>
+            <PartnerDisclaimer compact />
+          </section>
+        </div>
+
+        <section className="ss-card">
+          <Section
+            title="Insurance review partners"
+            sub="Licensed contacts for renewals, policy questions, and quote support"
+            extra={
+              <button type="button" className="ss-button soft ss-button-sm" onClick={onAddAdvisor}>
+                <Plus size={14} /> Add
+              </button>
+            }
+          />
+          {brokers.length === 0 && (
+            <div className="ss-note">
+              <Sparkles size={16} />
+              <span>No advisor saved. Add one for one-click renewal reviews.</span>
+            </div>
+          )}
+          {brokers.map((broker) => (
+            <div className="ss-insight" key={broker.id}>
               <div>
-                <b>{policyById.get(request.policyId)?.name || "Policy request"}</b>
+                <b>{broker.name}</b>
                 <small>
-                  {request.routeType === "partner"
-                    ? `Partner: ${partner?.name || "Unassigned"}`
-                    : `Advisor: ${broker?.name || "Unassigned"}`}
+                  {broker.company}
                   <br />
-                  Submitted {formatLongDate(request.submittedAt)}
+                  {broker.email}
                 </small>
               </div>
-              <em className={`ss-status ${tone}`}>{quoteStatusLabel(request.status)}</em>
             </div>
-          );
-        })}
-      </section>
+          ))}
 
-      <section className="ss-card">
-        <Section
-          title="Insurance review partners"
-          sub="Licensed contacts for renewals, policy questions, and quote support"
-          extra={
-            <button type="button" className="ss-button soft ss-button-sm" onClick={onAddAdvisor}>
-              <Plus size={14} /> Add
-            </button>
-          }
-        />
-        {brokers.length === 0 && (
-          <div className="ss-note">
-            <Sparkles size={16} />
-            <span>No advisor saved. Add one for one-click renewal reviews.</span>
-          </div>
-        )}
-        {brokers.map((broker) => (
-          <div className="ss-insight" key={broker.id}>
-            <div>
-              <b>{broker.name}</b>
-              <small>
-                {broker.company}
-                <br />
-                {broker.email}
-              </small>
+          <div className="ss-partner-network">
+            <span className="ss-eyebrow">Coverage and savings network</span>
+            <div className="ss-partner-chips">
+              {partners
+                .filter((partner) => partner.active)
+                .map((partner) => (
+                  <span className="ss-partner-chip" key={partner.id} title={partner.amRating || ""}>
+                    <ShieldCheck size={12} /> {partner.name}
+                  </span>
+                ))}
             </div>
           </div>
-        ))}
-
-        <div className="ss-partner-network">
-          <span className="ss-eyebrow">Coverage and savings network</span>
-          <div className="ss-partner-chips">
-            {partners
-              .filter((partner) => partner.active)
-              .map((partner) => (
-                <span className="ss-partner-chip" key={partner.id} title={partner.amRating || ""}>
-                  <ShieldCheck size={12} /> {partner.name}
-                </span>
-              ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="ss-card">
-        <Section title="Savings summary" sub="How much has been found and realized" />
-        <div className="ss-info-grid">
-          <Info label="Potential savings" value={`${formatMoney(potentialSavings)}/yr`} />
-          <Info label="Realized savings" value={`${formatMoney(realizedSavings)}/yr`} />
-          <Info label="Open opportunities" value={availableCount} />
-          <Info label="Purchased via partner" value={switchedCount} />
-        </div>
-        <PartnerDisclaimer compact />
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

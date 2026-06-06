@@ -8321,3 +8321,117 @@ body {
     margin-left: 0;
   }
 }
+
+/* Desktop layout refinements for mixed-height panels. */
+.ss-main {
+  padding-bottom: 28px;
+}
+
+.ss-savings-lower {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.ss-savings-lower-main,
+.ss-policies-content {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.ss-savings-lower > .ss-card,
+.ss-savings-lower-main > .ss-card,
+.ss-policies-content > .ss-card {
+  min-width: 0;
+}
+
+.ss-savings-lower > .ss-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-savings-lower > .ss-card .ss-partner-network {
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.ss-policies-body {
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+}
+
+.ss-policies-list {
+  align-self: start;
+  top: 18px;
+  max-height: calc(100vh - 76px);
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-policy-list-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  display: grid;
+  gap: 4px;
+}
+
+.ss-policy-list-footer b {
+  color: #101827;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.ss-policy-list-footer small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ss-policies-content .ss-renewal-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ss-policies-content .ss-renewal-card {
+  min-height: 112px;
+}
+
+.ss-sidebar .ss-account,
+.ss-sidebar .ss-account:hover,
+.ss-sidebar .ss-account.active {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.045));
+  box-shadow: none;
+}
+
+.ss-sidebar .ss-account:hover,
+.ss-sidebar .ss-account.active {
+  border-color: rgba(153, 184, 255, 0.34);
+  background: linear-gradient(180deg, rgba(76, 116, 201, 0.22), rgba(255, 255, 255, 0.055));
+}
+
+.ss-sidebar .ss-account-copy b {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ss-sidebar .ss-account-copy small {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ss-sidebar .ss-account-plan {
+  color: #d7e4ff;
+  border-color: rgba(126, 166, 255, 0.38);
+  background: rgba(82, 132, 255, 0.22);
+}
+
+@media (max-width: 1240px) {
+  .ss-savings-lower {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-policies-list {
+    height: auto;
+  }
+}
