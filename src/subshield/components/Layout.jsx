@@ -12,7 +12,6 @@ import {
   Link2,
   Search,
   Settings,
-  Shield,
   ShieldCheck,
   Upload,
   X,
@@ -44,7 +43,7 @@ export function Brand() {
   return (
     <div className="ss-brand">
       <span className="ss-brand-mark" aria-hidden="true">
-        <Shield size={20} />
+        <img src="/subshield-logo.png" alt="" />
       </span>
       <div>
         <b>SubShield</b>
