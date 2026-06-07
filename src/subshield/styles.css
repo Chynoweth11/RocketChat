@@ -6763,31 +6763,33 @@ h1, h2, h3 {
 
 .ss-carrier-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-auto-rows: 1fr; /* every row the same height so cards line up row-to-row */
+  gap: 14px;
   margin-top: 4px;
 }
 
 .ss-carrier-card {
-  border: 1px solid #e4eaf2;
-  border-radius: 13px;
-  background: #fff;
-  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.12s ease;
+  gap: 12px;
+  height: 100%; /* stretch to the equal-height grid row */
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
 }
 
 .ss-carrier-card:hover {
-  border-color: #c8d5e6;
-  box-shadow: 0 4px 18px rgba(10, 18, 38, 0.07);
-  transform: translateY(-1px);
+  border-color: #d7dce4;
+  box-shadow: var(--shadow-sm);
+  transform: none;
 }
 
 .ss-carrier-card.is-connected {
-  border-color: #a8d8be;
-  background: linear-gradient(160deg, #f4fcf8 0%, #fff 100%);
+  border-color: var(--ok-line);
+  background: var(--ok-bg);
 }
 
 .ss-carrier-card-head {
@@ -6813,28 +6815,45 @@ h1, h2, h3 {
   font-size: 14px;
 }
 
-.ss-carrier-rating {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--success);
-  background: var(--success-soft);
-  border-radius: 4px;
-  padding: 1px 6px;
+.ss-carrier-card-name-row b {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
+/* Standardized badges: same height, padding, radius, weight */
+.ss-carrier-rating,
 .ss-carrier-category {
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: 999px;
+  padding: 2px 8px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.ss-carrier-rating {
+  color: var(--ok);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-line);
+}
+.ss-carrier-category {
   color: var(--muted);
-  background: #f0f3f8;
-  border-radius: 4px;
-  padding: 1px 6px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
 }
 
+/* Fixed description height so chips + button align across every card */
 .ss-carrier-card-desc {
   font-size: 12px;
   color: var(--muted);
-  margin: 0;
+  margin: 2px 0 0;
   line-height: 1.5;
+  min-height: 54px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .ss-carrier-card-status {
@@ -6860,7 +6879,9 @@ h1, h2, h3 {
 .ss-carrier-caps {
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 6px;
+  min-height: 48px; /* reserve up to two chip rows so chips sit at the same place */
 }
 
 .ss-carrier-cap {
@@ -6878,8 +6899,12 @@ h1, h2, h3 {
 .ss-carrier-card-foot {
   display: flex;
   gap: 8px;
-  padding-top: 4px;
-  border-top: 1px solid #f0f3f8;
+  margin-top: auto; /* anchor the Connect button to the bottom of every card */
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+.ss-carrier-card-foot .ss-button {
+  flex: 1;
 }
 
 .ss-connections-section-label {
