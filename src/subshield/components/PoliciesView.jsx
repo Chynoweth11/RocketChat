@@ -5,11 +5,8 @@ import {
   CalendarClock,
   Check,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
   Download,
   FileSpreadsheet,
-  LifeBuoy,
   Plus,
   Search,
   Send,
@@ -309,24 +306,6 @@ function PolicyRow({ policy, selected, onClick }) {
   );
 }
 
-function Disclosure({ title, defaultOpen = false, children }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className={`ss-pd-disclosure${open ? " open" : ""}`}>
-      <button
-        type="button"
-        className="ss-pd-disclosure-toggle"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-      >
-        {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-        <span>{title}</span>
-      </button>
-      {open && <div className="ss-pd-disclosure-body">{children}</div>}
-    </div>
-  );
-}
-
 function PolicyDetail({
   policy,
   onRenew,
@@ -538,17 +517,6 @@ function PolicyDetail({
 
       {/* Secondary, de-emphasized */}
       <div className="ss-pd-secondary">
-        <Disclosure title="Filing a claim">
-          <p className="ss-pd-claim-intro">Have these ready to speed up the process:</p>
-          <ul className="ss-pd-claim-list">
-            <li>Policy number ({policy.policyNumber})</li>
-            <li>Date, time, place, and description of the incident</li>
-            <li>Names and roles of anyone involved</li>
-          </ul>
-          <button type="button" className="ss-button soft ss-button-sm" onClick={onSend}>
-            <LifeBuoy size={15} /> Contact advisor
-          </button>
-        </Disclosure>
         <button
           type="button"
           className="ss-pd-link ss-pd-summary"
