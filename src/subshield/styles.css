@@ -12540,6 +12540,89 @@ body {
   color: var(--muted);
 }
 
+/* Coverage lines — grouped blocks (cleaner than a wide repeating table) */
+.ss-cov-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ss-cov-block {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ss-cov-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--line);
+}
+.ss-cov-block-head b {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ss-cov-block-head small {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ss-cov-limits {
+  margin: 0;
+  padding: 4px 14px;
+}
+.ss-cov-limits > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.ss-cov-limits > div:first-child {
+  border-top: 0;
+}
+.ss-cov-limits dt {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.ss-cov-limits dd {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ss-cov-nolimit {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+/* Keep the source PDF in view while the review panel scrolls */
+.ss-pdf-preview-pane {
+  position: sticky;
+  top: 24px;
+}
+.ss-pdf-frame {
+  height: 560px;
+}
+@media (max-width: 980px) {
+  .ss-pdf-preview-pane {
+    position: static;
+  }
+  .ss-pdf-frame {
+    height: 420px;
+  }
+}
+
 /* Failed extraction — technical detail (kept out of the way) */
 .ss-pdf-error-detail {
   margin: 0;

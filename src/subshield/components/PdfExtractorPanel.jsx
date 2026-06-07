@@ -810,39 +810,38 @@ export default function PdfExtractorPanel({
                         {selected.coverages?.length > 0 && (
                           <div className="ss-cov-section">
                             <b>Coverage lines</b>
-                            <div className="ss-cov-table-wrap">
-                              <table className="ss-cov-table">
-                                <thead>
-                                  <tr>
-                                    <th>Coverage</th>
-                                    <th>Limit</th>
-                                    <th>Amount</th>
-                                    <th>Effective</th>
-                                    <th>Expiration</th>
-                                    <th>Policy #</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {selected.coverages.flatMap((cov) =>
-                                    (cov.limits?.length
-                                      ? cov.limits
-                                      : [{ name: "—", amount: "—" }]
-                                    ).map((limit, index) => (
-                                      <tr
-                                        key={`${cov.type}-${index}`}
-                                        className={index === 0 ? "cov-start" : ""}
-                                      >
-                                        <td>{index === 0 ? cov.type : ""}</td>
-                                        <td>{limit.name}</td>
-                                        <td className="ss-cov-amount">{limit.amount}</td>
-                                        <td>{index === 0 ? cov.effectiveDate || "—" : ""}</td>
-                                        <td>{index === 0 ? cov.expirationDate || "—" : ""}</td>
-                                        <td>{index === 0 ? cov.policyNumber || "—" : ""}</td>
-                                      </tr>
-                                    ))
-                                  )}
-                                </tbody>
-                              </table>
+                            <div className="ss-cov-groups">
+                              {selected.coverages.map((cov) => {
+                                const term = [cov.effectiveDate, cov.expirationDate]
+                                  .filter(Boolean)
+                                  .join(" – ");
+                                const meta = [
+                                  cov.policyNumber ? `Policy ${cov.policyNumber}` : "",
+                                  term,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ");
+                                return (
+                                  <div className="ss-cov-block" key={cov.type}>
+                                    <div className="ss-cov-block-head">
+                                      <b>{cov.type}</b>
+                                      {meta && <small>{meta}</small>}
+                                    </div>
+                                    {cov.limits?.length ? (
+                                      <dl className="ss-cov-limits">
+                                        {cov.limits.map((limit, index) => (
+                                          <div key={`${limit.name}-${index}`}>
+                                            <dt>{limit.name}</dt>
+                                            <dd>{limit.amount}</dd>
+                                          </div>
+                                        ))}
+                                      </dl>
+                                    ) : (
+                                      <p className="ss-cov-nolimit">No limits detected on this document.</p>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
