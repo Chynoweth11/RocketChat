@@ -12209,72 +12209,83 @@ body {
   }
 }
 
-/* ===================== Certificate sent — calm confirmation ===================== */
+/* ===================== Certificate sent — minimal, centered confirmation ===================== */
 .ss-sent-modal {
-  max-width: 460px;
+  max-width: 420px;
+}
+/* The Modal renders its own heading; keep it for screen readers but show the
+   centered custom title below the mark. */
+.ss-sent-modal > h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .ss-sent {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 4px;
-}
-.ss-sent-badge {
-  align-self: flex-start;
-  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ok);
+  text-align: center;
+  padding: 8px 4px 0;
+}
+.ss-sent-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
   background: var(--ok-bg);
-  border: 1px solid var(--ok-line);
-  border-radius: 999px;
-  padding: 3px 10px;
+  color: var(--ok);
+  margin-bottom: 16px;
+}
+.ss-sent-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 .ss-sent-lead {
-  margin: 0;
+  margin: 8px 0 0;
   font-size: 14px;
   line-height: 1.55;
   color: var(--muted);
+  max-width: 320px;
 }
 .ss-sent-lead b {
   color: var(--ink);
   font-weight: 600;
 }
-.ss-sent-summary {
+.ss-sent-meta {
+  margin-top: 20px;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface-soft);
-  padding: 6px 14px;
-}
-.ss-sent-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 0;
   font-size: 12.5px;
+}
+.ss-sent-meta span {
   color: var(--muted);
-  border-top: 1px solid var(--line);
 }
-.ss-sent-row:first-child {
-  border-top: 0;
-}
-.ss-sent-row svg {
-  color: var(--ok);
-  flex-shrink: 0;
-}
-.ss-sent-row b {
-  color: var(--text);
+.ss-sent-meta b {
+  color: var(--ink);
   font-weight: 600;
 }
 .ss-sent-actions {
+  margin-top: 22px;
   display: flex;
   gap: 10px;
-  margin-top: 2px;
+  justify-content: center;
 }
 
 /* ===================== Document Center — grouped, scannable list ===================== */

@@ -2,14 +2,18 @@ import { Check, RefreshCw } from "lucide-react";
 import Modal from "./Modal.jsx";
 
 export default function SuccessModal({ onClose, contractor, project, onSendAnother }) {
-  const email = contractor?.email || "the recipient";
+  const email = contractor?.email;
 
   return (
     <Modal title="Certificate sent" onClose={onClose} className="ss-sent-modal">
       <div className="ss-sent">
-        <span className="ss-sent-badge">
-          <Check size={12} aria-hidden="true" /> Delivered
-        </span>
+        <div className="ss-sent-mark" aria-hidden="true">
+          <Check size={22} strokeWidth={2.5} />
+        </div>
+
+        <h3 className="ss-sent-title" aria-hidden="true">
+          Certificate sent
+        </h3>
 
         <p className="ss-sent-lead">
           {contractor && project ? (
@@ -22,28 +26,12 @@ export default function SuccessModal({ onClose, contractor, project, onSendAnoth
           )}
         </p>
 
-        <div className="ss-sent-summary">
-          <div className="ss-sent-row">
-            <Check size={14} aria-hidden="true" />
-            <span>
-              Delivered to <b>{email}</b>
-            </span>
+        {email && (
+          <div className="ss-sent-meta">
+            <span>Sent to</span>
+            <b>{email}</b>
           </div>
-          <div className="ss-sent-row">
-            <Check size={14} aria-hidden="true" />
-            <span>Logged to your delivery history</span>
-          </div>
-          <div className="ss-sent-row">
-            <Check size={14} aria-hidden="true" />
-            <span>Project saved for one-click resends</span>
-          </div>
-          {contractor && (
-            <div className="ss-sent-row">
-              <Check size={14} aria-hidden="true" />
-              <span>Holder wording saved for {contractor.name}</span>
-            </div>
-          )}
-        </div>
+        )}
 
         <div className="ss-sent-actions">
           <button type="button" className="ss-button" onClick={onClose}>
