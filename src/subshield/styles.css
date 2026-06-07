@@ -12691,6 +12691,88 @@ body {
   background: #f6eedb;
 }
 
+/* ===================== PDF review: bounded split workspace =====================
+   One screen-height region: document rail + PDF (fills) + extracted data
+   (scrolls internally). Removes the large blank space around the short PDF
+   preview and the long blank scroll below it. */
+.ss-pdf-workspace {
+  align-items: stretch;
+  height: clamp(560px, calc(100vh - 196px), 900px);
+}
+.ss-pdf-list {
+  height: 100%;
+  max-height: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.ss-pdf-detail {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ss-pdf-detail-head,
+.ss-pdf-ocr-progress,
+.ss-pdf-detail > .ss-note,
+.ss-pdf-detail > .ss-coi-disclosure {
+  flex-shrink: 0;
+}
+.ss-pdf-review-shell {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  align-items: stretch;
+}
+.ss-pdf-preview-pane,
+.ss-pdf-review-pane {
+  height: 100%;
+  min-height: 0;
+}
+.ss-pdf-preview-pane {
+  position: static;
+  display: flex;
+  flex-direction: column;
+}
+.ss-pdf-frame {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+.ss-pdf-review-pane {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.ss-pdf-review-pane .ss-chip-group {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+  margin: -2px 0 12px;
+  padding: 2px 0 8px;
+}
+
+/* On narrow screens, let it flow naturally (stacked, no internal scroll). */
+@media (max-width: 980px) {
+  .ss-pdf-workspace,
+  .ss-pdf-detail,
+  .ss-pdf-review-shell,
+  .ss-pdf-list {
+    height: auto;
+    min-height: 0;
+  }
+  .ss-pdf-review-pane {
+    overflow: visible;
+  }
+  .ss-pdf-frame {
+    flex: none;
+    height: 460px;
+  }
+  .ss-pdf-review-pane .ss-chip-group {
+    position: static;
+  }
+}
+
 /* Failed extraction — technical detail (kept out of the way) */
 .ss-pdf-error-detail {
   margin: 0;
