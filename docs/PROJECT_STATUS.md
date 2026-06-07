@@ -13,12 +13,12 @@ Main entry: `src/subshield/SubShieldComplete.jsx`
 
 ## Navigation / surfaces
 
-1. **Dashboard** (`DashboardView`): executive overview and priority queue
-2. **Policies** (`PoliciesView`): coverage, premium, deductible, limits, renewals
+1. **Dashboard** (`DashboardView`): executive overview, priority queue, and recent activity
+2. **Policies** (`PoliciesView`): coverage, premium, deductible, limits, renewals, health score
 3. **Savings** (`SavingsView`): partner-routed quote review
 4. **Certificates** (`CertificatesView`): COI sends, holders, delivery history
 5. **Documents** (`DocumentsView`): declarations, certificates, endorsements, quotes, compliance files
-6. **Activity** (`ActivityView`): audit trail
+6. **Connections** (`ConnectionsView`): carrier integrations and policy sync
 7. **Settings** (`SettingsView`): SaaS settings center
 
 ## Key workflows (end-to-end)
@@ -31,13 +31,17 @@ Main entry: `src/subshield/SubShieldComplete.jsx`
 
 ## Data model
 
-Storage key: `subshield.complete.v5`
+Storage key: `subshield.complete.v6`
 
 Tracked entities: company, policies (with `deductible`), savingsOpportunities
 (with `alternateQuote`), quoteRequests, documents, contractors, coiSends, brokers,
-partners, activity, settings, preferences.
+partners, coverageApplication, pdfExtractions, activity, settings.
+
+> Note: the app currently runs on local demo/sample data (`sampleData.js`) for
+> testing. Real production data will replace it once the backend is connected.
 
 ## Validation
 
 - `npm run lint` passes
+- `npm test` passes
 - `npm run build` passes

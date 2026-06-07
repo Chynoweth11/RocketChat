@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import {
-  AlertTriangle,
   ArrowRight,
   BadgeDollarSign,
   Bell,

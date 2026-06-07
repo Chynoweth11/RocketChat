@@ -68,13 +68,6 @@ const TYPE_MATCHERS = [
   },
 ];
 
-// First matching type for a single line (used when walking COI rows).
-function typeForLine(line) {
-  for (const matcher of TYPE_MATCHERS) {
-    if (matcher.patterns.some((re) => re.test(line))) return matcher.type;
-  }
-  return null;
-}
 
 // Every coverage type whose wording appears anywhere in the document.
 export function detectCoverageTypes(text) {

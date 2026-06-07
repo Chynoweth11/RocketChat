@@ -1,4 +1,4 @@
-import { CheckCircle2, FileCheck2, RefreshCw, Send } from "lucide-react";
+import { CheckCircle2, FileCheck2, RefreshCw } from "lucide-react";
 import Modal from "./Modal.jsx";
 
 export default function SuccessModal({ onClose, contractor, project, onSendAnother }) {

@@ -42,7 +42,10 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "no-unused-vars": "off",
+      "no-unused-vars": [
+        "warn",
+        { args: "none", caughtErrors: "none", varsIgnorePattern: "^_" },
+      ],
       "react/no-unescaped-entities": "off",
     },
   },

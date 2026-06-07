@@ -70,7 +70,6 @@ export default function CertificatesView({
   }, [contractors, complianceByHolder]);
 
   const totalSends = (coiSends || []).length;
-  const totalProjects = contractors.reduce((sum, gc) => sum + (gc.projects || []).length, 0);
   const holdersWithRecentCOI = useMemo(() => {
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
     return contractors.filter((c) => {

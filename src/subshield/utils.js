@@ -101,8 +101,6 @@ const DOCUMENT_TYPE_LABELS = {
   policy: "Policy Document",
 };
 
-const DAY_BUCKETS = ["Today", "Yesterday"];
-
 const MONTHS_LONG = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -529,172 +527,6 @@ export function checkCompliance(requirements, policies) {
   };
 }
 
-/* ---------- Project readiness ----------
- * A job is one GC + project pairing. For each, we combine the GC's coverage
- * requirements, the contractor's real policies, and the COI delivery history to
- * answer the operational question that matters on a job site: is anything
- * missing from the insurance file? Everything here is derived. Jobs are never stored.
- */
-
-const COI_STALE_DAYS = 90;
-
-// Whole days since an ISO timestamp (never negative).
-export function daysSince(iso) {
-  return Math.max(0, -daysUntil(iso));
-}
-
-function sameProject(a, b) {
-  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
-}
-
-// Every COI send for a contractor: their stored pastSends merged with the
-// global coiSends log, de-duplicated by id and newest-first.
-function sendsForContractor(contractor, coiSends = []) {
-  const onHolder = contractor.pastSends || [];
-  const fromLog = (coiSends || []).filter(
-    (send) => send.contractorId === contractor.id && !onHolder.find((ps) => ps.id === send.id)
-  );
-  return [...onHolder, ...fromLog].sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
-}
-
-/**
- * Project-readiness verdict for a single job. Combines coverage compliance with
- * COI delivery state into a status, a document blocker checklist, and
- * the recommended next action.
- */
-export function jobPaymentStatus({ compliance, lastSend, daysSinceSend }) {
-  const hasReqs = Boolean(compliance?.hasRequirements);
-  const coverageOk = !hasReqs || compliance.compliant;
-  const sent = Boolean(lastSend);
-  const current = sent && daysSinceSend != null && daysSinceSend <= COI_STALE_DAYS;
-
-  const blockers = [];
-  if (hasReqs && !compliance.compliant) {
-    blockers.push(
-      `${compliance.unmetCount} coverage gap${compliance.unmetCount !== 1 ? "s" : ""} vs. GC requirements`
-    );
-  }
-  if (!sent) blockers.push("Certificate of insurance not sent yet");
-  else if (!current) blockers.push("Certificate may be outdated");
-
-  const steps = [
-    {
-      label: "Coverage meets GC requirements",
-      done: hasReqs ? compliance.compliant : false,
-      neutral: !hasReqs,
-      detail: hasReqs
-        ? compliance.compliant
-          ? `${compliance.metCount}/${compliance.total} requirements met`
-          : `${compliance.unmetCount} gap${compliance.unmetCount !== 1 ? "s" : ""} to close`
-        : "No requirements on file",
-    },
-    {
-      label: "COI sent to the GC",
-      done: sent,
-      detail: sent ? "Delivered" : "Not sent yet",
-    },
-    {
-      label: "COI is current",
-      done: current,
-      detail: sent ? (current ? `${daysSinceSend}d ago` : "Not sent yet") : "Not sent yet",
-    },
-  ];
-
-  let status;
-  let statusLabel;
-  let tone;
-  let primaryAction;
-  let sortRank;
-  if (hasReqs && !compliance.compliant) {
-    status = "not_covered";
-    statusLabel = "Coverage gap. Fix before sending";
-    tone = "danger";
-    primaryAction = "fix";
-    sortRank = 0;
-  } else if (!sent) {
-    status = "ready_to_send";
-    statusLabel = "Covered. Send the COI";
-    tone = "warning";
-    primaryAction = "send";
-    sortRank = 1;
-  } else if (!current) {
-    status = "needs_resend";
-    statusLabel = "Certificate may be outdated. Resend";
-    tone = "warning";
-    primaryAction = "resend";
-    sortRank = 2;
-  } else {
-    status = "covered_sent";
-    statusLabel = "Covered & documented";
-    tone = "success";
-    primaryAction = "none";
-    sortRank = 3;
-  }
-
-  return {
-    status,
-    statusLabel,
-    tone,
-    blockers,
-    steps,
-    readyToBill: coverageOk && sent && current,
-    primaryAction,
-    sortRank,
-  };
-}
-
-/** Build the list of jobs (GC x project) with their project-readiness verdicts. */
-export function buildJobs(contractors = [], policies = [], coiSends = []) {
-  const jobs = [];
-  contractors.forEach((gc) => {
-    const compliance = checkCompliance(gc.coverageRequirements, policies);
-    const allSends = sendsForContractor(gc, coiSends);
-    const projects = (gc.projects || []).filter(Boolean);
-    const projectList = projects.length ? projects : [null];
-
-    projectList.forEach((project) => {
-      const sends = project
-        ? allSends.filter((send) => sameProject(send.project, project))
-        : allSends;
-      const lastSend = sends[0] || null;
-      const daysSinceSend = lastSend ? daysSince(lastSend.sentAt) : null;
-      const verdict = jobPaymentStatus({ compliance, lastSend, daysSinceSend });
-
-      jobs.push({
-        id: `${gc.id}::${project || "general"}`,
-        contractorId: gc.id,
-        contractor: gc,
-        gcName: gc.name,
-        initials: gc.initials || deriveInitials(gc.name || ""),
-        project: project || "General coverage",
-        hasProject: Boolean(project),
-        compliance,
-        sends,
-        lastSend,
-        daysSinceSend,
-        ...verdict,
-      });
-    });
-  });
-
-  return jobs.sort(
-    (a, b) =>
-      a.sortRank - b.sortRank ||
-      a.gcName.localeCompare(b.gcName) ||
-      a.project.localeCompare(b.project)
-  );
-}
-
-/** Headline counts for project readiness. */
-export function summarizeJobs(jobs = []) {
-  return {
-    total: jobs.length,
-    actionNeeded: jobs.filter((job) => job.status !== "covered_sent").length,
-    coveredSent: jobs.filter((job) => job.status === "covered_sent").length,
-    gaps: jobs.filter((job) => job.status === "not_covered").length,
-  };
-}
-
 export function getComplianceScore(policies = []) {
   if (!policies.length) return 0;
 
@@ -967,61 +799,6 @@ function normalizeActivityItem(item) {
   };
 }
 
-function getDayDifference(isoDateTime) {
-  const parsed = new Date(isoDateTime);
-  if (Number.isNaN(parsed.getTime())) return null;
-  const today = startOfLocalDay(new Date());
-  const day = startOfLocalDay(parsed);
-  return Math.round((today - day) / 86400000);
-}
-
-function bucketFromLegacyTime(value) {
-  const time = (value || "").toLowerCase();
-  if (time === "just now" || time === "today") return "Today";
-  if (time === "yesterday" || time === "1 day ago") return "Yesterday";
-  return "Earlier";
-}
-
-export function formatActivityTime(item) {
-  if (item?.createdAt) {
-    const parsed = new Date(item.createdAt);
-    if (!Number.isNaN(parsed.getTime())) {
-      const dayDiff = getDayDifference(item.createdAt);
-      if (dayDiff === 0) {
-        const h = parsed.getHours();
-        const m = String(parsed.getMinutes()).padStart(2, "0");
-        const ampm = h >= 12 ? "PM" : "AM";
-        const hour = h % 12 || 12;
-        return `Today at ${hour}:${m} ${ampm}`;
-      }
-      if (dayDiff === 1) return "Yesterday";
-      if (dayDiff > 1 && dayDiff < 7) return `${dayDiff} days ago`;
-      return formatShortDate(item.createdAt);
-    }
-  }
-  return item?.time || "Just now";
-}
-
-export function groupActivityByDate(activity = []) {
-  const groups = { Today: [], Yesterday: [], Earlier: [] };
-
-  activity.forEach((item) => {
-    const dayDiff = item?.createdAt ? getDayDifference(item.createdAt) : null;
-    if (dayDiff === 0) {
-      groups.Today.push(item);
-    } else if (dayDiff === 1) {
-      groups.Yesterday.push(item);
-    } else {
-      const fallbackBucket = bucketFromLegacyTime(item?.time);
-      groups[fallbackBucket].push(item);
-    }
-  });
-
-  return [...DAY_BUCKETS, "Earlier"]
-    .map((label) => ({ label, items: groups[label] }))
-    .filter((group) => group.items.length > 0);
-}
-
 /* ---------- Storage ---------- */
 
 function normalizeStringArray(value = []) {
@@ -1029,22 +806,6 @@ function normalizeStringArray(value = []) {
   return value
     .map((item) => String(item || "").trim())
     .filter(Boolean);
-}
-
-function normalizePreferences(value, fallback = {}) {
-  const defaults = {
-    alerts: typeof fallback.alerts === "boolean" ? fallback.alerts : true,
-    routing: typeof fallback.routing === "boolean" ? fallback.routing : true,
-    autoshop: typeof fallback.autoshop === "boolean" ? fallback.autoshop : false,
-  };
-
-  if (!value || typeof value !== "object") return defaults;
-
-  return {
-    alerts: typeof value.alerts === "boolean" ? value.alerts : defaults.alerts,
-    routing: typeof value.routing === "boolean" ? value.routing : defaults.routing,
-    autoshop: typeof value.autoshop === "boolean" ? value.autoshop : defaults.autoshop,
-  };
 }
 
 function normalizeTeamMember(raw) {
@@ -1482,7 +1243,6 @@ export function readStoredData(fallback) {
       policies,
       contractors,
       activity: activity.length ? activity : fallback.activity,
-      preferences: normalizePreferences(parsed.preferences, fallback.preferences || {}),
       brokers,
       partners,
       savingsOpportunities,

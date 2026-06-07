@@ -91,6 +91,5 @@ Production-style entities tracked in state and `localStorage`:
   `commissionModel`)
 - `activity`
 - `settings`
-- `preferences`
 
 Storage key: `subshield.complete.v6`
