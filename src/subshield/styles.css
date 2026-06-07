@@ -11403,3 +11403,106 @@ body {
 .ss-policy-health-dot.danger {
   background: var(--bad);
 }
+
+/* ---- PDF extraction: confidence tones, coverage table, missing coverages ---- */
+.ss-pdf-edit-field span em.ss-conf {
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.ss-pdf-edit-field span em.ss-conf.ok {
+  color: var(--ok);
+  background: var(--ok-bg);
+}
+.ss-pdf-edit-field span em.ss-conf.mid,
+.ss-pdf-edit-field span em.ss-conf.needs {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+.ss-pdf-edit-field span em.ss-conf.low {
+  color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.ss-cov-section,
+.ss-cov-missing {
+  margin-top: 22px;
+}
+.ss-cov-section > b,
+.ss-cov-missing > b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.ss-cov-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ss-cov-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.ss-cov-table thead th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: var(--surface-soft);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.ss-cov-table tbody td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--text);
+  vertical-align: top;
+}
+.ss-cov-table tbody tr:first-child td {
+  border-top: 0;
+}
+.ss-cov-table td:first-child {
+  font-weight: 600;
+  color: var(--ink);
+}
+.ss-cov-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.ss-cov-missing-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ss-cov-missing-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+.ss-cov-missing-item svg {
+  color: var(--warn);
+  flex-shrink: 0;
+}
+.ss-cov-missing-item em {
+  font-style: normal;
+  color: var(--faint);
+  font-size: 11px;
+}

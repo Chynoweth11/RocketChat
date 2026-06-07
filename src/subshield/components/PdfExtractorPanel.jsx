@@ -31,11 +31,25 @@ const TABS = [
   { id: "metadata", label: "Metadata", icon: Rows3 },
 ];
 
-const REVIEW_FIELDS = [
+// ACORD certificate fields, mapped from their correct sections.
+const ACORD_FIELDS = [
+  { key: "carrier", label: "Carrier (Insurer A)" },
+  { key: "naic", label: "NAIC #" },
+  { key: "insuredName", label: "Named insured" },
+  { key: "certificateHolder", label: "Certificate holder" },
+  { key: "policyNumber", label: "Policy number" },
+  { key: "effectiveDate", label: "Policy effective" },
+  { key: "expirationDate", label: "Policy expiration" },
+  { key: "certificateDate", label: "Certificate date" },
+  { key: "producer", label: "Producer / broker" },
+  { key: "producerPhone", label: "Producer phone" },
+];
+
+// Generic fields for declarations / quotes / other documents.
+const GENERIC_FIELDS = [
   { key: "carrier", label: "Carrier" },
   { key: "policyNumber", label: "Policy number" },
   { key: "insuredName", label: "Named insured" },
-  { key: "certificateHolder", label: "Certificate holder" },
   { key: "effectiveDate", label: "Effective date" },
   { key: "expirationDate", label: "Expiration date" },
   { key: "premium", label: "Premium / amount" },
@@ -44,7 +58,11 @@ const REVIEW_FIELDS = [
   { key: "invoiceNumber", label: "Invoice number" },
 ];
 
-const REVIEW_FIELD_KEYS = new Set(REVIEW_FIELDS.map((field) => field.key));
+// Every key the editor manages, so address/array extras still route to the
+// "Additional extracted data" section instead of duplicating.
+const ALL_REVIEW_KEYS = new Set(
+  [...ACORD_FIELDS, ...GENERIC_FIELDS].map((field) => field.key)
+);
 
 function formatBytes(bytes = 0) {
   if (!bytes) return "0 KB";
@@ -58,6 +76,10 @@ function safeFileName(name = "pdf-extraction") {
     .replace(/[^a-z0-9_-]+/gi, "-")
     .replace(/^-|-$/g, "")
     .toLowerCase();
+}
+
+function fieldDefsFor(item) {
+  return item?.docKind === "acord25" ? ACORD_FIELDS : GENERIC_FIELDS;
 }
 
 function humanizeKey(key = "") {
@@ -91,36 +113,55 @@ function csvEscape(value) {
 }
 
 function buildCsv(extractions) {
+  // One row per coverage limit so every amount is exported, not just one.
   const headers = [
     "File",
-    "Status",
-    "Source",
     "Document Type",
-    "Pages",
-    "Words",
     "Carrier",
-    "Policy Number",
-    "Insured",
-    "Premium",
+    "NAIC",
+    "Named Insured",
+    "Certificate Holder",
+    "Certificate Date",
+    "Coverage Type",
+    "Limit",
+    "Amount",
+    "Effective Date",
     "Expiration Date",
-    "Reviewed At",
-    "Extracted At",
+    "Policy Number",
   ];
-  const rows = extractions.map((item) => [
-    item.fileName,
-    item.status,
-    item.source || "embedded",
-    item.docTypeLabel || item.docType,
-    item.pages,
-    item.words,
-    item.fields?.carrier,
-    item.fields?.policyNumber,
-    item.fields?.insuredName,
-    item.fields?.premium,
-    item.fields?.expirationDate,
-    item.reviewedAt,
-    item.extractedAt,
-  ]);
+
+  const rows = [];
+  extractions.forEach((item) => {
+    const f = item.fields || {};
+    const base = [
+      item.fileName,
+      item.docTypeLabel || item.docType,
+      f.carrier,
+      f.naic,
+      f.insuredName,
+      f.certificateHolder,
+      f.certificateDate,
+    ];
+
+    if (item.coverages?.length) {
+      item.coverages.forEach((cov) => {
+        const limits = cov.limits?.length ? cov.limits : [{ name: "", amount: "" }];
+        limits.forEach((limit) => {
+          rows.push([
+            ...base,
+            cov.type,
+            limit.name,
+            limit.amount,
+            cov.effectiveDate,
+            cov.expirationDate,
+            cov.policyNumber,
+          ]);
+        });
+      });
+    } else {
+      rows.push([...base, "", f.coverageLimit, f.premium, f.effectiveDate, f.expirationDate, f.policyNumber]);
+    }
+  });
 
   return [headers, ...rows]
     .map((row) => row.map((cell) => csvEscape(cell)).join(","))
@@ -140,11 +181,62 @@ function statusLabel(status) {
 }
 
 function confidenceLabel(value) {
-  if (!value) return "Empty";
+  if (!value) return "Needs review";
   if (value >= 95) return "Reviewed";
   if (value >= 80) return "High";
   if (value >= 60) return "Medium";
   return "Low";
+}
+
+function confidenceTone(value) {
+  if (!value) return "needs";
+  if (value >= 80) return "ok";
+  if (value >= 60) return "mid";
+  return "low";
+}
+
+function buildText(item) {
+  const f = item.fields || {};
+  const lines = [item.fileName, `Document type: ${item.docTypeLabel || item.docType}`, ""];
+  lines.push("FIELDS");
+  [
+    ["Certificate date", "certificateDate"],
+    ["Carrier (Insurer A)", "carrier"],
+    ["NAIC", "naic"],
+    ["Named insured", "insuredName"],
+    ["Insured address", "insuredAddress"],
+    ["Certificate holder", "certificateHolder"],
+    ["Holder address", "holderAddress"],
+    ["Producer", "producer"],
+    ["Producer phone", "producerPhone"],
+    ["Policy number", "policyNumber"],
+    ["Policy effective", "effectiveDate"],
+    ["Policy expiration", "expirationDate"],
+    ["Premium", "premium"],
+    ["Deductible", "deductible"],
+  ].forEach(([label, key]) => {
+    if (f[key]) lines.push(`  ${label}: ${formatValue(f[key])}`);
+  });
+
+  if (item.coverages?.length) {
+    lines.push("", "COVERAGES");
+    item.coverages.forEach((cov) => {
+      lines.push(
+        `  ${cov.type}  (Policy ${cov.policyNumber || "—"}, ${cov.effectiveDate || "—"} to ${
+          cov.expirationDate || "—"
+        })`
+      );
+      cov.limits.forEach((limit) => lines.push(`    - ${limit.name}: ${limit.amount}`));
+    });
+  }
+
+  if (item.missingCoverages?.length) {
+    lines.push("", "MISSING / NOT FOUND");
+    item.missingCoverages.forEach((name) => lines.push(`  - ${name}: Not found`));
+  }
+
+  lines.push("", "RAW TEXT", item.text || "");
+  return lines.join("\n");
 }
 
 export default function PdfExtractorPanel({
@@ -177,7 +269,8 @@ export default function PdfExtractorPanel({
   const selected = sorted.find((item) => item.id === activeId) || sorted[0] || null;
   const fieldRows = selected?.fields ? Object.entries(selected.fields) : [];
   const metadataRows = selected?.metadata ? Object.entries(selected.metadata) : [];
-  const additionalRows = fieldRows.filter(([key]) => !REVIEW_FIELD_KEYS.has(key));
+  const additionalRows = fieldRows.filter(([key]) => !ALL_REVIEW_KEYS.has(key));
+  const reviewFieldDefs = selected ? fieldDefsFor(selected) : [];
   const selectedPreviewUrl = selected ? previewUrls[selected.id] : "";
   const selectedFile = selected ? fileByIdRef.current.get(selected.id) : null;
   const selectedOcrRunning = ocrState?.id === selected?.id;
@@ -207,7 +300,7 @@ export default function PdfExtractorPanel({
     const fields = selected.fields || {};
     setReviewFields(
       Object.fromEntries(
-        REVIEW_FIELDS.map((field) => [field.key, formatValue(fields[field.key])])
+        fieldDefsFor(selected).map((field) => [field.key, formatValue(fields[field.key])])
       )
     );
     setReviewDirty(false);
@@ -329,11 +422,11 @@ export default function PdfExtractorPanel({
     if (!selected) return;
 
     const nextFields = Object.fromEntries(
-      Object.entries(selected.fields || {}).filter(([key]) => !REVIEW_FIELD_KEYS.has(key))
+      Object.entries(selected.fields || {}).filter(([key]) => !ALL_REVIEW_KEYS.has(key))
     );
     const nextConfidence = { ...(selected.fieldConfidence || {}) };
 
-    REVIEW_FIELDS.forEach((field) => {
+    fieldDefsFor(selected).forEach((field) => {
       const value = String(reviewFields[field.key] || "").trim();
       if (!value) {
         delete nextFields[field.key];
@@ -373,8 +466,8 @@ export default function PdfExtractorPanel({
   function exportSelectedText() {
     if (!selected) return;
     downloadBlob(
-      `${safeFileName(selected.fileName)}-text.txt`,
-      selected.text || selected.warnings?.join("\n") || "",
+      `${safeFileName(selected.fileName)}-extraction.txt`,
+      buildText(selected),
       "text/plain;charset=utf-8"
     );
   }
@@ -657,18 +750,21 @@ export default function PdfExtractorPanel({
                           </button>
                         </div>
                         <div className="ss-pdf-edit-grid">
-                          {REVIEW_FIELDS.map((field) => {
+                          {reviewFieldDefs.map((field) => {
+                            const hasValue = Boolean(reviewFields[field.key]);
                             const confidence =
-                              selected.fieldConfidence?.[field.key] ||
-                              (reviewFields[field.key] ? 50 : 0);
+                              selected.fieldConfidence?.[field.key] || (hasValue ? 50 : 0);
                             return (
                               <label className="ss-pdf-edit-field" key={field.key}>
                                 <span>
                                   {field.label}
-                                  <em>{confidenceLabel(confidence)}</em>
+                                  <em className={`ss-conf ${confidenceTone(confidence)}`}>
+                                    {confidenceLabel(confidence)}
+                                  </em>
                                 </span>
                                 <input
                                   value={reviewFields[field.key] || ""}
+                                  placeholder="Not found — review"
                                   onChange={(event) =>
                                     updateReviewField(field.key, event.target.value)
                                   }
@@ -677,6 +773,57 @@ export default function PdfExtractorPanel({
                             );
                           })}
                         </div>
+
+                        {selected.coverages?.length > 0 && (
+                          <div className="ss-cov-section">
+                            <b>Coverage lines</b>
+                            <div className="ss-cov-table-wrap">
+                              <table className="ss-cov-table">
+                                <thead>
+                                  <tr>
+                                    <th>Coverage</th>
+                                    <th>Limit</th>
+                                    <th>Amount</th>
+                                    <th>Effective</th>
+                                    <th>Expiration</th>
+                                    <th>Policy #</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {selected.coverages.flatMap((cov) =>
+                                    (cov.limits?.length
+                                      ? cov.limits
+                                      : [{ name: "—", amount: "—" }]
+                                    ).map((limit, index) => (
+                                      <tr key={`${cov.type}-${index}`}>
+                                        <td>{index === 0 ? cov.type : ""}</td>
+                                        <td>{limit.name}</td>
+                                        <td className="ss-cov-amount">{limit.amount}</td>
+                                        <td>{index === 0 ? cov.effectiveDate || "—" : ""}</td>
+                                        <td>{index === 0 ? cov.expirationDate || "—" : ""}</td>
+                                        <td>{index === 0 ? cov.policyNumber || "—" : ""}</td>
+                                      </tr>
+                                    ))
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {selected.missingCoverages?.length > 0 && (
+                          <div className="ss-cov-missing">
+                            <b>Missing / not found coverages</b>
+                            <div className="ss-cov-missing-list">
+                              {selected.missingCoverages.map((name) => (
+                                <span className="ss-cov-missing-item" key={name}>
+                                  <AlertTriangle size={13} aria-hidden="true" /> {name}
+                                  <em>Not found</em>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {additionalRows.length > 0 && (
                           <div className="ss-pdf-extra-data">

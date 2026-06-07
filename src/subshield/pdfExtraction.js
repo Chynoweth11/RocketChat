@@ -274,10 +274,27 @@ function extractKnownFields(text) {
     ),
   };
 
+  // Drop scalar values that clearly came from certificate boilerplate
+  // (disclaimer / cancellation / general wording) rather than a real field.
+  const boilerplate =
+    /authorized representative|notwithstanding|cancel|subrogation|additional insured|confers no rights|does not (constitute|affirmatively)|policy (eff|exp|period)|^limits$|in lieu of|certificate holder/i;
+  const scalarKeys = new Set([
+    "carrier",
+    "policyNumber",
+    "insuredName",
+    "certificateHolder",
+    "effectiveDate",
+    "expirationDate",
+    "coverageLimit",
+  ]);
+
   return Object.fromEntries(
-    Object.entries(fields).filter(([, value]) =>
-      Array.isArray(value) ? value.length > 0 : Boolean(value)
-    )
+    Object.entries(fields).filter(([key, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (!value) return false;
+      if (scalarKeys.has(key) && boilerplate.test(value)) return false;
+      return true;
+    })
   );
 }
 
@@ -347,10 +364,263 @@ async function loadPdf(file) {
   };
 }
 
+/* ---------- ACORD 25 (Certificate of Liability) structured parser ----------
+ * ACORD certificates use a fixed multi-column layout, so a flat line read mixes
+ * disclaimer/cancellation text into the wrong fields (the classic "Carrier =
+ * AUTHORIZED REPRESENTATIVE" bug). This parser reads the positioned text items
+ * (x/y) and pulls each value from its correct region/column, then extracts each
+ * coverage line and its limits separately. */
+
+const ACORD_DATE_RE = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/;
+const ACORD_MONEY_RE = /\$\s?\d[\d,]*(?:\.\d{2})?/;
+const ACORD_PHONE_RE = /\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}/;
+
+const ACORD_COVERAGE_TYPES = [
+  { re: /commercial general liability/i, type: "Commercial General Liability" },
+  { re: /automobile liability/i, type: "Automobile Liability" },
+  { re: /umbrella liab|excess liab/i, type: "Umbrella / Excess Liability" },
+  { re: /workers'?\s*compensation/i, type: "Workers' Compensation" },
+  { re: /employment practices liability/i, type: "Employment Practices Liability" },
+];
+
+const ACORD_LIMIT_NAMES = [
+  [/each occurrence/i, "Each Occurrence"],
+  [/damage to rented/i, "Damage to Rented Premises"],
+  [/med exp/i, "Medical Expense"],
+  [/personal\s*&?\s*adv/i, "Personal & Advertising Injury"],
+  [/products?\s*-?\s*comp/i, "Products / Completed Operations Aggregate"],
+  [/general aggregate/i, "General Aggregate"],
+  [/combined single limit/i, "Combined Single Limit"],
+  [/bodily injury \(per person\)/i, "Bodily Injury (Per Person)"],
+  [/bodily injury \(per accident\)/i, "Bodily Injury (Per Accident)"],
+  [/property damage/i, "Property Damage"],
+  [/e\.?l\.?\s*each accident/i, "E.L. Each Accident"],
+  [/e\.?l\.?\s*disease.*employee/i, "E.L. Disease - Each Employee"],
+  [/e\.?l\.?\s*disease.*policy/i, "E.L. Disease - Policy Limit"],
+  [/each claim limit/i, "Each Claim Limit"],
+  [/annual aggregate limit/i, "Annual Aggregate Limit"],
+  [/aggregate/i, "Aggregate"],
+];
+
+function cleanAcordLimitName(raw = "") {
+  const text = normalizeSpaces(raw);
+  if (!text) return "Limit";
+  const hit = ACORD_LIMIT_NAMES.find(([re]) => re.test(text));
+  if (hit) return hit[1];
+  return text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export function isAcordCertificate(text = "") {
+  const t = text.toLowerCase();
+  return (
+    t.includes("certificate of liability insurance") ||
+    (t.includes("acord 25") && t.includes("insurer"))
+  );
+}
+
+export function parseAcordItems(rawItems = []) {
+  const all = rawItems
+    .map((i) => ({ x: Math.round(i.x), y: Math.round(i.y), text: normalizeSpaces(i.text) }))
+    .filter((i) => i.text);
+  if (!all.length) return null;
+
+  const rowAt = (y, tol = 3) =>
+    all.filter((i) => Math.abs(i.y - y) <= tol).sort((a, b) => a.x - b.x);
+
+  const fields = {};
+  const fieldConfidence = {};
+  const set = (key, value, confidence = 92) => {
+    const v = normalizeSpaces(value);
+    if (v) {
+      fields[key] = v;
+      fieldConfidence[key] = confidence;
+    }
+  };
+
+  // Certificate date - top-right date token
+  const certDate = all
+    .filter((i) => ACORD_DATE_RE.test(i.text) && i.x > 440)
+    .sort((a, b) => b.y - a.y)[0];
+  if (certDate) set("certificateDate", certDate.text);
+
+  // Insurer A (carrier) + NAIC, read from the "INSURER A :" row
+  const insurerA = all.find((i) => /^insurer a\b/i.test(i.text));
+  if (insurerA) {
+    const after = rowAt(insurerA.y).filter((i) => i.x > insurerA.x + 15);
+    const naicItem = after.find((i) => /^\d{3,6}$/.test(i.text));
+    const carrier = after
+      .filter((i) => i !== naicItem && !/^\d{3,6}$/.test(i.text))
+      .map((i) => i.text)
+      .join(" ");
+    set("carrier", carrier);
+    if (naicItem) set("naic", naicItem.text);
+  }
+
+  // Producer block (left column under the PRODUCER label)
+  const producerLabel = all.find((i) => i.text.toUpperCase() === "PRODUCER" && i.x < 120);
+  if (producerLabel) {
+    const block = all
+      .filter((i) => i.x < 235 && i.y < producerLabel.y && i.y > producerLabel.y - 60)
+      .sort((a, b) => b.y - a.y)
+      .map((i) => i.text);
+    if (block[0]) set("producer", block[0]);
+    const address = block.slice(1).filter((l) => !/^\d{6,}$/.test(l)).join(", ");
+    if (address) set("producerAddress", address, 80);
+    const phone = all.find(
+      (i) => ACORD_PHONE_RE.test(i.text) && i.x > 260 && i.x < 460 && i.y > producerLabel.y - 60
+    );
+    if (phone) set("producerPhone", (phone.text.match(ACORD_PHONE_RE) || [])[0]);
+  }
+
+  // Insured block (label is exactly "INSURED")
+  const insuredLabel = all.find((i) => i.text.toUpperCase() === "INSURED" && i.x < 80);
+  if (insuredLabel) {
+    const block = all
+      .filter((i) => i.x < 220 && i.y < insuredLabel.y && i.y > insuredLabel.y - 60)
+      .sort((a, b) => b.y - a.y)
+      .map((i) => i.text);
+    if (block[0]) set("insuredName", block[0]);
+    const addr = block.slice(1).join(", ");
+    if (addr) set("insuredAddress", addr, 80);
+  }
+
+  // Certificate holder block (left column under the CERTIFICATE HOLDER label).
+  // Match the standalone label cell only - "certificate holder" also appears in
+  // the IMPORTANT disclaimer sentence near the top.
+  const holderLabel = all.find((i) => /^certificate holder$/i.test(i.text) && i.x < 200);
+  if (holderLabel) {
+    const block = all
+      .filter((i) => i.x < 300 && i.y < holderLabel.y && i.y > 95)
+      .sort((a, b) => b.y - a.y)
+      .map((i) => i.text);
+    const firstAddr = block.findIndex((l) => /^\d/.test(l));
+    const nameLines = firstAddr === -1 ? block.slice(0, 2) : block.slice(0, firstAddr);
+    const addrLines = firstAddr === -1 ? [] : block.slice(firstAddr);
+    if (nameLines.length) set("certificateHolder", nameLines.join(", "));
+    if (addrLines.length) set("holderAddress", addrLines.join(", "), 80);
+  }
+
+  // Coverage sections, anchored by their type labels in the left column
+  const anchors = [];
+  ACORD_COVERAGE_TYPES.forEach(({ re, type }) => {
+    const hit = all
+      .filter((i) => re.test(i.text) && i.x > 40 && i.x < 175)
+      .sort((a, b) => b.y - a.y)[0];
+    if (hit) anchors.push({ type, y: hit.y });
+  });
+  anchors.sort((a, b) => b.y - a.y);
+
+  // The coverage table ends at the "DESCRIPTION OF OPERATIONS / LOCATIONS"
+  // header (not the "describe under DESCRIPTION OF OPERATIONS below" hint that
+  // sits inside the Workers' Comp cell).
+  const descLabel = all.find((i) => /description of operations\s*\/\s*locations/i.test(i.text));
+  const tableBottom = descLabel ? descLabel.y + 4 : 95;
+
+  const coverages = [];
+  const missingCoverages = [];
+
+  anchors.forEach((anchor, idx) => {
+    const top = anchor.y + 6;
+    const bottom = idx + 1 < anchors.length ? anchors[idx + 1].y + 4 : tableBottom;
+    const band = all.filter((i) => i.y < top && i.y > bottom);
+
+    const policyItem = band.find(
+      (i) =>
+        i.x >= 215 &&
+        i.x <= 305 &&
+        /[A-Za-z0-9]/.test(i.text) &&
+        /[0-9]/.test(i.text) &&
+        i.text.length >= 5 &&
+        !ACORD_MONEY_RE.test(i.text) &&
+        !ACORD_DATE_RE.test(i.text)
+    );
+    const effItem = band.find((i) => ACORD_DATE_RE.test(i.text) && i.x >= 300 && i.x < 360);
+    const expItem = band.find((i) => ACORD_DATE_RE.test(i.text) && i.x >= 360 && i.x < 420);
+
+    const limits = band
+      .filter((i) => i.x >= 500 && ACORD_MONEY_RE.test(i.text))
+      .sort((a, b) => b.y - a.y)
+      .map((amt) => {
+        const nameItems = band
+          .filter((i) => Math.abs(i.y - amt.y) <= 4 && i.x >= 395 && i.x < 505)
+          .sort((a, b) => a.x - b.x);
+        return {
+          name: cleanAcordLimitName(nameItems.map((i) => i.text).join(" ")),
+          amount: (amt.text.match(ACORD_MONEY_RE) || [amt.text])[0].replace(/\s/g, ""),
+        };
+      });
+
+    if (limits.length || policyItem) {
+      coverages.push({
+        type: anchor.type,
+        policyNumber: policyItem ? policyItem.text : "",
+        effectiveDate: effItem ? effItem.text : "",
+        expirationDate: expItem ? expItem.text : "",
+        limits,
+      });
+    } else {
+      missingCoverages.push(anchor.type);
+    }
+  });
+
+  // Top-level policy + dates come from the primary (first) coverage line
+  const primary = coverages[0];
+  if (primary) {
+    if (primary.policyNumber) set("policyNumber", primary.policyNumber);
+    if (primary.effectiveDate) set("effectiveDate", primary.effectiveDate);
+    if (primary.expirationDate) set("expirationDate", primary.expirationDate);
+  }
+
+  return { fields, fieldConfidence, coverages, missingCoverages };
+}
+
 function buildResult({ file, pdf, metadata, pages, source, extractedAt }) {
   const text = normalizeTextBlock(pages.map((page) => page.text).join("\n\n"));
   const type = detectDocumentType(text || file.name);
-  const fields = extractKnownFields(text);
+
+  // Prefer the structure-aware ACORD parser when the document is a certificate
+  // and we have positioned text items (embedded PDFs). Fall back to the generic
+  // regex extractor for declarations, quotes, and OCR text.
+  const acordPage = pages.find(
+    (page) => Array.isArray(page.items) && page.items.length && isAcordCertificate(page.text)
+  );
+  let acord = null;
+  if (acordPage) {
+    try {
+      acord = parseAcordItems(acordPage.items);
+    } catch {
+      acord = null;
+    }
+  }
+
+  const genericFields = extractKnownFields(text);
+  let fields;
+  let fieldConfidence;
+  let coverages = [];
+  let missingCoverages = [];
+  let docKind = "generic";
+
+  if (acord && Object.keys(acord.fields).length) {
+    docKind = "acord25";
+    fields = {
+      ...acord.fields,
+      emails: genericFields.emails,
+      phones: genericFields.phones,
+      moneyAmounts: genericFields.moneyAmounts,
+      dates: genericFields.dates,
+      addresses: genericFields.addresses,
+    };
+    Object.keys(fields).forEach((key) => {
+      if (fields[key] == null) delete fields[key];
+    });
+    fieldConfidence = { ...acord.fieldConfidence };
+    coverages = acord.coverages;
+    missingCoverages = acord.missingCoverages;
+  } else {
+    fields = genericFields;
+    fieldConfidence = confidenceForFields(fields, source);
+  }
+
   const tables = extractTables(pages);
   const warnings = [];
   const hasText = text.length >= 30;
@@ -380,9 +650,12 @@ function buildResult({ file, pdf, metadata, pages, source, extractedAt }) {
     source,
     docType: type.id,
     docTypeLabel: type.label,
+    docKind,
     confidence: type.confidence,
     fields,
-    fieldConfidence: confidenceForFields(fields, source),
+    fieldConfidence,
+    coverages,
+    missingCoverages,
     tables,
     metadata,
     text,
@@ -405,11 +678,21 @@ export async function extractPdfFile(file) {
     const page = await pdf.getPage(pageNumber);
     const content = await page.getTextContent();
     const lines = extractLines(content);
+    // Positioned items (x/y) power the structure-aware ACORD parser, which
+    // needs column positions a flat line read throws away.
+    const items = content.items
+      .filter((item) => typeof item.str === "string" && item.str.trim())
+      .map((item) => ({
+        x: Math.round(Number(item.transform?.[4] || 0)),
+        y: Math.round(Number(item.transform?.[5] || 0)),
+        text: normalizeSpaces(item.str),
+      }));
     pages.push({
       pageNumber,
       lineCount: lines.length,
       text: lines.join("\n"),
       lines,
+      items,
     });
   }
 
@@ -516,9 +799,12 @@ export function makeFailedExtraction(file, error) {
     source: "embedded",
     docType: "policy",
     docTypeLabel: "Policy",
+    docKind: "generic",
     confidence: 0,
     fields: {},
     fieldConfidence: {},
+    coverages: [],
+    missingCoverages: [],
     tables: [],
     metadata: {},
     text: "",
