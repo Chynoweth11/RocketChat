@@ -59,8 +59,8 @@ export function CompliancePanel({ result, compact = false }) {
             <span className="ss-comply-req-status">{STATUS_LABEL[req.status]}</span>
           </div>
           <div className="ss-comply-checks">
-            {req.checks.map((check, index) => (
-              <span key={index} className={`ss-comply-check ${check.ok ? "ok" : "no"}`}>
+            {req.checks.map((check) => (
+              <span key={check.label} className={`ss-comply-check ${check.ok ? "ok" : "no"}`}>
                 {check.ok ? "✓" : "✗"} {check.label}
                 {check.detail ? <em>, {check.detail}</em> : null}
               </span>
