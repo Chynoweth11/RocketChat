@@ -12634,6 +12634,63 @@ body {
   }
 }
 
+/* Policy detail — refined inline alert (no harsh banner) */
+.ss-pd-alert {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text);
+}
+.ss-pd-alert svg {
+  flex-shrink: 0;
+}
+.ss-pd-alert.danger {
+  background: color-mix(in srgb, var(--bad) 7%, var(--surface));
+}
+.ss-pd-alert.danger svg {
+  color: var(--bad);
+}
+.ss-pd-alert.warning {
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface));
+}
+.ss-pd-alert.warning svg {
+  color: var(--warn);
+}
+.ss-pd-alert.success {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+.ss-pd-alert.success svg {
+  color: var(--faint);
+}
+
+/* Policy detail — cleaner, more refined health summary */
+.ss-pd-health {
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+.ss-pd-health-bar {
+  height: 5px;
+}
+.ss-pd-health-bar span.warning {
+  background: #d59b35;
+}
+.ss-pd-health-num.warning {
+  color: #b07719;
+}
+.ss-pd-health-grade {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.ss-pd-health-grade.warning {
+  color: #8a5e16;
+  background: #f6eedb;
+}
+
 /* Failed extraction — technical detail (kept out of the way) */
 .ss-pdf-error-detail {
   margin: 0;

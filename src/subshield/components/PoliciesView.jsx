@@ -322,7 +322,9 @@ function PolicyDetail({
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
   const cls = status.className;
-  const width = `${Math.max(2, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
+  // Show term elapsed (bar fills as renewal approaches) so a near-renewal
+  // policy reads as "almost up" instead of an empty sliver.
+  const width = `${Math.max(5, Math.min(100, Math.round((1 - policy.daysRemaining / 365) * 100)))}%`;
   const notLicense = (policy.type || policy.policyType) !== "license";
   const health = policyHealthScore(policy);
   const hcls = scoreClass(health.score);
@@ -379,12 +381,10 @@ function PolicyDetail({
       <div className="ss-pd-renewal">
         <div className="ss-pd-renewal-top">
           <span>
-            <b>{policy.daysRemaining} days</b> to renewal ·{" "}
-            {formatLongDate(policy.renewalDate || policy.expires)}
+            Renews {formatLongDate(policy.renewalDate || policy.expires)} ·{" "}
+            <b>{policy.daysRemaining} days left</b>
           </span>
-          <span className="ss-pd-renewal-prem">
-            {premium}/{policy.premiumFrequency || "annual"}
-          </span>
+          <span className="ss-pd-renewal-prem">{premium}/yr</span>
         </div>
         <div className="ss-pd-bar">
           <span className={cls} style={{ width }} />
@@ -392,8 +392,8 @@ function PolicyDetail({
       </div>
 
       {policy.statusNote && (
-        <div className={`ss-note${urgent ? " danger" : ""}`}>
-          <AlertTriangle size={15} />
+        <div className={`ss-pd-alert ${cls}`}>
+          <AlertTriangle size={14} aria-hidden="true" />
           <span>{policy.statusNote}</span>
         </div>
       )}
