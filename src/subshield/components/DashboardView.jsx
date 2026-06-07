@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -33,15 +34,6 @@ function activityIcon(title = "") {
   if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return <Settings size={14} />;
   if (t.includes("holder") || t.includes("advisor")) return <UserPlus size={14} />;
   return <Shield size={14} />;
-}
-
-function activityColor(title = "") {
-  const t = title.toLowerCase();
-  if (t.includes("certificate") || t.includes("sent to")) return "#2f63e9";
-  if (t.includes("upload") || t.includes("document")) return "#7c3aed";
-  if (t.includes("sav") || t.includes("quote")) return "#0b7f5d";
-  if (t.includes("setting") || t.includes("logout")) return "#64748b";
-  return "#0284c7";
 }
 
 function buildSpendBars(policies = []) {
@@ -116,6 +108,17 @@ export default function DashboardView({
   const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
   const monthlySeries = buildMonthlySpend(totalPremium);
   const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.value));
+  const [breakdownMonth, setBreakdownMonth] = useState(null);
+  const monthlyBreakdown = policyAccounts.map((policy) => {
+    const annual = policy.premiumAmount ?? policy.premium ?? 0;
+    return {
+      id: policy.id,
+      name: policyLabelFromType(policy.policyType || policy.type),
+      carrier: policy.carrier,
+      annual,
+      monthly: Math.round(annual / 12),
+    };
+  });
 
   const metricCards = [
     { label: "Total annual premium", value: `${formatMoney(totalPremium)}/yr` },
@@ -191,16 +194,21 @@ export default function DashboardView({
 
             <div className="ss-spend-chart" aria-label="Projected monthly insurance spend, even pace across the trailing six months">
               {monthlySeries.map((point, idx) => (
-                <div
+                <button
+                  type="button"
                   key={point.label}
                   className={`ss-spend-point${idx === monthlySeries.length - 1 ? " is-current" : ""}`}
+                  onDoubleClick={() => setBreakdownMonth(`${point.label} ${new Date().getFullYear()}`)}
+                  title={`Double-click for the ${point.label} cost breakdown`}
+                  aria-label={`${point.label}: ${formatMoney(point.value)} estimated. Double-click for the cost breakdown.`}
                 >
                   <em className="ss-spend-val">{formatMoney(point.value)}</em>
                   <span style={{ height: `${Math.max(12, Math.round((point.value / monthlyPeak) * 70))}px` }} />
                   <small>{point.label}</small>
-                </div>
+                </button>
               ))}
             </div>
+            <p className="ss-spend-hint">Double-click a month to see its cost breakdown.</p>
             <div className="ss-dash-action-rail" aria-label="Dashboard primary actions">
               <button type="button" className="ss-action-tile primary" onClick={onReviewSavings}>
                 <span className="ss-action-icon">
@@ -384,22 +392,20 @@ export default function DashboardView({
           </div>
         )}
 
-        {recentActivity.map((item) => (
-          <div className="ss-dash-activity-row" key={item.id}>
-            <span
-              className="ss-dash-activity-icon"
-              style={{ color: activityColor(item.title) }}
-              aria-hidden="true"
-            >
-              {activityIcon(item.title)}
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <b>{item.title}</b>
-              <small>{item.body}</small>
+        <div className="ss-activity-feed">
+          {recentActivity.map((item) => (
+            <div className="ss-dash-activity-row" key={item.id}>
+              <span className="ss-dash-activity-icon" aria-hidden="true">
+                {activityIcon(item.title)}
+              </span>
+              <div className="ss-dash-activity-body">
+                <b>{item.title}</b>
+                <small>{item.body}</small>
+              </div>
+              <small className="ss-activity-time">{timeAgo(item.createdAt)}</small>
             </div>
-            <small className="ss-activity-time">{timeAgo(item.createdAt)}</small>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
 
       {contractors.length > 0 && (
@@ -476,6 +482,71 @@ export default function DashboardView({
           </div>
         </div>
       </section>
+
+      {breakdownMonth && (
+        <MonthBreakdownModal
+          month={breakdownMonth}
+          rows={monthlyBreakdown}
+          total={monthlySpend}
+          onClose={() => setBreakdownMonth(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function MonthBreakdownModal({ month, rows, total, onClose }) {
+  useEffect(() => {
+    function onKey(event) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const peak = Math.max(1, ...rows.map((row) => row.monthly));
+
+  return (
+    <div
+      className="ss-breakdown-backdrop"
+      onClick={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <div className="ss-breakdown" role="dialog" aria-modal="true" aria-label={`${month} cost breakdown`}>
+        <div className="ss-breakdown-head">
+          <div>
+            <span className="ss-eyebrow">Estimated monthly spend</span>
+            <h3>{month}</h3>
+          </div>
+          <button type="button" className="ss-breakdown-close" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+
+        <div className="ss-breakdown-total">
+          <span>Total this month</span>
+          <strong>{formatMoney(total)}</strong>
+        </div>
+
+        <div className="ss-breakdown-list">
+          {rows.map((row) => (
+            <div className="ss-breakdown-row" key={row.id}>
+              <div className="ss-breakdown-row-head">
+                <span className="ss-breakdown-name">{row.name}</span>
+                <strong>{formatMoney(row.monthly)}/mo</strong>
+              </div>
+              <div className="ss-breakdown-track" aria-hidden="true">
+                <span style={{ width: `${Math.round((row.monthly / peak) * 100)}%` }} />
+              </div>
+              <small>{row.carrier} · {formatMoney(row.annual)}/yr</small>
+            </div>
+          ))}
+        </div>
+
+        <p className="ss-breakdown-note">
+          Projected at one-twelfth of each active policy's annual premium. Actual billing may vary by
+          carrier schedule.
+        </p>
+      </div>
     </div>
   );
 }
@@ -659,9 +730,11 @@ function ActionCenter({ upcoming, missingDocCount, coverageGaps, openSavings, on
       <div className="ss-action-center-list">
         {topActions.map((action) => (
           <button key={action.key} type="button" className={`ss-action-item ss-action-item--${action.priority}`} onClick={action.onClick}>
-            <span className={`ss-action-dot ${action.priority}`} aria-hidden="true">{action.icon}</span>
             <span className="ss-action-text">
-              <b>{action.title}</b>
+              <span className="ss-action-title">
+                <span className={`ss-action-pip ${action.priority}`} aria-hidden="true" />
+                {action.title}
+              </span>
               <small>{action.detail}</small>
             </span>
             <span className="ss-action-cta">{action.cta} <ArrowRight size={12} /></span>

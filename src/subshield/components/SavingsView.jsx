@@ -569,9 +569,9 @@ function CoverageApplicationCard({
       {/* Step 1 - Coverage: renewal dates, trade, state */}
       {stepIndex === 1 && (
         <>
-          <div className="ss-note success" style={{ marginTop: 0 }}>
+          <p className="ss-form-hint">
             When does this policy renew? This helps partners contact you at the right time.
-          </div>
+          </p>
           <div className="ss-field-grid">
             <label className="ss-field">
               <span className="ss-field-label">Policy renewal month</span>
@@ -694,9 +694,9 @@ function CoverageApplicationCard({
       {/* Step 3 - Quote: certificate support + notes */}
       {stepIndex === 3 && (
         <>
-          <div className="ss-note success" style={{ marginTop: 0 }}>
+          <p className="ss-form-hint">
             Do you need a certificate of insurance sent alongside the quote?
-          </div>
+          </p>
           <label className="ss-field">
             <span className="ss-field-label">Certificate support</span>
             <div className="ss-option-stack">
