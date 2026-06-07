@@ -565,10 +565,23 @@ export function getCoverageGaps(policies = []) {
   );
 }
 
-/** Total annual savings still available from open opportunities. */
+/**
+ * Total annual savings still in play from open opportunities. Includes
+ * in-flight statuses (requested / sent_to_partner) so pursuing an opportunity
+ * doesn't make the headline savings figure drop.
+ */
 export function getPotentialSavings(opportunities = []) {
   return opportunities
-    .filter((item) => ["available", "pending_partner", "quote_received", "at_partner"].includes(item.status))
+    .filter((item) =>
+      [
+        "available",
+        "requested",
+        "pending_partner",
+        "sent_to_partner",
+        "quote_received",
+        "at_partner",
+      ].includes(item.status)
+    )
     .reduce((sum, item) => sum + savingsForOpportunity(item), 0);
 }
 

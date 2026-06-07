@@ -6208,6 +6208,16 @@ h1, h2, h3 {
   font-size: 13px;
   color: var(--muted);
 }
+.ss-dropzone b {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+.ss-dropzone small {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
 
 .ss-scan-points {
   display: flex;

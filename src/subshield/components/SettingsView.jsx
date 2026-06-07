@@ -179,7 +179,7 @@ function joinCsv(list = []) {
 function summaryData(data, totalPremium) {
   return {
     policies: data.policies?.length || 0,
-    docs: data.policies?.reduce((sum, policy) => sum + (policy.documents?.length || 0), 0) || 0,
+    docs: data.documents?.length || 0,
     contractors: data.contractors?.length || 0,
     teamMembers: data.settings?.teamMembers?.length || 0,
     totalPremium,

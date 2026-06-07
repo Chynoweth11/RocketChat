@@ -146,6 +146,20 @@ describe("getPotentialSavings", () => {
     ];
     expect(getPotentialSavings(opps)).toBe(800);
   });
+  it("keeps in-flight opportunities counted so pursuing one doesn't drop the total", () => {
+    const opps = [
+      { status: "requested", estimatedSavings: 295 },
+      { status: "sent_to_partner", estimatedSavings: 360 },
+    ];
+    expect(getPotentialSavings(opps)).toBe(655);
+  });
+  it("excludes terminal states (accepted/dismissed)", () => {
+    const opps = [
+      { status: "accepted", estimatedSavings: 400 },
+      { status: "dismissed", estimatedSavings: 100 },
+    ];
+    expect(getPotentialSavings(opps)).toBe(0);
+  });
 });
 
 describe("getRealizedSavings", () => {
