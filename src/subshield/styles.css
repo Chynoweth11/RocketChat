@@ -10451,3 +10451,45 @@ body {
 .ss-note {
   box-shadow: none;
 }
+
+/* ---------- Charts: make bars read as intentional data, flat brand fills ---------- */
+.ss-spend-chart {
+  background: var(--surface-soft);
+  border-color: var(--line);
+  border-radius: 12px;
+}
+.ss-spend-point span {
+  background: #dbe3f4;
+}
+.ss-spend-point.is-current span {
+  background: var(--brand);
+}
+.ss-spend-val {
+  color: var(--ink);
+}
+.ss-dash-trend {
+  border-color: var(--line);
+  background: var(--surface-soft);
+  border-radius: 12px;
+}
+.ss-dash-trend-track {
+  background: #e6e9ef;
+}
+.ss-dash-trend-fill {
+  background: var(--brand);
+}
+
+/* ---------- Inner panels: align radius with the softened card family ---------- */
+.ss-dash-metric,
+.ss-policy,
+.ss-holder-card,
+.ss-renewal-card,
+.ss-health-card,
+.ss-coi-needs-action,
+.ss-coi-holder-row,
+.ss-insight,
+.ss-doc-row,
+.ss-service-link,
+.ss-review-box {
+  border-radius: 12px;
+}
