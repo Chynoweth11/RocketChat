@@ -544,8 +544,13 @@ export function getComplianceScore(policies = []) {
   return Math.round(total / policies.length);
 }
 
+// A trade license is a fee, not an insurance premium, so it's excluded from
+// premium totals. This keeps "insurance spend", the active-policy count, and
+// the per-policy breakdown (all of which already exclude license) consistent.
 export function totalTrackedPremium(policies = []) {
-  return policies.reduce((sum, policy) => sum + toNumber(policy.premiumAmount ?? policy.premium, 0), 0);
+  return policies
+    .filter((policy) => (policy.policyType || policy.type) !== "license")
+    .reduce((sum, policy) => sum + toNumber(policy.premiumAmount ?? policy.premium, 0), 0);
 }
 
 /**

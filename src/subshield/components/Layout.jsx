@@ -352,23 +352,24 @@ export function PartnerJourney({ activeId = "coverage" }) {
     0,
     PARTNER_JOURNEY_STEPS.findIndex((step) => step.id === activeId)
   );
+  // Un-numbered lifecycle status rail (distinct from the numbered wizard below
+  // it) so the two progress indicators don't read as competing steppers.
   return (
-    <ol className="ss-partner-journey" aria-label="How coverage review works">
-      {PARTNER_JOURNEY_STEPS.map((step, index) => (
-        <li
-          key={step.id}
-          className={`ss-journey-step ${index < activeIndex ? "done" : ""} ${
-            index === activeIndex ? "active" : ""
-          }`}
-          aria-current={index === activeIndex ? "step" : undefined}
-        >
-          <span className="ss-journey-num">{index + 1}</span>
-          <span className="ss-journey-copy">
-            <b>{step.label}</b>
-            <small>{step.detail}</small>
-          </span>
-        </li>
-      ))}
-    </ol>
+    <div className="ss-journey-status" role="list" aria-label="Coverage review status">
+      {PARTNER_JOURNEY_STEPS.map((step, index) => {
+        const state = index < activeIndex ? "done" : index === activeIndex ? "active" : "todo";
+        return (
+          <div
+            key={step.id}
+            className={`ss-journey-status-step ${state}`}
+            role="listitem"
+            aria-current={state === "active" ? "step" : undefined}
+          >
+            <span className="ss-journey-status-dot" aria-hidden="true" />
+            <span className="ss-journey-status-label">{step.label}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }

@@ -10117,3 +10117,57 @@ body {
     grid-template-columns: 34px minmax(0, 1fr) auto;
   }
 }
+
+/* ----- Partner lifecycle status rail (un-numbered; distinct from the
+   numbered coverage-review wizard that sits below it) ----- */
+.ss-journey-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 4px;
+  margin: 4px 0 18px;
+}
+.ss-journey-status-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px 5px 10px;
+  border-radius: 999px;
+  background: var(--surface, #f4f6fa);
+  border: 1px solid var(--line, #e4e9f2);
+}
+.ss-journey-status-step:not(:last-child)::after {
+  content: "";
+  width: 14px;
+  height: 1px;
+  margin-left: 2px;
+  background: var(--line, #e4e9f2);
+}
+.ss-journey-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line, #cbd5e1);
+  flex-shrink: 0;
+}
+.ss-journey-status-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted, #64748b);
+  white-space: nowrap;
+}
+.ss-journey-status-step.done .ss-journey-status-dot {
+  background: #14a06a;
+}
+.ss-journey-status-step.active {
+  background: color-mix(in srgb, var(--brand, #2563eb) 8%, transparent);
+  border-color: color-mix(in srgb, var(--brand, #2563eb) 35%, transparent);
+}
+.ss-journey-status-step.active .ss-journey-status-dot {
+  background: var(--brand, #2563eb);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand, #2563eb) 18%, transparent);
+}
+.ss-journey-status-step.active .ss-journey-status-label {
+  color: var(--text, #0a1421);
+  font-weight: 600;
+}

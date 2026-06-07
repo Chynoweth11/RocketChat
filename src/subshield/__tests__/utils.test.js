@@ -83,6 +83,13 @@ describe("totalTrackedPremium", () => {
     expect(totalTrackedPremium(policies)).toBe(500);
   });
   it("handles empty array", () => expect(totalTrackedPremium([])).toBe(0));
+  it("excludes trade license (a fee, not a premium)", () => {
+    const policies = [
+      { policyType: "liability", premiumAmount: 1840 },
+      { policyType: "license", premiumAmount: 295 },
+    ];
+    expect(totalTrackedPremium(policies)).toBe(1840);
+  });
 });
 
 describe("getCoverageGaps", () => {
