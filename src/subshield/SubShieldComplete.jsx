@@ -166,9 +166,27 @@ function renewalDateFromMonthYear(monthName, yearValue) {
   return renewal.toISOString().slice(0, 10);
 }
 
+// The navigable top-level views, used to drive hash-based routing so views are
+// deep-linkable, survive a refresh, and respond to the browser's back/forward.
+const VIEWS = [
+  "dashboard",
+  "policies",
+  "savings",
+  "certificates",
+  "documents",
+  "connections",
+  "settings",
+];
+
+function viewFromHash() {
+  if (typeof window === "undefined") return "dashboard";
+  const raw = window.location.hash.replace(/^#\/?/, "");
+  return VIEWS.includes(raw) ? raw : "dashboard";
+}
+
 export default function SubShieldComplete() {
   const [data, setData] = useState(() => readStoredData(initialData));
-  const [view, setView] = useState("dashboard");
+  const [view, setView] = useState(viewFromHash);
   const [policyId, setPolicyId] = useState(() => data.policies[0]?.id || null);
   const [contractorId, setContractorId] = useState(
     () => data.contractors[0]?.id || null
@@ -331,6 +349,24 @@ export default function SubShieldComplete() {
     const label = titles[view] || "SubShield";
     document.title = `${label} | SubShield`;
   }, [view]);
+
+  // Reflect the active view in the URL hash so views are deep-linkable and
+  // survive a refresh. Writing a new hash also pushes a history entry, which is
+  // what makes the browser back/forward buttons move between views.
+  useEffect(() => {
+    if (viewFromHash() !== view) {
+      window.location.hash = `#/${view}`;
+    }
+  }, [view]);
+
+  // Respond to back/forward navigation (and manual hash edits).
+  useEffect(() => {
+    function onHashChange() {
+      setView(viewFromHash());
+    }
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   function commit(next) {
     setData(next);

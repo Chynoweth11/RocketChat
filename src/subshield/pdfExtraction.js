@@ -1,11 +1,21 @@
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { makeId } from "./utils.js";
 
-if (typeof window !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
+// pdf.js is heavy (~hundreds of KB). Load it on demand the first time a PDF is
+// actually processed, so simply opening the Documents tab doesn't pull it in.
+let pdfjsPromise = null;
+function getPdfjs() {
+  if (!pdfjsPromise) {
+    pdfjsPromise = import("pdfjs-dist/legacy/build/pdf.mjs").then((pdfjsLib) => {
+      if (typeof window !== "undefined") {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+          "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+      }
+      return pdfjsLib;
+    });
+  }
+  return pdfjsPromise;
 }
 
 const OCR_SCALE = 2.2;
@@ -323,6 +333,7 @@ function normalizeMetadata(raw = {}) {
 }
 
 async function loadPdf(file) {
+  const pdfjsLib = await getPdfjs();
   const buffer = await file.arrayBuffer();
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(buffer),

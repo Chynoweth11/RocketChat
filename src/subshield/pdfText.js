@@ -10,11 +10,21 @@
  * in the initial bundle - it downloads only when a user opens the uploader.
  */
 
-import * as pdfjsLib from "pdfjs-dist";
-import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-
-// pdf.js runs parsing off the main thread in a web worker.
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+// pdf.js is heavy, so it's loaded on demand the first time a PDF is parsed
+// (rather than when the Scan modal's chunk loads). The worker runs parsing off
+// the main thread.
+let pdfjsPromise = null;
+function getPdfjs() {
+  if (!pdfjsPromise) {
+    pdfjsPromise = (async () => {
+      const pdfjsLib = await import("pdfjs-dist");
+      const { default: workerUrl } = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+      return pdfjsLib;
+    })();
+  }
+  return pdfjsPromise;
+}
 
 // COIs and declaration pages are short; cap work so a huge PDF can't hang the UI.
 const MAX_PAGES = 15;
@@ -85,6 +95,7 @@ export async function extractPdfText(source) {
 
   let pdf;
   try {
+    const pdfjsLib = await getPdfjs();
     pdf = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
   } catch {
     throw new Error(

@@ -38,6 +38,15 @@ Node `>=20.19.0` (see `.nvmrc`). CI runs lint + test + build on push/PR to
 - The Dashboard view loads eagerly; **all other views and modals are
   `React.lazy` code-split** to keep the initial bundle small. Keep this pattern
   when adding new views/modals.
+- **Routing:** top-level views are hash-routed (`#/policies`, etc.) via the
+  `VIEWS` list + `viewFromHash()` in `SubShieldComplete.jsx`. Add new views to
+  `VIEWS` so they're deep-linkable and back/forward works.
+- **Heavy deps load on demand:** `pdfjs-dist` (in `pdfText.js` / `pdfExtraction.js`)
+  and `tesseract.js` (OCR) are dynamically `import()`-ed only when a PDF is
+  actually processed — never in a view's initial chunk. Preserve this.
+- **PWA:** configured via `vite-plugin-pwa` in `vite.config.js` (manifest +
+  Workbox service worker, auto-update). The heavy pdf chunks are excluded from
+  precache to keep installs lean.
 - **`src/subshield/utils.js`** holds all pure logic (no React/DOM beyond
   storage/clipboard): normalization, scoring, compliance matching, formatting,
   and `localStorage` read/write. Prefer adding pure helpers here and unit-test

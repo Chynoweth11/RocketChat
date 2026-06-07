@@ -20,7 +20,8 @@ The daily headaches SubShield solves:
 > send my insurance to this GC?" · "Are we missing documents for this job?" ·
 > "Can I find a better price before renewal?"
 
-Built with React 19 + Vite 6. Frontend-only with local persistence.
+Built with React 19 + Vite 6. Frontend-only with local persistence. Ships as an
+installable PWA (offline-capable) with deep-linkable, hash-routed views.
 
 ## Quick start
 
