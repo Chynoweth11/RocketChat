@@ -10730,3 +10730,299 @@ body {
 .ss-grid {
   gap: 18px;
 }
+
+/* =====================================================================
+   PREMIUM REFINEMENT — calmer muted status system, quieter cards,
+   elegant compliance + offer layouts, balanced charts. Addresses the
+   circled feedback (cheap/AI status colors, heavy tiles, harsh banners).
+   ===================================================================== */
+
+.ss-app {
+  --ok: #1a7a4e;   --ok-bg: #eef6f0;   --ok-line: #d6e8dd;
+  --warn: #8a6313; --warn-bg: #f8f2e4; --warn-line: #e9dcc2;
+  --bad: #b24a40;  --bad-bg: #f9efed;  --bad-line: #efd4cf;
+}
+
+/* ---- One muted, refined badge/pill system ---- */
+.ss-status,
+.ss-coi-status,
+.ss-comply-badge,
+.ss-history-pill {
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.ss-status.success,
+.ss-coi-status.current,
+.ss-comply-badge.ok,
+.ss-history-pill,
+.ss-verified {
+  color: var(--ok);
+  background: var(--ok-bg);
+  border-color: var(--ok-line);
+}
+.ss-status.warning,
+.ss-coi-status.aging,
+.ss-comply-badge.gap {
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-color: var(--warn-line);
+}
+.ss-status.danger,
+.ss-coi-status.stale {
+  color: var(--bad);
+  background: var(--bad-bg);
+  border-color: var(--bad-line);
+}
+.ss-coi-status.unsent,
+.ss-comply-badge.none {
+  color: var(--muted);
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+
+/* ---- Dashboard quick-action tiles: one calm, consistent style ---- */
+.ss-action-tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-xs);
+  min-height: 84px;
+}
+.ss-action-tile:hover {
+  transform: none;
+  border-color: #d8d8de;
+  box-shadow: var(--shadow-sm);
+}
+.ss-action-tile b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.ss-action-tile small {
+  color: var(--muted);
+}
+.ss-action-icon {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border-radius: 10px;
+}
+/* Primary tile = subtle blue-tinted (stands out without a heavy dark block) */
+.ss-action-tile.primary {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  box-shadow: var(--shadow-xs);
+}
+.ss-action-tile.primary b {
+  color: var(--brand-strong);
+}
+.ss-action-tile.primary small {
+  color: var(--muted);
+}
+.ss-action-tile.primary .ss-action-icon {
+  background: var(--brand);
+  color: #fff;
+}
+.ss-action-tile.primary > svg:last-child {
+  color: var(--brand-strong);
+}
+
+/* ---- Action Center: clean white cards, colored icon only (no stripe) ---- */
+.ss-action-center {
+  background: var(--surface);
+  padding: 24px;
+}
+.ss-action-center-head b {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.ss-action-center-head small {
+  color: var(--muted);
+}
+.ss-action-item {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: none;
+}
+.ss-action-item::before {
+  display: none;
+}
+.ss-action-item:hover {
+  transform: none;
+  border-color: #d8d8de;
+  box-shadow: var(--shadow-sm);
+}
+.ss-action-dot {
+  border-radius: 10px;
+}
+.ss-action-dot.danger {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.ss-action-dot.warning {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.ss-action-dot.info {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+.ss-action-text b {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.ss-action-text small {
+  color: var(--muted);
+}
+.ss-action-cta {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* ---- Notes: subtle, refined (success helpers + critical banner) ---- */
+.ss-note {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  box-shadow: none;
+  font-size: 12.5px;
+  padding: 11px 14px;
+}
+.ss-note svg {
+  color: var(--faint);
+}
+.ss-note.success {
+  background: var(--ok-bg);
+  border-color: var(--ok-line);
+  color: #2f6a4c;
+}
+.ss-note.success svg {
+  color: var(--ok);
+}
+.ss-note.danger {
+  background: var(--bad-bg);
+  border-color: var(--bad-line);
+  color: #8f3a32;
+}
+.ss-note.danger svg {
+  color: var(--bad);
+}
+
+/* ---- Compliance requirements: calm, no color-blocked cards ---- */
+.ss-comply-panel {
+  gap: 8px;
+}
+.ss-comply-req {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 12px 14px;
+}
+.ss-comply-req.met {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.ss-comply-req.unmet,
+.ss-comply-req.missing {
+  border-color: var(--bad-line);
+  background: var(--surface);
+}
+.ss-comply-req-head b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.ss-comply-ico.ok {
+  color: var(--ok);
+}
+.ss-comply-ico.no {
+  color: var(--bad);
+}
+.ss-comply-req-status {
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.ss-comply-req.met .ss-comply-req-status {
+  color: var(--ok);
+}
+.ss-comply-req.unmet .ss-comply-req-status,
+.ss-comply-req.missing .ss-comply-req-status {
+  color: var(--bad);
+}
+.ss-comply-check.ok {
+  color: var(--muted);
+}
+.ss-comply-check.no {
+  color: var(--bad);
+  font-weight: 500;
+}
+.ss-holder-history {
+  background: var(--surface-soft);
+  border-top-color: var(--line);
+}
+
+/* ---- Savings offer comparison + disclaimer: refined and quiet ---- */
+.ss-compare-col {
+  border-radius: 12px;
+  border-color: var(--line);
+}
+.ss-compare-col.recommended {
+  border-color: var(--ok-line);
+  background: var(--ok-bg);
+}
+.ss-compare-col.recommended .ss-compare-label {
+  color: var(--ok);
+}
+.ss-compare-label {
+  letter-spacing: 0.04em;
+  color: var(--faint);
+  font-weight: 600;
+}
+.ss-savings-amount strong {
+  color: var(--ok);
+}
+.ss-partner-disclaimer {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+}
+.ss-partner-disclaimer svg {
+  color: var(--brand);
+}
+.ss-partner-disclaimer b {
+  color: var(--ink);
+}
+
+/* ---- Spend chart: balanced bars, breathing room for the value label ---- */
+.ss-spend-chart {
+  height: 138px;
+  gap: 16px;
+  padding: 30px 20px 14px;
+  background: var(--surface-soft);
+  border-color: var(--line);
+  border-radius: 14px;
+}
+.ss-spend-point span {
+  max-width: none;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  background: #dbe3f4;
+}
+.ss-spend-point.is-current span {
+  background: var(--brand);
+}
+.ss-spend-point.is-current .ss-spend-val {
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.ss-dash-trend-fill {
+  background: var(--brand);
+}
