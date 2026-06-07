@@ -5,14 +5,14 @@ import {
   CalendarClock,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Download,
-  FileCheck2,
   FileSpreadsheet,
   LifeBuoy,
   Plus,
   Search,
   Send,
-  Shield,
   ShieldCheck,
   Upload,
   Zap,
@@ -309,202 +309,255 @@ function PolicyRow({ policy, selected, onClick }) {
   );
 }
 
-function PolicyDetail({ policy, onRenew, onFindSavings, onSend, isRenewing, carrierConnections = {}, onManageConnections }) {
+function Disclosure({ title, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className={`ss-pd-disclosure${open ? " open" : ""}`}>
+      <button
+        type="button"
+        className="ss-pd-disclosure-toggle"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+      >
+        {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+        <span>{title}</span>
+      </button>
+      {open && <div className="ss-pd-disclosure-body">{children}</div>}
+    </div>
+  );
+}
+
+function PolicyDetail({
+  policy,
+  onRenew,
+  onFindSavings,
+  onSend,
+  isRenewing,
+  carrierConnections = {},
+  onManageConnections,
+}) {
+  const [showChecks, setShowChecks] = useState(false);
   const verifiedCarrierId = Object.keys(carrierConnections).find((id) =>
     policy.carrier?.toLowerCase().includes(id)
   );
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
-  const width = `${Math.max(0, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
-  const isCritical = status.className === "danger";
+  const cls = status.className;
+  const width = `${Math.max(2, Math.min(100, (policy.daysRemaining / 180) * 100))}%`;
   const notLicense = (policy.type || policy.policyType) !== "license";
   const health = policyHealthScore(policy);
+  const hcls = scoreClass(health.score);
+  const premium = formatMoney(policy.premiumAmount ?? policy.premium);
+  const urgent = cls === "danger" || cls === "warning";
+
+  // One clear primary action, ordered by what matters in this policy's state.
+  const renewAction = {
+    key: "renew",
+    label: isRenewing ? "Renewing…" : "Renew now",
+    Icon: Zap,
+    onClick: onRenew,
+    disabled: isRenewing,
+  };
+  const sendAction = { key: "send", label: "Send certificate", Icon: Send, onClick: onSend };
+  const saveAction = notLicense
+    ? { key: "save", label: "Find savings", Icon: BadgeDollarSign, onClick: onFindSavings }
+    : null;
+  const actions = (urgent
+    ? [renewAction, saveAction, sendAction]
+    : [sendAction, saveAction, renewAction]
+  ).filter(Boolean);
+
+  const facts = [
+    ["Premium", `${premium}/yr`],
+    ["Deductible", formatDeductible(policy.deductible)],
+    ["Coverage limit", policy.coverageLimits || policy.limit || "—"],
+    [
+      "Term",
+      `${formatLongDate(policy.effectiveDate)} – ${formatLongDate(
+        policy.expirationDate || policy.expires
+      )}`,
+    ],
+    ["Documents", `${policy.documents.length} on file`],
+    ["Advisor", policy.brokerId ? "Assigned" : "Not assigned"],
+  ];
 
   return (
-    <div className="ss-detail">
-      <div className="ss-detail-head">
-        <span className="ss-icon-tile" aria-hidden="true">
-          <Icon size={22} />
+    <div className="ss-pd">
+      {/* Executive overview */}
+      <div className="ss-pd-head">
+        <span className="ss-pd-icon" aria-hidden="true">
+          <Icon size={20} />
         </span>
-        <div className="ss-detail-head-copy">
-          <span className="ss-eyebrow">Policy detail</span>
+        <div className="ss-pd-head-copy">
           <h2>{policy.name}</h2>
-          <p className="ss-muted">
-            {policy.carrier} | {policy.policyNumber}
-          </p>
-          {verifiedCarrierId ? (
-            <span className="ss-carrier-verified-badge">
-              <ShieldCheck size={12} /> Carrier verified · synced {timeAgo(carrierConnections[verifiedCarrierId].syncedAt)}
-            </span>
-          ) : (
-            <button type="button" className="ss-link-btn" style={{ fontSize: 12, marginTop: 2 }} onClick={onManageConnections}>
-              Connect carrier for real-time verification
-            </button>
-          )}
+          <small>
+            {policy.carrier} · {policy.policyNumber}
+          </small>
         </div>
-        <em className={`ss-status ${status.className}`}>{status.label}</em>
+        <em className={`ss-status ${cls}`}>{status.label}</em>
       </div>
 
-      <div className="ss-bar-top">
-        <span>{policy.daysRemaining} days left</span>
-        <span>
-          {formatMoney(policy.premiumAmount ?? policy.premium)}/
-          {policy.premiumFrequency || "annual"}
-        </span>
-      </div>
-      <div className="ss-bar">
-        <span className={status.className} style={{ width }} />
-      </div>
-
-      <div className="ss-info-grid">
-        <Info label="Annual premium" value={`${formatMoney(policy.premiumAmount ?? policy.premium)}`} />
-        <Info label="Deductible" value={formatDeductible(policy.deductible)} />
-        <Info label="Coverage limit" value={policy.coverageLimits || policy.limit} />
-        <Info
-          label="Term"
-          value={`${formatLongDate(policy.effectiveDate)} - ${formatLongDate(
-            policy.expirationDate || policy.expires
-          )}`}
-        />
-        <Info label="Documents" value={`${policy.documents.length} on file`} />
-        <Info label="Advisor" value={policy.brokerId ? "Assigned" : "Not assigned"} />
+      <div className="ss-pd-renewal">
+        <div className="ss-pd-renewal-top">
+          <span>
+            <b>{policy.daysRemaining} days</b> to renewal ·{" "}
+            {formatLongDate(policy.renewalDate || policy.expires)}
+          </span>
+          <span className="ss-pd-renewal-prem">
+            {premium}/{policy.premiumFrequency || "annual"}
+          </span>
+        </div>
+        <div className="ss-pd-bar">
+          <span className={cls} style={{ width }} />
+        </div>
       </div>
 
       {policy.statusNote && (
-        <div className={`ss-note ${isCritical ? "danger" : ""}`}>
-          <AlertTriangle size={16} />
+        <div className={`ss-note${urgent ? " danger" : ""}`}>
+          <AlertTriangle size={15} />
           <span>{policy.statusNote}</span>
         </div>
       )}
 
-      <div className="ss-health-card">
-        <div className="ss-health-score-row">
-          <div>
-            <span className="ss-eyebrow">Policy health score</span>
-            <div className="ss-health-number">
-              <span className={`ss-health-val ${scoreClass(health.score)}`}>{health.score}</span>
-              <span className="ss-health-denom">/100</span>
-              <span className={`ss-health-grade ss-health-grade--${scoreClass(health.score)}`}>{health.grade}</span>
-            </div>
-          </div>
-          <div className="ss-health-bar-wrap">
-            <div className="ss-health-bar">
-              <span className={`ss-health-fill ${scoreClass(health.score)}`} style={{ width: `${health.score}%` }} />
-            </div>
-          </div>
-        </div>
-        <div className="ss-health-breakdown">
-          {health.good.map((item) => (
-            <div key={item} className="ss-health-item good">
-              <CheckCircle2 size={13} /> <span>{item}</span>
-            </div>
-          ))}
-          {health.issues.map((item) => (
-            <div key={item} className="ss-health-item issue">
-              <AlertTriangle size={13} /> <span>{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="ss-detail-body">
-        <div className="ss-detail-col">
-          <Section title="Policy services" sub="Manage this policy and its paperwork" />
-          <div className="ss-service-list">
-            <ServiceLink
-              icon={Shield}
-              title="Manage / renew policy"
-              detail="Renew coverage or compare a better rate before the deadline."
-              onClick={onRenew}
-            />
-            <ServiceLink
-              icon={FileCheck2}
-              title="Request certificate"
-              detail="Send a certificate of insurance to a holder or GC."
-              onClick={onSend}
-            />
-            {notLicense && (
-              <ServiceLink
-                icon={BadgeDollarSign}
-                title="Find savings"
-                detail="Route this policy to partners for lower-rate quotes."
-                onClick={onFindSavings}
-              />
-            )}
-            <ServiceLink
-              icon={Download}
-              title="Download client summary"
-              detail="Export a one-page coverage summary for this policy."
-              onClick={() => downloadPolicySummary(policy)}
-            />
-          </div>
-        </div>
-
-        <div className="ss-detail-col">
-          <Section
-            title="Documents on file"
-            sub={`${policy.documents.length} file${policy.documents.length === 1 ? "" : "s"}`}
-          />
-          {policy.documents.length === 0 ? (
-            <div className="ss-note">
-              <AlertTriangle size={16} />
-              <span>No documents stored yet. Upload the declarations page to keep certificates ready.</span>
-            </div>
-          ) : (
-            policy.documents.map((doc) => <DocumentRow key={doc} name={doc} />)
-          )}
-
-          <div className="ss-claims-card" style={{ marginTop: 12 }}>
-            <b className="ss-claims-title">Filing a claim</b>
-            <p className="ss-muted">Have these ready to speed up the process:</p>
-            <ul className="ss-claims-list">
-              <li>Policy number ({policy.policyNumber})</li>
-              <li>Date, time, place, and description of the incident</li>
-              <li>Names and roles of anyone involved</li>
-            </ul>
-            <button type="button" className="ss-button soft ss-button-sm" onClick={onSend}>
-              <LifeBuoy size={15} /> Contact advisor
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="ss-detail-actions">
-        <button type="button" className="ss-button" onClick={onRenew} disabled={isRenewing}>
-          {isRenewing ? (
-            <>
-              <Spinner /> Renewing...
-            </>
-          ) : (
-            <>
-              <Zap size={16} /> Renew now
-            </>
-          )}
+      {verifiedCarrierId ? (
+        <span className="ss-pd-verified">
+          <ShieldCheck size={12} /> Carrier verified · synced{" "}
+          {timeAgo(carrierConnections[verifiedCarrierId].syncedAt)}
+        </span>
+      ) : (
+        <button type="button" className="ss-pd-link" onClick={onManageConnections}>
+          Connect carrier for real-time verification
         </button>
-        {notLicense && (
-          <button type="button" className="ss-button soft" onClick={onFindSavings}>
-            <BadgeDollarSign size={16} /> Find savings
-          </button>
+      )}
+
+      {/* One clear primary action */}
+      <div className="ss-pd-actions">
+        {actions.map((action, index) => {
+          const ActionIcon = action.Icon;
+          return (
+            <button
+              key={action.key}
+              type="button"
+              className={`ss-button${index === 0 ? "" : " soft"}`}
+              onClick={action.onClick}
+              disabled={action.disabled}
+            >
+              {action.key === "renew" && isRenewing ? <Spinner /> : <ActionIcon size={16} />}{" "}
+              {action.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Key facts */}
+      <dl className="ss-pd-facts">
+        {facts.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {/* Health, compact */}
+      <div className="ss-pd-health">
+        <div className="ss-pd-health-top">
+          <span className="ss-pd-health-label">Health</span>
+          <span className={`ss-pd-health-num ${hcls}`}>
+            {health.score}
+            <i>/100</i>
+          </span>
+          <span className={`ss-pd-health-grade ${hcls}`}>{health.grade}</span>
+          <div className="ss-pd-health-bar">
+            <span className={hcls} style={{ width: `${health.score}%` }} />
+          </div>
+        </div>
+        <div className="ss-pd-health-points">
+          {health.issues.length === 0 ? (
+            <div className="ss-pd-point good">
+              <CheckCircle2 size={13} /> All checks passed
+            </div>
+          ) : (
+            health.issues.map((item) => (
+              <div key={item} className="ss-pd-point issue">
+                <AlertTriangle size={13} /> {item}
+              </div>
+            ))
+          )}
+          {health.good.length > 0 && (
+            <>
+              <button
+                type="button"
+                className="ss-pd-link ss-pd-health-toggle"
+                onClick={() => setShowChecks((value) => !value)}
+              >
+                {showChecks
+                  ? "Hide completed checks"
+                  : `Show ${health.good.length} completed check${
+                      health.good.length === 1 ? "" : "s"
+                    }`}
+              </button>
+              {showChecks &&
+                health.good.map((item) => (
+                  <div key={item} className="ss-pd-point good">
+                    <CheckCircle2 size={13} /> {item}
+                  </div>
+                ))}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Documents */}
+      <div className="ss-pd-section">
+        <div className="ss-pd-section-head">
+          <b>Documents on file</b>
+          <small>
+            {policy.documents.length} file{policy.documents.length === 1 ? "" : "s"}
+          </small>
+        </div>
+        {policy.documents.length === 0 ? (
+          <div className="ss-note">
+            <AlertTriangle size={15} />
+            <span>No documents stored yet. Upload the declarations page to keep certificates ready.</span>
+          </div>
+        ) : (
+          <div className="ss-pd-docs">
+            {policy.documents.map((doc) => (
+              <div className="ss-pd-doc" key={doc}>
+                <span className="ss-pd-doc-pdf" aria-hidden="true">
+                  PDF
+                </span>
+                <span className="ss-pd-doc-name">{doc}</span>
+                <Check size={14} className="ss-pd-doc-check" aria-hidden="true" />
+              </div>
+            ))}
+          </div>
         )}
-        <button type="button" className="ss-button soft" onClick={onSend}>
-          <Send size={16} /> Send certificate
+      </div>
+
+      {/* Secondary, de-emphasized */}
+      <div className="ss-pd-secondary">
+        <Disclosure title="Filing a claim">
+          <p className="ss-pd-claim-intro">Have these ready to speed up the process:</p>
+          <ul className="ss-pd-claim-list">
+            <li>Policy number ({policy.policyNumber})</li>
+            <li>Date, time, place, and description of the incident</li>
+            <li>Names and roles of anyone involved</li>
+          </ul>
+          <button type="button" className="ss-button soft ss-button-sm" onClick={onSend}>
+            <LifeBuoy size={15} /> Contact advisor
+          </button>
+        </Disclosure>
+        <button
+          type="button"
+          className="ss-pd-link ss-pd-summary"
+          onClick={() => downloadPolicySummary(policy)}
+        >
+          <Download size={14} /> Download one-page summary
         </button>
       </div>
     </div>
-  );
-}
-
-function ServiceLink({ icon: Icon, title, detail, onClick }) {
-  return (
-    <button type="button" className="ss-service-link" onClick={onClick}>
-      <span className="ss-service-icon" aria-hidden="true">
-        <Icon size={18} />
-      </span>
-      <span className="ss-service-copy">
-        <b>{title}</b>
-        <small>{detail}</small>
-      </span>
-    </button>
   );
 }
 
@@ -535,19 +588,4 @@ function downloadPolicySummary(policy) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-}
-
-function DocumentRow({ name }) {
-  return (
-    <div className="ss-doc">
-      <span className="ss-pdf" aria-hidden="true">PDF</span>
-      <div className="ss-doc-body">
-        <b>{name}</b>
-        <small>Carrier-issued document | verified</small>
-      </div>
-      <em className="ss-verified">
-        <Check size={13} /> Verified
-      </em>
-    </div>
-  );
 }

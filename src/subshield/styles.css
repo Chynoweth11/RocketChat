@@ -11829,3 +11829,382 @@ body {
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
+
+/* ===================== Policy detail — calm, scannable redesign ===================== */
+.ss-pd {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Executive header */
+.ss-pd-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ss-pd-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-soft);
+  color: var(--brand);
+  flex-shrink: 0;
+}
+.ss-pd-head-copy {
+  flex: 1;
+  min-width: 0;
+}
+.ss-pd-head-copy h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.ss-pd-head-copy small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.ss-pd-head .ss-status {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Renewal + slim progress */
+.ss-pd-renewal {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: -4px;
+}
+.ss-pd-renewal-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.ss-pd-renewal-top b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.ss-pd-renewal-prem {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ss-pd-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+.ss-pd-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.ss-pd-bar span.success {
+  background: var(--ok);
+}
+.ss-pd-bar span.warning {
+  background: var(--warn);
+}
+.ss-pd-bar span.danger {
+  background: var(--bad);
+}
+
+.ss-pd-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ok);
+}
+.ss-pd-link {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand);
+}
+.ss-pd-link:hover {
+  color: var(--brand-strong);
+}
+
+/* Primary actions */
+.ss-pd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Key facts — light hairline grid */
+.ss-pd-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ss-pd-facts > div {
+  background: var(--surface);
+  padding: 12px 14px;
+}
+.ss-pd-facts dt {
+  margin: 0;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: var(--faint);
+}
+.ss-pd-facts dd {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+/* Health — compact summary */
+.ss-pd-health {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.ss-pd-health-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ss-pd-health-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: var(--faint);
+}
+.ss-pd-health-num {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.ss-pd-health-num i {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--faint);
+  margin-left: 1px;
+}
+.ss-pd-health-num.success {
+  color: var(--ok);
+}
+.ss-pd-health-num.warning {
+  color: var(--warn);
+}
+.ss-pd-health-num.danger {
+  color: var(--bad);
+}
+.ss-pd-health-grade {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.ss-pd-health-grade.success {
+  color: var(--ok);
+  background: var(--ok-bg);
+}
+.ss-pd-health-grade.warning {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+.ss-pd-health-grade.danger {
+  color: var(--bad);
+  background: var(--bad-bg);
+}
+.ss-pd-health-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+.ss-pd-health-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.ss-pd-health-bar span.success {
+  background: var(--ok);
+}
+.ss-pd-health-bar span.warning {
+  background: var(--warn);
+}
+.ss-pd-health-bar span.danger {
+  background: var(--bad);
+}
+.ss-pd-health-points {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.ss-pd-point {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.ss-pd-point svg {
+  flex-shrink: 0;
+}
+.ss-pd-point.good {
+  color: var(--muted);
+}
+.ss-pd-point.good svg {
+  color: var(--ok);
+}
+.ss-pd-point.issue {
+  color: var(--text);
+}
+.ss-pd-point.issue svg {
+  color: var(--warn);
+}
+.ss-pd-health-toggle {
+  margin-top: 2px;
+}
+
+/* Documents */
+.ss-pd-section {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.ss-pd-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ss-pd-section-head b {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ss-pd-section-head small {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.ss-pd-docs {
+  display: flex;
+  flex-direction: column;
+}
+.ss-pd-doc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.ss-pd-doc:first-child {
+  border-top: 0;
+}
+.ss-pd-doc-pdf {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.ss-pd-doc-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.ss-pd-doc-check {
+  color: var(--ok);
+  flex-shrink: 0;
+}
+
+/* Secondary, de-emphasized */
+.ss-pd-secondary {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ss-pd-disclosure {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.ss-pd-disclosure-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: left;
+}
+.ss-pd-disclosure-toggle svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.ss-pd-disclosure-body {
+  padding: 0 14px 14px 36px;
+}
+.ss-pd-claim-intro {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.ss-pd-claim-list {
+  margin: 0 0 12px;
+  padding-left: 16px;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.ss-pd-summary {
+  align-self: flex-start;
+}
+
+@media (max-width: 600px) {
+  .ss-pd-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
