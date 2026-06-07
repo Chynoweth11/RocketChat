@@ -12498,3 +12498,58 @@ body {
     display: none;
   }
 }
+
+/* ===================== PDF Extraction Studio polish ===================== */
+/* Confidence labels: subtle, flat text (no colorful pills) */
+.ss-pdf-edit-field span em.ss-conf {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 9.5px;
+}
+.ss-pdf-edit-field span em.ss-conf.ok {
+  color: var(--faint);
+  background: none;
+}
+.ss-pdf-edit-field span em.ss-conf.mid,
+.ss-pdf-edit-field span em.ss-conf.needs {
+  color: var(--warn);
+  background: none;
+}
+.ss-pdf-edit-field span em.ss-conf.low {
+  color: var(--bad);
+  background: none;
+}
+
+/* Coverage table: separate each coverage group, calm limit rows within */
+.ss-cov-table tbody td {
+  border-top: 0;
+}
+.ss-cov-table tbody tr.cov-start td {
+  border-top: 1px solid var(--line);
+}
+.ss-cov-table tbody tr.cov-start:first-child td {
+  border-top: 0;
+}
+
+/* Missing-coverages clarifying note */
+.ss-cov-missing-note {
+  margin: -4px 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Failed extraction — technical detail (kept out of the way) */
+.ss-pdf-error-detail {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  background: var(--surface-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+}

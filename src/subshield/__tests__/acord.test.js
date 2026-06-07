@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseAcordItems, isAcordCertificate } from "../pdfExtraction.js";
+import { parseAcordItems, isAcordCertificate, buildDocTitle } from "../pdfExtraction.js";
 
 // Positioned text items reproduced from a real ACORD 25 certificate
 // (Hartford / LMC Slab & Tile). y increases upward, matching pdf.js.
@@ -131,5 +131,39 @@ describe("parseAcordItems", () => {
       ])
     );
     expect(result.missingCoverages).not.toContain("Employment Practices Liability");
+  });
+});
+
+describe("buildDocTitle", () => {
+  it("names by policy type, category, and short carrier", () => {
+    expect(
+      buildDocTitle({
+        docTypeId: "certificate",
+        coverages: [{ type: "General Liability" }],
+        carrier: "Hartford Underwriters Insurance Company",
+      })
+    ).toBe("General Liability Certificate — Hartford");
+  });
+
+  it("keeps multi-word carriers that have no corporate suffix", () => {
+    expect(
+      buildDocTitle({
+        docTypeId: "declaration",
+        coverages: [{ type: "Commercial Auto" }],
+        carrier: "Progressive Commercial",
+      })
+    ).toBe("Commercial Auto Declarations — Progressive Commercial");
+  });
+
+  it("uses category + carrier when there are no coverage lines", () => {
+    expect(buildDocTitle({ docTypeId: "quote", coverages: [], carrier: "The Hartford" })).toBe(
+      "Quote — The Hartford"
+    );
+  });
+
+  it("falls back to a cleaned file name", () => {
+    expect(
+      buildDocTitle({ docTypeId: "policy", coverages: [], carrier: "", fileName: "my_policy_doc.pdf" })
+    ).toBe("my policy doc");
   });
 });

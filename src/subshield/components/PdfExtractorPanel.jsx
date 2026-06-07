@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
   ClipboardCheck,
   Database,
   Download,
@@ -80,6 +82,26 @@ function safeFileName(name = "pdf-extraction") {
 
 function fieldDefsFor(item) {
   return item?.docKind === "acord25" ? ACORD_FIELDS : GENERIC_FIELDS;
+}
+
+function Disclosure({ title, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className={`ss-coi-disclosure${open ? " open" : ""}`}>
+      <div className="ss-coi-disclosure-head">
+        <button
+          type="button"
+          className="ss-coi-disclosure-toggle"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+        >
+          {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+          <span>{title}</span>
+        </button>
+      </div>
+      {open && <div className="ss-coi-disclosure-body">{children}</div>}
+    </div>
+  );
 }
 
 function humanizeKey(key = "") {
@@ -197,7 +219,12 @@ function confidenceTone(value) {
 
 function buildText(item) {
   const f = item.fields || {};
-  const lines = [item.fileName, `Document type: ${item.docTypeLabel || item.docType}`, ""];
+  const lines = [
+    item.title || item.fileName,
+    `File: ${item.fileName}`,
+    `Document type: ${item.docTypeLabel || item.docType}`,
+    "",
+  ];
   lines.push("FIELDS");
   [
     ["Certificate date", "certificateDate"],
@@ -640,10 +667,10 @@ export default function PdfExtractorPanel({
                 <div className="ss-pdf-detail-head">
                   <div>
                     <span className="ss-eyebrow">{selected.docTypeLabel}</span>
-                    <h3>{selected.fileName}</h3>
+                    <h3>{selected.title || selected.fileName}</h3>
                     <p>
-                      {selected.words.toLocaleString()} words - {selected.confidence}%
-                      type confidence - {formatShortDate(selected.extractedAt)}
+                      {selected.fileName} · {selected.words.toLocaleString()} words ·{" "}
+                      {formatShortDate(selected.extractedAt)}
                     </p>
                   </div>
                   <div className="ss-pdf-detail-actions">
@@ -690,6 +717,12 @@ export default function PdfExtractorPanel({
                     <AlertTriangle size={16} />
                     <span>{selected.warnings.join(" ")}</span>
                   </div>
+                )}
+
+                {selected.status === "failed" && selected.errorDetail && (
+                  <Disclosure title="Technical details">
+                    <pre className="ss-pdf-error-detail">{selected.errorDetail}</pre>
+                  </Disclosure>
                 )}
 
                 <div className="ss-pdf-review-shell">
@@ -795,7 +828,10 @@ export default function PdfExtractorPanel({
                                       ? cov.limits
                                       : [{ name: "—", amount: "—" }]
                                     ).map((limit, index) => (
-                                      <tr key={`${cov.type}-${index}`}>
+                                      <tr
+                                        key={`${cov.type}-${index}`}
+                                        className={index === 0 ? "cov-start" : ""}
+                                      >
                                         <td>{index === 0 ? cov.type : ""}</td>
                                         <td>{limit.name}</td>
                                         <td className="ss-cov-amount">{limit.amount}</td>
@@ -813,12 +849,17 @@ export default function PdfExtractorPanel({
 
                         {selected.missingCoverages?.length > 0 && (
                           <div className="ss-cov-missing">
-                            <b>Missing / not found coverages</b>
+                            <b>Not listed on this document</b>
+                            <p className="ss-cov-missing-note">
+                              These coverage types weren't found on this document. They may be
+                              carried on a separate policy — this isn't a confirmation that coverage
+                              is missing.
+                            </p>
                             <div className="ss-cov-missing-list">
                               {selected.missingCoverages.map((name) => (
                                 <span className="ss-cov-missing-item" key={name}>
                                   <AlertTriangle size={13} aria-hidden="true" /> {name}
-                                  <em>Not found</em>
+                                  <em>Not on this document</em>
                                 </span>
                               ))}
                             </div>
@@ -826,8 +867,7 @@ export default function PdfExtractorPanel({
                         )}
 
                         {additionalRows.length > 0 && (
-                          <div className="ss-pdf-extra-data">
-                            <b>Additional extracted data</b>
+                          <Disclosure title="Additional extracted data">
                             <div className="ss-pdf-kv">
                               {additionalRows.map(([key, value]) => (
                                 <div key={key} className="ss-pdf-kv-row">
@@ -836,7 +876,7 @@ export default function PdfExtractorPanel({
                                 </div>
                               ))}
                             </div>
-                          </div>
+                          </Disclosure>
                         )}
 
                         {fieldRows.length === 0 && (

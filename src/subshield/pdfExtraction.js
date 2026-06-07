@@ -5,15 +5,16 @@ import { makeId } from "./utils.js";
 let pdfjsPromise = null;
 function getPdfjs() {
   if (!pdfjsPromise) {
-    pdfjsPromise = import("pdfjs-dist/legacy/build/pdf.mjs").then((pdfjsLib) => {
-      if (typeof window !== "undefined") {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-          "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
-          import.meta.url
-        ).toString();
-      }
+    pdfjsPromise = (async () => {
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      // Load the worker via a resolved URL (more reliable across dev/proxied
+      // hosts than `new URL(..., import.meta.url)`, which can fail to fetch).
+      const { default: workerUrl } = await import(
+        "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url"
+      );
+      pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
       return pdfjsLib;
-    });
+    })();
   }
   return pdfjsPromise;
 }
@@ -574,6 +575,55 @@ export function parseAcordItems(rawItems = []) {
   return { fields, fieldConfidence, coverages, missingCoverages };
 }
 
+/* ---------- Smart document title ----------
+ * Rename the document from its insurance content (policy type + category +
+ * carrier) instead of the raw file name, so the review screen reads cleanly. */
+
+const DOC_CATEGORY_WORD = {
+  certificate: "Certificate",
+  declaration: "Declarations",
+  endorsement: "Endorsement",
+  quote: "Quote",
+  invoice: "Invoice",
+  policy: "Policy",
+};
+
+const CARRIER_SUFFIX_WORDS = new Set([
+  "company",
+  "co",
+  "co.",
+  "insurance",
+  "underwriters",
+  "group",
+  "inc",
+  "inc.",
+  "llc",
+  "corp",
+  "corp.",
+  "corporation",
+  "casualty",
+  "indemnity",
+]);
+
+function shortCarrier(carrier = "") {
+  const words = normalizeSpaces(carrier).split(/\s+/).filter(Boolean);
+  while (words.length > 1 && CARRIER_SUFFIX_WORDS.has(words[words.length - 1].toLowerCase())) {
+    words.pop();
+  }
+  return words.join(" ");
+}
+
+export function buildDocTitle({ docTypeId, coverages = [], carrier = "", fileName = "" }) {
+  const category = DOC_CATEGORY_WORD[docTypeId] || "Document";
+  const primaryType = coverages.length ? coverages[0].type : "";
+  const carrierLabel = shortCarrier(carrier);
+  if (primaryType && carrierLabel) return `${primaryType} ${category} — ${carrierLabel}`;
+  if (primaryType) return `${primaryType} ${category}`;
+  if (carrierLabel) return `${category} — ${carrierLabel}`;
+  const cleaned = normalizeSpaces(String(fileName).replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "));
+  return cleaned || category;
+}
+
 function buildResult({ file, pdf, metadata, pages, source, extractedAt }) {
   const text = normalizeTextBlock(pages.map((page) => page.text).join("\n\n"));
   const type = detectDocumentType(text || file.name);
@@ -642,6 +692,12 @@ function buildResult({ file, pdf, metadata, pages, source, extractedAt }) {
   return {
     id: makeId("pdf"),
     fileName: file.name,
+    title: buildDocTitle({
+      docTypeId: type.id,
+      coverages,
+      carrier: fields.carrier,
+      fileName: file.name,
+    }),
     fileSize: file.size,
     pages: pdf.numPages,
     characters: text.length,
@@ -791,6 +847,7 @@ export function makeFailedExtraction(file, error) {
   return {
     id: makeId("pdf"),
     fileName: file?.name || "Unknown PDF",
+    title: file?.name ? String(file.name).replace(/\.[^.]+$/, "") : "Document",
     fileSize: file?.size || 0,
     pages: 0,
     characters: 0,
@@ -809,7 +866,9 @@ export function makeFailedExtraction(file, error) {
     metadata: {},
     text: "",
     pageText: [],
-    warnings: [error?.message || "The PDF could not be extracted."],
+    // User-facing message; the raw error is kept in errorDetail for debugging.
+    warnings: ["We couldn't read this PDF automatically. Try OCR, or review the document manually."],
+    errorDetail: error?.message || String(error || ""),
     extractedAt: new Date().toISOString(),
   };
 }
