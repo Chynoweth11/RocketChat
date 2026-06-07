@@ -4,7 +4,6 @@ import {
   BadgeDollarSign,
   CalendarClock,
   Check,
-  CheckCircle2,
   Download,
   FileSpreadsheet,
   Plus,
@@ -322,9 +321,6 @@ function PolicyDetail({
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
   const cls = status.className;
-  // Show term elapsed (bar fills as renewal approaches) so a near-renewal
-  // policy reads as "almost up" instead of an empty sliver.
-  const width = `${Math.max(5, Math.min(100, Math.round((1 - policy.daysRemaining / 365) * 100)))}%`;
   const notLicense = (policy.type || policy.policyType) !== "license";
   const health = policyHealthScore(policy);
   const hcls = scoreClass(health.score);
@@ -375,28 +371,22 @@ function PolicyDetail({
             {policy.carrier} · {policy.policyNumber}
           </small>
         </div>
-        <em className={`ss-status ${cls}`}>{status.label}</em>
+        <span className={`ss-pdx-status ${cls}`}>
+          <i className="ss-pdx-status-dot" aria-hidden="true" />
+          {status.label}
+        </span>
       </div>
 
-      <div className="ss-pd-renewal">
-        <div className="ss-pd-renewal-top">
-          <span>
-            Renews {formatLongDate(policy.renewalDate || policy.expires)} ·{" "}
-            <b>{policy.daysRemaining} days left</b>
+      <div className="ss-pdx-meta">
+        <span className={`ss-pdx-renews ${cls}`}>
+          Renews in {policy.daysRemaining} day{policy.daysRemaining === 1 ? "" : "s"}
+          <span className="ss-pdx-renews-date">
+            {" · "}
+            {formatLongDate(policy.renewalDate || policy.expires)}
           </span>
-          <span className="ss-pd-renewal-prem">{premium}/yr</span>
-        </div>
-        <div className="ss-pd-bar">
-          <span className={cls} style={{ width }} />
-        </div>
+        </span>
+        <span className="ss-pdx-prem">{premium}/yr</span>
       </div>
-
-      {policy.statusNote && (
-        <div className={`ss-pd-alert ${cls}`}>
-          <AlertTriangle size={14} aria-hidden="true" />
-          <span>{policy.statusNote}</span>
-        </div>
-      )}
 
       {verifiedCarrierId ? (
         <span className="ss-pd-verified">
@@ -428,8 +418,8 @@ function PolicyDetail({
         })}
       </div>
 
-      {/* Key facts */}
-      <dl className="ss-pd-facts">
+      {/* Key facts — airy, boxless */}
+      <dl className="ss-pdx-facts">
         {facts.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
@@ -438,28 +428,23 @@ function PolicyDetail({
         ))}
       </dl>
 
-      {/* Health, compact */}
-      <div className="ss-pd-health">
-        <div className="ss-pd-health-top">
-          <span className="ss-pd-health-label">Health</span>
-          <span className={`ss-pd-health-num ${hcls}`}>
+      {/* Health — typographic summary */}
+      <div className="ss-pdx-health">
+        <span className="ss-eyebrow">Policy health</span>
+        <div className="ss-pdx-health-row">
+          <span className={`ss-pdx-score ${hcls}`}>
             {health.score}
             <i>/100</i>
           </span>
-          <span className={`ss-pd-health-grade ${hcls}`}>{health.grade}</span>
-          <div className="ss-pd-health-bar">
-            <span className={hcls} style={{ width: `${health.score}%` }} />
-          </div>
+          <span className="ss-pdx-grade">{health.grade}</span>
         </div>
-        <div className="ss-pd-health-points">
+        <div className="ss-pdx-points">
           {health.issues.length === 0 ? (
-            <div className="ss-pd-point good">
-              <CheckCircle2 size={13} /> All checks passed
-            </div>
+            <div className="ss-pdx-point good">All checks passed</div>
           ) : (
             health.issues.map((item) => (
-              <div key={item} className="ss-pd-point issue">
-                <AlertTriangle size={13} /> {item}
+              <div key={item} className="ss-pdx-point issue">
+                {item}
               </div>
             ))
           )}
@@ -467,7 +452,7 @@ function PolicyDetail({
             <>
               <button
                 type="button"
-                className="ss-pd-link ss-pd-health-toggle"
+                className="ss-pd-link ss-pdx-health-toggle"
                 onClick={() => setShowChecks((value) => !value)}
               >
                 {showChecks
@@ -478,8 +463,8 @@ function PolicyDetail({
               </button>
               {showChecks &&
                 health.good.map((item) => (
-                  <div key={item} className="ss-pd-point good">
-                    <CheckCircle2 size={13} /> {item}
+                  <div key={item} className="ss-pdx-point good">
+                    {item}
                   </div>
                 ))}
             </>

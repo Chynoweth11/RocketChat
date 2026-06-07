@@ -12634,6 +12634,196 @@ body {
   }
 }
 
+/* ===================== Policy detail — Apple-style reimagining =====================
+   Boxless, typographic, restrained. Status as a dot + word (no pill), urgency
+   as a quiet colored line (no banner, no bar), airy facts, and a typographic
+   health summary (no bar, no badge). */
+.ss-pd {
+  gap: 20px;
+}
+.ss-pd-head {
+  align-items: flex-start;
+}
+.ss-pd-head-copy h2 {
+  font-size: 21px;
+  letter-spacing: -0.022em;
+}
+
+/* Status: small dot + word, top-right */
+.ss-pdx-status {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ss-pdx-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ss-pdx-status.danger {
+  color: var(--bad);
+}
+.ss-pdx-status.danger .ss-pdx-status-dot {
+  background: var(--bad);
+}
+.ss-pdx-status.warning {
+  color: var(--warn);
+}
+.ss-pdx-status.warning .ss-pdx-status-dot {
+  background: var(--warn);
+}
+.ss-pdx-status.success {
+  color: var(--muted);
+}
+.ss-pdx-status.success .ss-pdx-status-dot {
+  background: var(--ok);
+}
+
+/* Renewal line: quiet, colored by urgency — no box, no bar */
+.ss-pdx-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: -8px;
+}
+.ss-pdx-renews {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.ss-pdx-renews.danger {
+  color: var(--bad);
+}
+.ss-pdx-renews.warning {
+  color: var(--warn);
+}
+.ss-pdx-renews.success {
+  color: var(--muted);
+  font-weight: 400;
+}
+.ss-pdx-renews-date {
+  color: var(--faint);
+  font-weight: 400;
+}
+.ss-pdx-prem {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Facts: airy boxless definition grid */
+.ss-pdx-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 28px;
+  margin: 2px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.ss-pdx-facts dt {
+  margin: 0;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--faint);
+}
+.ss-pdx-facts dd {
+  margin: 6px 0 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+/* Health: typographic summary, no bar/badge/box */
+.ss-pdx-health {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.ss-pdx-health-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ss-pdx-score {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.ss-pdx-score i {
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--faint);
+  margin-left: 2px;
+}
+.ss-pdx-score.success {
+  color: var(--ok);
+}
+.ss-pdx-score.warning {
+  color: #b07719;
+}
+.ss-pdx-score.danger {
+  color: var(--bad);
+}
+.ss-pdx-grade {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.ss-pdx-points {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ss-pdx-point {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.ss-pdx-point::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--line);
+}
+.ss-pdx-point.issue {
+  color: var(--text);
+}
+.ss-pdx-point.issue::before {
+  background: var(--warn);
+}
+.ss-pdx-point.good::before {
+  background: var(--ok);
+}
+.ss-pdx-health-toggle {
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  .ss-pdx-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+  }
+}
+
 /* Policy detail — refined inline alert (no harsh banner) */
 .ss-pd-alert {
   display: flex;
