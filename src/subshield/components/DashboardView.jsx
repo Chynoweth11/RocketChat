@@ -15,6 +15,15 @@ import {
   Upload,
   UserPlus,
 } from "lucide-react";
+import {
+  formatMoney,
+  formatShortDate,
+  getStatus,
+  policyLabelFromType,
+  savingsForOpportunity,
+  timeAgo,
+} from "../utils.js";
+import { Section } from "./Layout.jsx";
 
 function activityIcon(title = "") {
   const t = title.toLowerCase();
@@ -34,15 +43,6 @@ function activityColor(title = "") {
   if (t.includes("setting") || t.includes("logout")) return "#64748b";
   return "#0284c7";
 }
-import {
-  formatMoney,
-  formatShortDate,
-  getStatus,
-  policyLabelFromType,
-  savingsForOpportunity,
-  timeAgo,
-} from "../utils.js";
-import { Section } from "./Layout.jsx";
 
 function buildSpendBars(policies = []) {
   const top = [...policies]
