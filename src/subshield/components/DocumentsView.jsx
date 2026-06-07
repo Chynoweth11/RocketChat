@@ -30,14 +30,17 @@ function displayDocument(doc) {
 
 function exportDocumentsCsv(documents) {
   const header = ["Name","Type","Carrier","Status","Size (KB)","Uploaded"];
-  const rows = documents.map((doc) => [
-    displayDocument(doc).name,
-    displayDocument(doc).typeLabel,
-    doc.carrier || "",
-    doc.status,
-    doc.sizeKb || "",
-    formatShortDate(doc.uploadedAt),
-  ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`));
+  const rows = documents.map((doc) => {
+    const display = displayDocument(doc);
+    return [
+      display.name,
+      display.typeLabel,
+      doc.carrier || "",
+      doc.status,
+      doc.sizeKb || "",
+      formatShortDate(doc.uploadedAt),
+    ].map((cell) => `"${String(cell).replace(/"/g, '""')}"`);
+  });
   const csv = [header.join(","), ...rows.map((row) => row.join(","))].join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);

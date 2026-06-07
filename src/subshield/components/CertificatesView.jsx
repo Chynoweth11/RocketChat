@@ -204,8 +204,8 @@ export default function CertificatesView({
           <div className="ss-note success" style={{ marginTop: 14 }}>
             <CheckCircle2 size={16} />
             <span>
-              Saved holder wording and project details mean every resend is a few clicks.
-              no searching old emails.
+              Saved holder wording and project details mean every resend is a few clicks —
+              no searching through old emails.
             </span>
           </div>
         )}

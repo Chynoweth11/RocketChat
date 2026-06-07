@@ -28,6 +28,8 @@ import {
   scoreClass,
   timeAgo,
 } from "../utils.js";
+import { Section, Info, Spinner } from "./Layout.jsx";
+import ScoreRing from "./ScoreRing.jsx";
 
 function exportPoliciesCsv(policies) {
   const header = ["Policy","Type","Carrier","Policy Number","Annual Premium","Deductible","Coverage Limit","Effective Date","Renewal Date","Days Remaining","Status"];
@@ -55,8 +57,6 @@ function exportPoliciesCsv(policies) {
   link.remove();
   URL.revokeObjectURL(url);
 }
-import { Section, Info, Spinner } from "./Layout.jsx";
-import ScoreRing from "./ScoreRing.jsx";
 
 const FILTERS = [
   { id: "all", label: "All policies" },
