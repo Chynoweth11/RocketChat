@@ -10493,3 +10493,240 @@ body {
 .ss-review-box {
   border-radius: 12px;
 }
+
+/* =====================================================================
+   APPLE-STYLE REFINEMENT (final layer)
+   Authentic system (SF) typography, Apple neutrals, restrained blue
+   primary, generous whitespace, and larger soft-rounded corners.
+   ===================================================================== */
+
+:root,
+.ss-app,
+body,
+.ss-app button,
+.ss-app input,
+.ss-app select,
+.ss-app textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+.ss-app {
+  --surface: #ffffff;
+  --surface-soft: #f5f5f7;
+  --line: #e5e5ea;
+  --line-soft: #f0f0f3;
+  --ink: #1d1d1f;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #8a8a8e;
+  --brand: #0071e3;
+  --brand-soft: #eaf3ff;
+  --brand-line: #cfe4ff;
+  --brand-strong: #0066cc;
+  --ink-btn: #0071e3;
+  --ink-btn-hover: #0077ed;
+  --success: #1d8a4e;
+  --success-soft: #e9f7ee;
+  --warning: #b25e09;
+  --warning-soft: #fdf4e7;
+  --danger: #d63a31;
+  --danger-soft: #fdf0ef;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 28px 64px rgba(0, 0, 0, 0.18);
+  --ring: 0 0 0 4px rgba(0, 113, 227, 0.22);
+  --radius-card: 18px;
+  --radius-control: 12px;
+  background: #f5f5f7;
+  color: var(--text);
+}
+
+body {
+  background: #f5f5f7;
+}
+.ss-main,
+.ss-layout {
+  background: #f5f5f7;
+}
+
+/* ---- Apple typography: confident, tightly tracked headings ---- */
+.ss-top h1 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.026em;
+  font-size: clamp(26px, 2.1vw, 34px);
+}
+.ss-section h2 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  font-size: 17px;
+}
+.ss-hero h2 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.026em;
+}
+.ss-brand b {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.ss-eyebrow {
+  color: var(--faint);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+}
+.ss-eyebrow::before {
+  background: var(--brand);
+}
+.ss-info b,
+.ss-dash-metric b,
+.ss-dash-spend-value,
+.ss-savings-amount strong,
+.ss-coi-stat-num {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.ss-section p,
+.ss-muted,
+.ss-card > p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ---- Apple cards: large soft corners, airy padding, whisper depth ---- */
+.ss-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  box-shadow: var(--shadow-xs);
+}
+.ss-card:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-xs);
+}
+.ss-dash-spend-panel,
+.ss-dash-accounts-panel,
+.ss-dash-onboard,
+.ss-score-card,
+.ss-coverage-application-card,
+.ss-policy-services-card,
+.ss-settings-nav-card,
+.ss-settings-context {
+  border-radius: var(--radius-card);
+  border-color: var(--line);
+}
+
+/* ---- Apple primary = restrained blue, rounder, no bounce ---- */
+.ss-button {
+  background: var(--brand);
+  border: 1px solid var(--brand);
+  border-radius: var(--radius-control);
+  color: #fff;
+  font-weight: 600;
+  min-height: 42px;
+  box-shadow: none;
+}
+.ss-button:hover:not(:disabled) {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.ss-button:active:not(:disabled) {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+  transform: none;
+}
+.ss-button.soft {
+  background: #fff;
+  color: var(--text);
+  border-color: var(--line);
+  box-shadow: var(--shadow-xs);
+}
+.ss-button.soft:hover:not(:disabled) {
+  background: var(--surface-soft);
+  border-color: #d8d8de;
+  color: var(--ink);
+}
+.ss-button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+.ss-side-card .ss-button {
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: none;
+}
+.ss-side-card .ss-button:hover:not(:disabled) {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+}
+
+/* ---- Controls, chips, nav rounder + Apple-blue accents ---- */
+.ss-search input,
+.ss-field input,
+.ss-field select,
+.ss-field textarea,
+.ss-settings-search {
+  border-radius: var(--radius-control);
+  border-color: var(--line);
+}
+.ss-search input:focus,
+.ss-field input:focus,
+.ss-field select:focus,
+.ss-field textarea:focus,
+.ss-settings-search:focus-within {
+  border-color: var(--brand-line);
+  box-shadow: var(--ring);
+}
+.ss-chip.active {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand-strong);
+}
+.ss-nav.active {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+/* ---- Inner panels: gentle Apple rounding ---- */
+.ss-info {
+  border-radius: 14px;
+}
+.ss-dash-metric,
+.ss-policy,
+.ss-holder-card,
+.ss-renewal-card,
+.ss-health-card,
+.ss-coi-needs-action,
+.ss-coi-holder-row,
+.ss-insight,
+.ss-doc-row,
+.ss-service-link,
+.ss-review-box,
+.ss-spend-chart,
+.ss-dash-trend,
+.ss-empty {
+  border-radius: 14px;
+}
+.ss-spend-point.is-current span,
+.ss-dash-trend-fill {
+  background: var(--brand);
+}
+
+/* ---- Generous Apple spacing rhythm ---- */
+.ss-main {
+  padding: 36px 44px 44px;
+}
+.ss-section {
+  margin-bottom: 22px;
+}
+.ss-grid {
+  gap: 18px;
+}
