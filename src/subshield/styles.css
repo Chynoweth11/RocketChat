@@ -10171,3 +10171,283 @@ body {
   color: var(--text, #0a1421);
   font-weight: 600;
 }
+
+/* =====================================================================
+   DESIGN POLISH — unified premium pass (intentionally the final layer so
+   it harmonizes the earlier dark + light redesign layers into one system).
+   Principles: flat ink primary with blue reserved for accents, calm neutral
+   shadows (no colored glows), softer consistent radii, a disciplined type
+   scale, and steady spacing. No bouncy hover lifts on containers.
+   ===================================================================== */
+
+.ss-app {
+  --surface: #ffffff;
+  --surface-soft: #f6f7f9;
+  --line: #e8eaee;
+  --line-soft: #f0f1f4;
+  --ink: #0c1320;
+  --text: #1a2231;
+  --muted: #5d6b7e;
+  --faint: #93a0b1;
+  --brand: #2f5bd7;
+  --brand-soft: #eef3ff;
+  --brand-line: #d4e0fb;
+  --brand-strong: #2247b0;
+  --ink-btn: #0c1320;
+  --ink-btn-hover: #1c2638;
+  --success: #0e7a57;
+  --success-soft: #ecfdf3;
+  --warning: #b25e09;
+  --warning-soft: #fff8ec;
+  --danger: #c2413b;
+  --danger-soft: #fdf1f0;
+  --shadow-xs: 0 1px 1px rgba(12, 19, 32, 0.04);
+  --shadow-sm: 0 1px 2px rgba(12, 19, 32, 0.05), 0 1px 3px rgba(12, 19, 32, 0.04);
+  --shadow-md: 0 10px 28px rgba(12, 19, 32, 0.10), 0 2px 6px rgba(12, 19, 32, 0.06);
+  --shadow-lg: 0 24px 60px rgba(12, 19, 32, 0.18);
+  --ring: 0 0 0 3px rgba(47, 91, 215, 0.18);
+  --radius-card: 14px;
+  --radius-control: 10px;
+  background: #f5f6f8;
+  color: var(--text);
+}
+
+body {
+  background: #f5f6f8;
+}
+
+/* Calm, flat canvas — remove the blue radial tint that read as an AI gradient */
+.ss-main {
+  background: #f5f6f8;
+  padding: 32px 40px 40px;
+}
+.ss-layout {
+  background: #f5f6f8;
+}
+
+/* ---------- Typography rhythm ---------- */
+.ss-top h1 {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  font-size: clamp(25px, 2vw, 31px);
+}
+.ss-eyebrow {
+  color: var(--faint);
+  font-weight: 600;
+  letter-spacing: 0.085em;
+  font-size: 10.5px;
+}
+.ss-eyebrow::before {
+  background: var(--brand);
+}
+.ss-section h2 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  font-size: 15.5px;
+}
+.ss-section p,
+.ss-muted,
+.ss-card > p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.ss-hero h2 {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+.ss-brand b {
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.ss-empty h2 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Cards: softer corners, hairline border, barely-there shadow,
+   and no hover bounce (containers shouldn't move) ---------- */
+.ss-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-xs);
+  padding: 24px;
+}
+.ss-card:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-xs);
+}
+.ss-dash-spend-panel,
+.ss-dash-accounts-panel,
+.ss-dash-onboard,
+.ss-score-card,
+.ss-coverage-application-card,
+.ss-policy-services-card,
+.ss-settings-nav-card,
+.ss-settings-context,
+.ss-settings-main > section.ss-card {
+  border-color: var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ---------- Primary action = crisp flat ink; blue is for accents only ---------- */
+.ss-button {
+  min-height: 40px;
+  border-radius: var(--radius-control);
+  background: var(--ink-btn);
+  border: 1px solid var(--ink-btn);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: var(--shadow-xs);
+}
+.ss-button:hover:not(:disabled) {
+  background: var(--ink-btn-hover);
+  border-color: var(--ink-btn-hover);
+  transform: none;
+  filter: none;
+  box-shadow: var(--shadow-sm);
+}
+.ss-button:active:not(:disabled) {
+  transform: none;
+  background: #05080f;
+  border-color: #05080f;
+}
+.ss-button.soft {
+  background: #fff;
+  color: var(--text);
+  border-color: var(--line);
+  box-shadow: var(--shadow-xs);
+  font-weight: 600;
+}
+.ss-button.soft:hover:not(:disabled) {
+  background: var(--surface-soft);
+  border-color: #d9dde5;
+  color: var(--ink);
+  transform: none;
+}
+.ss-button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+.ss-button.danger:hover:not(:disabled) {
+  background: #a8362f;
+  border-color: #a8362f;
+}
+.ss-button-sm {
+  min-height: 34px;
+}
+.ss-side-card .ss-button {
+  background: var(--ink-btn);
+  border-color: var(--ink-btn);
+  box-shadow: var(--shadow-xs);
+}
+.ss-side-card .ss-button:hover:not(:disabled) {
+  background: var(--ink-btn-hover);
+  border-color: var(--ink-btn-hover);
+}
+
+/* ---------- Inputs: consistent radius/height, calm focus ring ---------- */
+.ss-search input,
+.ss-field input,
+.ss-field select,
+.ss-field textarea,
+.ss-settings-search {
+  border-radius: var(--radius-control);
+  border-color: var(--line);
+  box-shadow: none;
+  font-size: 13.5px;
+}
+.ss-search input,
+.ss-field input,
+.ss-field select {
+  min-height: 44px;
+}
+.ss-search input:focus,
+.ss-field input:focus,
+.ss-field select:focus,
+.ss-field textarea:focus,
+.ss-settings-search:focus-within {
+  border-color: var(--brand-line);
+  box-shadow: var(--ring);
+}
+
+/* ---------- Chips: flat and refined ---------- */
+.ss-chip {
+  box-shadow: none;
+  border-color: var(--line);
+  color: var(--muted);
+  font-weight: 500;
+}
+.ss-chip:hover {
+  border-color: #cdd4df;
+  color: var(--ink);
+}
+.ss-chip.active {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand-strong);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+/* ---------- Stat / metric numbers: tighter tracking, calmer weight ---------- */
+.ss-info {
+  border-color: var(--line);
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 16px 18px;
+}
+.ss-info:hover {
+  border-color: #dfe3ea;
+  box-shadow: none;
+}
+.ss-info b,
+.ss-dash-metric b,
+.ss-dash-spend-value,
+.ss-savings-amount strong,
+.ss-coi-stat-num {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.ss-info span,
+.ss-dash-metric span {
+  color: var(--faint);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Header pills & icon buttons: flat hairline ---------- */
+.ss-top-date,
+.ss-search-trigger,
+.ss-icon-button,
+.ss-alert-chip {
+  box-shadow: none;
+  border-color: var(--line);
+}
+
+/* ---------- Sidebar nav: calmer weight, blue accent on active ---------- */
+.ss-nav {
+  font-weight: 600;
+}
+.ss-nav.active {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+/* ---------- Spacing rhythm ---------- */
+.ss-section {
+  margin-bottom: 18px;
+}
+.ss-grid {
+  gap: 16px;
+}
+.ss-note {
+  box-shadow: none;
+}
