@@ -198,17 +198,6 @@ export default function PoliciesView({
               onClick={() => onSelectPolicy(policy.id)}
             />
           ))}
-
-          {upcoming.length > 0 && (
-            <div className="ss-policy-list-footer">
-              <span className="ss-eyebrow">Next renewal</span>
-              <b>{upcoming[0].name}</b>
-              <small>
-                {formatShortDate(upcoming[0].renewalDate || upcoming[0].expires)} |
-                {" "}{upcoming[0].daysRemaining} days left
-              </small>
-            </div>
-          )}
         </section>
 
         <div className="ss-policies-content">
@@ -274,8 +263,6 @@ export default function PoliciesView({
 function PolicyRow({ policy, selected, onClick }) {
   const Icon = policyIcon(policy.type);
   const status = getStatus(policy.daysRemaining);
-  const health = policyHealthScore(policy);
-  const hClass = scoreClass(health.score);
   return (
     <button
       type="button"
@@ -289,17 +276,14 @@ function PolicyRow({ policy, selected, onClick }) {
       <span className="ss-policy-copy">
         <b>{policy.name}</b>
         <small>
-          {policy.carrier} | {formatMoney(policy.premiumAmount ?? policy.premium)}/yr
-          {" · "}{policy.daysRemaining}d left
+          {policy.carrier} · {formatMoney(policy.premiumAmount ?? policy.premium)}/yr · {policy.daysRemaining}d left
         </small>
       </span>
       <div className="ss-policy-meta">
-        <em className={`ss-status ${status.className}`}>{status.label}</em>
-        <span
-          className={`ss-policy-health-dot ${hClass}`}
-          title={`Health: ${health.score}/100, ${health.grade}`}
-          aria-label={`Health score ${health.score}`}
-        />
+        <span className={`ss-policy-status ${status.className}`}>
+          <i className="ss-policy-status-dot" aria-hidden="true" />
+          {status.label}
+        </span>
       </div>
     </button>
   );
