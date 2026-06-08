@@ -708,7 +708,7 @@ export default function PdfExtractorPanel({
                     {activeTab === "fields" && (
                       <div className="ss-pdf-field-editor">
                         <div className="ss-pdf-editor-head">
-                          <b>Verified fields</b>
+                          <b>Extracted fields</b>
                           <button
                             type="button"
                             className="ss-button soft ss-button-sm"

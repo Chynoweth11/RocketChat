@@ -64,7 +64,6 @@ const TYPE_ICONS = {
 
 const STATUS_FILTERS = [
   { id: "all", label: "All" },
-  { id: "verified", label: "Verified" },
   { id: "pending", label: "Needs review" },
 ];
 
@@ -299,10 +298,16 @@ export default function DocumentsView({
                     </div>
                     <span className="ss-dx-date">{formatShortDate(doc.uploadedAt)}</span>
                     <span className="ss-dx-size">{doc.sizeKb} KB</span>
-                    <span className={`ss-dx-status ${verifiedDoc ? "ok" : "pending"}`}>
-                      <span className="ss-dx-dot" aria-hidden="true" />
-                      {verifiedDoc ? "Verified" : "Needs review"}
-                    </span>
+                    {verifiedDoc ? (
+                      <span className="ss-dx-status ok" aria-label="Verified">
+                        <span className="ss-dx-dot" aria-hidden="true" />
+                      </span>
+                    ) : (
+                      <span className="ss-dx-status pending">
+                        <span className="ss-dx-dot" aria-hidden="true" />
+                        Needs review
+                      </span>
+                    )}
                     <RowMenu onDelete={() => onDelete(doc.id)} name={display.name} />
                   </div>
                 );
