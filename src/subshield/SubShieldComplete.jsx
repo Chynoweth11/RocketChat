@@ -21,6 +21,7 @@ import {
   normalizeSavingsOpportunity,
   packagePolicies,
   policyLabelFromType,
+  policyTypeFromLabel,
   readStoredData,
   savingsForOpportunity,
   totalTrackedPremium,
@@ -526,8 +527,8 @@ export default function SubShieldComplete() {
     const meta = scan.documentMeta || {};
     let workingPolicies = [...data.policies];
     let workingOpportunities = [...opportunities];
-    const newDocuments = [];
     let firstSavedId = null;
+    let primaryPolicy = null;
     let added = 0;
     let updated = 0;
 
@@ -544,22 +545,7 @@ export default function SubShieldComplete() {
       );
       const targetId = existing ? existing.id : normalized.id;
       if (!firstSavedId) firstSavedId = targetId;
-
-      newDocuments.push(
-        normalizeDocument({
-          name: meta.fileName
-            ? `${meta.fileName.replace(/\.pdf$/i, "")} - ${normalized.name}`
-            : `${normalized.name} document`,
-          docType: meta.kind === "coi" ? "certificate" : "declaration",
-          policyId: targetId,
-          policyType: normalized.policyType,
-          carrier: normalized.carrier,
-          fileType: meta.fileType || "PDF",
-          sizeKb: meta.sizeKb || 160,
-          status: "verified",
-          addedBy: firstName || "You",
-        })
-      );
+      if (!primaryPolicy) primaryPolicy = normalized;
 
       const docLabels = scannedDocumentLabels({ ...raw, kind: meta.kind });
 
@@ -607,6 +593,25 @@ export default function SubShieldComplete() {
       [added ? `${added} added` : "", updated ? `${updated} updated` : ""]
         .filter(Boolean)
         .join(", ") || "saved";
+
+    // One uploaded file = one library document. A certificate that lists
+    // several coverage lines is filed once as a COI package (not duplicated
+    // across each policy type); a declarations page files under its policy.
+    const isCoi = meta.kind === "coi" || scanned.length > 1;
+    const fileBase = (meta.fileName || "").replace(/\.pdf$/i, "").trim();
+    const newDocuments = [
+      normalizeDocument({
+        name: fileBase || (primaryPolicy ? `${primaryPolicy.name} document` : "Insurance document"),
+        docType: isCoi ? "certificate" : "declaration",
+        policyId: firstSavedId,
+        policyType: isCoi ? null : primaryPolicy?.policyType || null,
+        carrier: primaryPolicy?.carrier || "",
+        fileType: meta.fileType || "PDF",
+        sizeKb: meta.sizeKb || 160,
+        status: "verified",
+        addedBy: firstName || "You",
+      }),
+    ];
 
     commit({
       ...data,
@@ -1230,8 +1235,14 @@ export default function SubShieldComplete() {
       .filter((result) => result.status !== "failed")
       .map((result) =>
         normalizeDocument({
-          name: result.fileName,
+          name: result.title || result.fileName,
           docType: result.docType,
+          // A certificate covering several lines files once as a COI package;
+          // a single-line declaration files under its policy type.
+          policyType:
+            result.docType === "certificate"
+              ? null
+              : policyTypeFromLabel(result.coverages?.[0]?.type),
           carrier: result.fields?.carrier || "",
           fileType: "PDF",
           sizeKb: Math.max(1, Math.round((result.fileSize || 0) / 1024)),
@@ -1288,7 +1299,12 @@ export default function SubShieldComplete() {
         doc.extractionId === id
           ? normalizeDocument({
               ...doc,
+              name: nextExtraction.title || doc.name,
               docType: nextExtraction.docType || doc.docType,
+              policyType:
+                nextExtraction.docType === "certificate"
+                  ? null
+                  : policyTypeFromLabel(nextExtraction.coverages?.[0]?.type) || doc.policyType,
               carrier: nextExtraction.fields?.carrier || doc.carrier,
               status: verifiedStatus,
               extractedWords: nextExtraction.words || doc.extractedWords,
@@ -1310,6 +1326,8 @@ export default function SubShieldComplete() {
     commit({
       ...data,
       pdfExtractions: (data.pdfExtractions || []).filter((item) => item.id !== id),
+      // Keep the library in lock-step: drop the document this extraction filed.
+      documents: (data.documents || []).filter((doc) => doc.extractionId !== id),
       activity: prependActivity(
         data.activity,
         "PDF extraction deleted",

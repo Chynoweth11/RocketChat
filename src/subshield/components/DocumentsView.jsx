@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  ArrowDown,
   FileBadge,
   FileCheck2,
   FileSignature,
@@ -9,9 +10,8 @@ import {
   ScrollText,
   Search,
   Trash2,
-  Upload,
 } from "lucide-react";
-import { Section, Info } from "./Layout.jsx";
+import { Section } from "./Layout.jsx";
 import { documentTypeLabel, formatShortDate, policyLabelFromType } from "../utils.js";
 import PdfExtractorPanel from "./PdfExtractorPanel.jsx";
 
@@ -103,7 +103,6 @@ export default function DocumentsView({
   documents,
   policies,
   extractions,
-  onUpload,
   onDelete,
   onExtracted,
   onUpdateExtraction,
@@ -174,37 +173,45 @@ export default function DocumentsView({
         onDeleteExtraction={onDeleteExtraction}
       />
 
-      <section className="ss-card ss-span">
+      <div className="ss-doc-flow-link" aria-hidden="true">
+        <span className="ss-doc-flow-line" />
+        <span className="ss-doc-flow-chip">
+          <ArrowDown size={13} /> Confirmed documents file into your library
+        </span>
+        <span className="ss-doc-flow-line" />
+      </div>
+
+      <section className="ss-card ss-span ss-doc-library">
         <Section
-          title="Document Center"
-          sub="Every declaration, certificate, endorsement, and quote in one organized place."
+          title="Document Library"
+          sub="Every certificate, declaration, endorsement, and quote you confirm in the studio is filed and organized here — automatically."
           extra={
-            <div style={{ display: "flex", gap: 8 }}>
-              {documents.length > 0 && (
-                <button
-                  type="button"
-                  className="ss-button soft ss-button-sm"
-                  onClick={() => exportDocumentsCsv(documents)}
-                  title="Export document list as CSV"
-                >
-                  <FileSpreadsheet size={14} /> Export
-                </button>
-              )}
-              <button type="button" className="ss-button" onClick={onUpload}>
-                <Upload size={15} /> Upload document
+            documents.length > 0 ? (
+              <button
+                type="button"
+                className="ss-button soft ss-button-sm"
+                onClick={() => exportDocumentsCsv(documents)}
+                title="Export document list as CSV"
+              >
+                <FileSpreadsheet size={14} /> Export
               </button>
-            </div>
+            ) : null
           }
         />
-        <div className="ss-command-metrics">
-          <Info label="Total documents" value={documents.length} />
-          <Info label="Verified" value={verified} />
-          <Info label="Needs review" value={pending} />
-          <Info label="Storage used" value={`${totalMb} MB`} />
-        </div>
-      </section>
 
-      <section className="ss-card ss-span">
+        {documents.length > 0 && (
+          <div className="ss-doc-library-stats">
+            <span><b>{documents.length}</b> in library</span>
+            <span><b>{verified}</b> verified</span>
+            {pending > 0 && (
+              <span className="is-flag">
+                <b>{pending}</b> need review
+              </span>
+            )}
+            <span><b>{totalMb} MB</b> stored</span>
+          </div>
+        )}
+
         {documents.length > 0 && (
           <>
             <div className="ss-search">
@@ -254,11 +261,11 @@ export default function DocumentsView({
         {documents.length === 0 && (
           <div className="ss-empty">
             <FileText size={32} />
-            <h2>No documents yet</h2>
-            <p>Upload your insurance paperwork and we'll keep it organized and searchable.</p>
-            <button type="button" className="ss-button" onClick={onUpload}>
-              <Upload size={15} /> Upload first document
-            </button>
+            <h2>Your library is empty</h2>
+            <p>
+              Upload a PDF in the Extraction Studio above. Once you review and save it, the
+              document is filed here automatically.
+            </p>
           </div>
         )}
 

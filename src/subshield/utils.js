@@ -206,6 +206,34 @@ export function policyLabelFromType(type) {
   return POLICY_TYPE_NAMES[type] || "Insurance Policy";
 }
 
+// Reverse lookup: a coverage display label (e.g. "Commercial General
+// Liability") back to our internal policy-type key. Used when a confirmed
+// extraction is filed into the document library so it groups correctly.
+const POLICY_LABEL_TO_TYPE = (() => {
+  const map = {};
+  Object.entries(POLICY_TYPE_NAMES).forEach(([key, label]) => {
+    map[label.toLowerCase()] = key;
+  });
+  Object.assign(map, {
+    "commercial general liability": "liability",
+    "general liability": "liability",
+    "automobile liability": "auto",
+    "commercial auto": "auto",
+    "umbrella / excess liability": "umbrella",
+    "inland marine / equipment": "equipment",
+    "crime / fidelity": "crime",
+    "builder's risk": "builders_risk",
+    "directors & officers": "directors",
+    "employment practices liability": "epl",
+  });
+  return map;
+})();
+
+export function policyTypeFromLabel(label) {
+  if (!label) return null;
+  return POLICY_LABEL_TO_TYPE[String(label).toLowerCase().trim()] || null;
+}
+
 function normalizePolicyDocuments(value) {
   if (!Array.isArray(value)) return [];
   return value

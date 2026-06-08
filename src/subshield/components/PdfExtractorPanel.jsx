@@ -530,7 +530,7 @@ export default function PdfExtractorPanel({
       <section className={`ss-card ss-span ss-pdf-intake-card${sorted.length ? " has-results" : ""}`}>
         <Section
           title="PDF Extraction Studio"
-          sub="Scan, OCR, review, and export insurance document data."
+          sub="Upload, scan, OCR, and review any insurance PDF. Confirmed documents file into your library below."
           extra={
             <button
               type="button"
@@ -711,11 +711,11 @@ export default function PdfExtractorPanel({
                           <b>Extracted fields</b>
                           <button
                             type="button"
-                            className="ss-button soft ss-button-sm"
+                            className="ss-button ss-button-sm"
                             onClick={saveReviewedFields}
-                            disabled={!reviewDirty}
+                            title="Confirm these details and file this document in your library"
                           >
-                            <Save size={14} /> Save
+                            <Save size={14} /> {reviewDirty ? "Save to library" : "Saved to library"}
                           </button>
                         </div>
                         <div className="ss-pdf-field-groups">
