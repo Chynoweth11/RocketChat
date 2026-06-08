@@ -10,11 +10,9 @@ import {
   PiggyBank,
   Plus,
   Send,
-  Settings,
   Shield,
   Sparkles,
   Upload,
-  UserPlus,
 } from "lucide-react";
 import {
   formatMoney,
@@ -25,16 +23,6 @@ import {
   timeAgo,
 } from "../utils.js";
 import { Section } from "./Layout.jsx";
-
-function activityIcon(title = "") {
-  const t = title.toLowerCase();
-  if (t.includes("certificate") || t.includes("sent to")) return <Send size={16} />;
-  if (t.includes("upload") || t.includes("document")) return <Upload size={16} />;
-  if (t.includes("sav") || t.includes("quote") || t.includes("coverage review")) return <BadgeDollarSign size={16} />;
-  if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return <Settings size={16} />;
-  if (t.includes("holder") || t.includes("advisor")) return <UserPlus size={16} />;
-  return <Shield size={16} />;
-}
 
 function activityTone(title = "") {
   const t = title.toLowerCase();
@@ -359,30 +347,6 @@ export default function DashboardView({
             }
           />
 
-          {primaryCriticalRenewal && (
-            <div className="ss-renewal-alert" role="status">
-              <span className="ss-renewal-alert-icon" aria-hidden="true">
-                <AlertTriangle size={17} />
-              </span>
-              <div className="ss-renewal-alert-copy">
-                <span className="ss-renewal-alert-label">Critical window</span>
-                <b>
-                  {primaryCriticalRenewal.name} renews in {primaryCriticalRenewal.daysRemaining} day
-                  {primaryCriticalRenewal.daysRemaining === 1 ? "" : "s"}
-                </b>
-                <small>
-                  Confirm renewal direction before {formatShortDate(primaryCriticalRenewal.renewalDate || primaryCriticalRenewal.expires)}.
-                  {criticalRenewals.length > 1 && (
-                    <em> +{criticalRenewals.length - 1} more urgent</em>
-                  )}
-                </small>
-              </div>
-              <button type="button" className="ss-renewal-alert-action" onClick={onOpenPolicies}>
-                Review <ArrowRight size={13} />
-              </button>
-            </div>
-          )}
-
           {upcoming.length === 0 && (
             <div className="ss-note success">
               <CheckCircle2 size={16} />
@@ -391,26 +355,39 @@ export default function DashboardView({
           )}
 
           {upcoming.length > 0 && (
-            <div className="ss-renewal-priority-list">
+            <div className="ss-renewal-timeline">
               {upcoming.map((policy) => {
                 const status = getStatus(policy.daysRemaining);
+                const isPriority = policy.id === primaryCriticalRenewal?.id;
+                const renewalDate = formatShortDate(policy.renewalDate || policy.expires);
                 return (
                   <button
                     type="button"
-                    className={`ss-renewal-priority-row ${status.className}`}
+                    className={`ss-renewal-timeline-row ${status.className}${isPriority ? " is-priority" : ""}`}
                     key={policy.id}
                     onClick={onOpenPolicies}
                     aria-label={`Open ${policy.name} renewal details`}
                   >
-                    <span className={`ss-renewal-date-chip ${status.className}`}>
-                      <strong>{policy.daysRemaining}</strong>
-                      <small>days</small>
+                    <span className="ss-renewal-time">
+                      <b>{renewalDate}</b>
+                      <small>
+                        {policy.daysRemaining} day{policy.daysRemaining === 1 ? "" : "s"}
+                      </small>
+                    </span>
+                    <span className="ss-renewal-rail" aria-hidden="true">
+                      <span />
                     </span>
                     <span className="ss-renewal-copy">
+                      {isPriority && <em>Next renewal</em>}
                       <b title={policy.name}>{policy.name}</b>
-                      <small title={`${policy.carrier} | ${formatShortDate(policy.renewalDate || policy.expires)}`}>
-                        {policy.carrier} | Renews {formatShortDate(policy.renewalDate || policy.expires)}
-                      </small>
+                      <small title={`${policy.carrier} | Renews ${renewalDate}`}>{policy.carrier}</small>
+                    </span>
+                    <span className="ss-renewal-state">
+                      {status.className === "danger"
+                        ? "Review now"
+                        : status.className === "warning"
+                        ? "Prepare"
+                        : "Scheduled"}
                     </span>
                     <ArrowRight className="ss-renewal-row-arrow" size={15} aria-hidden="true" />
                   </button>
@@ -424,7 +401,11 @@ export default function DashboardView({
           <Section
             title="Recent activity"
             sub="Latest account movement"
-            extra={recentActivity.length > 0 && <span className="ss-activity-count">{recentActivity.length} latest</span>}
+            extra={
+              recentActivity.length > 0 && (
+                <span className="ss-activity-summary">Updated {timeAgo(recentActivity[0].createdAt)}</span>
+              )
+            }
           />
 
           {recentActivity.length === 0 && (
@@ -438,9 +419,7 @@ export default function DashboardView({
             <div className="ss-dash-activity-list">
               {recentActivity.map((item) => (
                 <article className={`ss-dash-activity-row ss-dash-activity-row--${activityTone(item.title)}`} key={item.id}>
-                  <span className="ss-dash-activity-icon" aria-hidden="true">
-                    {activityIcon(item.title)}
-                  </span>
+                  <span className="ss-activity-marker" aria-hidden="true" />
                   <div className="ss-dash-activity-content">
                     <div className="ss-dash-activity-mainline">
                       <b title={item.title}>{item.title}</b>
