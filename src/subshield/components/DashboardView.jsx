@@ -789,11 +789,11 @@ function ActionCenter({ upcoming, missingDocCount, coverageGaps, openSavings, on
       <div className="ss-action-center-list">
         {topActions.map((action) => (
           <button key={action.key} type="button" className={`ss-action-item ss-action-item--${action.priority}`} onClick={action.onClick}>
+            <span className={`ss-action-dot ${action.priority}`} aria-hidden="true">
+              {action.icon}
+            </span>
             <span className="ss-action-text">
-              <span className="ss-action-title">
-                <span className={`ss-action-pip ${action.priority}`} aria-hidden="true" />
-                {action.title}
-              </span>
+              <span className="ss-action-title">{action.title}</span>
               <small>{action.detail}</small>
             </span>
             <span className="ss-action-cta">{action.cta} <ArrowRight size={12} /></span>

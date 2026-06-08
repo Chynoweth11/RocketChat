@@ -13754,18 +13754,18 @@ body {
 }
 
 .ss-action-center-list {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
   gap: 12px;
   align-items: stretch;
 }
 
 .ss-action-item {
   display: grid !important;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: 38px minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-items: flex-start;
-  gap: 10px 13px;
-  min-height: 108px;
+  gap: 9px 13px;
+  min-height: 116px;
   padding: 16px 16px 15px 18px;
   border-radius: 8px;
   background: #fff;
@@ -13784,35 +13784,57 @@ body {
 }
 
 .ss-action-dot {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   width: 38px;
   height: 38px;
   margin: 0;
   border-radius: 8px;
+  display: grid;
+  place-items: center;
+  align-self: start;
 }
 
 .ss-action-text {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
+  display: grid;
   gap: 4px;
 }
 
+.ss-action-title,
 .ss-action-text b {
+  display: block;
+  min-width: 0;
   color: #151b26;
   font-size: 13.6px;
   font-weight: 740;
   line-height: 1.32;
+  white-space: normal;
+  overflow-wrap: normal;
 }
 
 .ss-action-text small {
+  display: -webkit-box;
+  min-width: 0;
+  margin-top: 0;
+  padding-left: 0;
   color: #6a625b;
   font-size: 12.15px;
   line-height: 1.45;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .ss-action-cta {
   grid-column: 2;
+  grid-row: 2;
   margin: 0;
   padding: 0;
   align-self: end;
+  justify-self: start;
   color: #2558d6;
   font-size: 11.25px;
   font-weight: 740;
