@@ -14415,3 +14415,217 @@ body {
 .ss-policy-status.success .ss-policy-status-dot {
   background: var(--ok);
 }
+
+/* =====================================================================
+   Apple-style refinement — dashboard hero list, Action Center,
+   Upcoming renewals, Recent activity. Calmer surfaces, hairline
+   dividers, tabular figures, restrained hover. (appended = wins cascade)
+   ===================================================================== */
+
+/* ---- Shared card shell: softer, rounder, layered shadow ---- */
+.ss-action-center,
+.ss-dash-renewals-card,
+.ss-dash-activity-card {
+  border-radius: 18px;
+  border-color: rgba(20, 24, 31, 0.08);
+  background: #fffefd;
+  box-shadow: 0 1px 1px rgba(20, 24, 31, 0.03),
+    0 10px 30px rgba(20, 24, 31, 0.045);
+}
+
+/* ---- Insurance policies (hero right rail) ---- */
+.ss-dash-accounts-panel {
+  border-radius: 18px;
+  border-color: rgba(20, 24, 31, 0.08);
+  background: #fffefd;
+  padding: 6px 20px 14px;
+}
+
+.ss-dash-accounts-panel .ss-section {
+  margin-bottom: 6px;
+  padding: 14px 0 13px;
+  border-bottom: 1px solid rgba(20, 24, 31, 0.07);
+}
+
+.ss-dash-account-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin: 0 -10px;
+  padding: 13px 10px;
+  border-top: 1px solid rgba(20, 24, 31, 0.06);
+  border-radius: 12px;
+  transition: background 0.18s ease;
+}
+
+.ss-dash-account-row:first-of-type {
+  border-top: 0;
+}
+
+.ss-dash-account-row:hover {
+  background: rgba(20, 24, 31, 0.022);
+}
+
+.ss-dash-account-row b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 640;
+  letter-spacing: -0.012em;
+  color: #16181d;
+  line-height: 1.3;
+}
+
+.ss-dash-account-row small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.75px;
+  color: #8a8178;
+  letter-spacing: -0.003em;
+}
+
+.ss-insight-amount {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  text-align: right;
+}
+
+.ss-insight-amount strong {
+  font-size: 14px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  color: #16181d;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Calmer status pills — quieter, pill-tight, tabular */
+.ss-dash-account-row .ss-status {
+  padding: 2px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.002em;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+/* ---- Action Center ---- */
+.ss-action-center {
+  padding: 20px 22px 22px;
+}
+
+.ss-action-center-head {
+  margin-bottom: 15px;
+}
+
+.ss-action-center-head b {
+  font-size: 15.5px;
+  font-weight: 680;
+  letter-spacing: -0.018em;
+  color: #16181d;
+}
+
+.ss-action-center-head small {
+  color: #8a8178;
+  letter-spacing: -0.003em;
+}
+
+.ss-action-center-list {
+  gap: 13px;
+}
+
+.ss-action-item {
+  gap: 11px 14px;
+  padding: 17px 17px 16px;
+  border-radius: 16px;
+  border-color: rgba(20, 24, 31, 0.08);
+  background: #fff;
+  box-shadow: 0 1px 1px rgba(20, 24, 31, 0.025);
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+/* Drop the hard left keyline — Apple keeps the edge clean */
+.ss-action-item::before {
+  display: none;
+}
+
+.ss-action-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(20, 24, 31, 0.12);
+  box-shadow: 0 2px 4px rgba(20, 24, 31, 0.04),
+    0 16px 32px rgba(20, 24, 31, 0.08);
+}
+
+.ss-action-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 0;
+}
+
+.ss-action-title,
+.ss-action-text b {
+  font-size: 13.75px;
+  font-weight: 640;
+  letter-spacing: -0.012em;
+  color: #16181d;
+}
+
+.ss-action-text small {
+  color: #8a8178;
+  letter-spacing: -0.002em;
+}
+
+.ss-action-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--brand);
+  font-size: 11.5px;
+  font-weight: 640;
+  letter-spacing: -0.006em;
+  transition: gap 0.18s ease;
+}
+
+.ss-action-item:hover .ss-action-cta {
+  gap: 7px;
+}
+
+/* ---- Upcoming renewals + Recent activity headers ---- */
+.ss-dash-renewals-card .ss-section,
+.ss-dash-activity-card .ss-section {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(20, 24, 31, 0.07);
+}
+
+.ss-dash-renewals-card .ss-section h2,
+.ss-dash-activity-card .ss-section h2 {
+  letter-spacing: -0.018em;
+}
+
+/* Renewals timeline — calmer hover, cleaner figures */
+.ss-renewal-timeline-row {
+  border-radius: 12px;
+  border-top-color: rgba(20, 24, 31, 0.06);
+}
+
+.ss-renewal-timeline-row:hover {
+  background: rgba(20, 24, 31, 0.022);
+}
+
+.ss-renewal-time b {
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-renewal-copy b {
+  letter-spacing: -0.012em;
+}
+
+/* Activity — refined markers + tighter heads */
+.ss-dash-activity-mainline b {
+  letter-spacing: -0.014em;
+}
+
