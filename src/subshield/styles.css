@@ -13105,17 +13105,30 @@ body {
 .ss-pdf-preview-pane {
   position: sticky;
   top: 16px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 104px);
+  min-height: 540px;
+  max-height: 900px;
 }
 
 .ss-pdf-pane-head {
+  flex: none;
   min-height: 38px;
   padding: 8px 11px;
 }
 
+/* Iframe fills the pane; PDF scrolls via its own internal scrollbar.
+   No outer empty space, no layout shift while scrolling the page. */
 .ss-pdf-frame {
-  flex: none;
-  height: clamp(520px, calc(100vh - 320px), 680px);
-  min-height: 520px;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+.ss-pdf-preview-empty {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .ss-pdf-review-pane {
@@ -13333,6 +13346,13 @@ body {
 
   .ss-pdf-preview-pane {
     position: static;
+    height: auto;
+    max-height: none;
+  }
+
+  .ss-pdf-frame {
+    flex: none;
+    height: clamp(520px, calc(100vh - 320px), 680px);
   }
 }
 
@@ -13348,9 +13368,12 @@ body {
 
   .ss-pdf-preview-pane {
     position: static;
+    height: auto;
+    max-height: none;
   }
 
   .ss-pdf-frame {
+    flex: none;
     height: 460px;
     min-height: 0;
   }

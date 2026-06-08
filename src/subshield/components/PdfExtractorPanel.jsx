@@ -3,18 +3,12 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
-  ClipboardCheck,
   Database,
-  Download,
   Eye,
-  FileJson,
   FileSearch,
   FileText,
-  RefreshCcw,
-  Rows3,
   Save,
   ScanText,
-  Table2,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -23,15 +17,7 @@ import {
   makeFailedExtraction,
   ocrPdfFile,
 } from "../pdfExtraction.js";
-import { formatShortDate } from "../utils.js";
 import { Info, Section, Spinner } from "./Layout.jsx";
-
-const TABS = [
-  { id: "fields", label: "Review", icon: ClipboardCheck },
-  { id: "text", label: "Text", icon: FileText },
-  { id: "tables", label: "Tables", icon: Table2 },
-  { id: "metadata", label: "Metadata", icon: Rows3 },
-];
 
 // ACORD certificate fields, mapped from their correct sections.
 const ACORD_FIELDS = [
@@ -327,7 +313,6 @@ export default function PdfExtractorPanel({
   );
   const selected = sorted.find((item) => item.id === activeId) || sorted[0] || null;
   const fieldRows = selected?.fields ? Object.entries(selected.fields) : [];
-  const metadataRows = selected?.metadata ? Object.entries(selected.metadata) : [];
   const additionalRows = fieldRows.filter(([key]) => !ALL_REVIEW_KEYS.has(key));
   const reviewFieldGroups = selected ? fieldGroupsFor(selected) : [];
   const selectedPreviewUrl = selected ? previewUrls[selected.id] : "";
@@ -632,37 +617,7 @@ export default function PdfExtractorPanel({
         <section className="ss-card ss-span ss-pdf-results-card">
           <Section
             title="Review Queue"
-            sub="Validate extracted data against the source PDF before exporting."
-            extra={
-              <div className="ss-pdf-actions">
-                <button
-                  type="button"
-                  className="ss-button soft"
-                  onClick={exportSelectedJson}
-                  disabled={!selected}
-                  title="Download selected result as JSON"
-                >
-                  <FileJson size={15} /> JSON
-                </button>
-                <button
-                  type="button"
-                  className="ss-button soft"
-                  onClick={exportSelectedText}
-                  disabled={!selected}
-                  title="Download selected raw text"
-                >
-                  <Download size={15} /> Text
-                </button>
-                <button
-                  type="button"
-                  className="ss-button soft"
-                  onClick={exportAllCsv}
-                  title="Download all extraction summaries as CSV"
-                >
-                  <Download size={15} /> CSV
-                </button>
-              </div>
-            }
+            sub="Validate extracted data against the source PDF."
           />
 
           <div className={`ss-pdf-workspace${sorted.length === 1 ? " is-single" : ""}`}>
@@ -700,26 +655,8 @@ export default function PdfExtractorPanel({
                   <div>
                     <span className="ss-eyebrow">{selected.docTypeLabel}</span>
                     <h3>{selected.title || selected.fileName}</h3>
-                    <p>
-                      {selected.fileName} · {selected.words.toLocaleString()} words ·{" "}
-                      {formatShortDate(selected.extractedAt)}
-                    </p>
                   </div>
                   <div className="ss-pdf-detail-actions">
-                    <button
-                      type="button"
-                      className="ss-button soft ss-button-sm"
-                      onClick={runOcr}
-                      disabled={!selectedFile || selectedOcrRunning || isProcessing}
-                      title={
-                        selectedFile
-                          ? "Run OCR on this PDF"
-                          : "Re-upload this PDF to run OCR"
-                      }
-                    >
-                      {selectedOcrRunning ? <Spinner /> : <RefreshCcw size={14} />}
-                      {selectedOcrRunning ? `${ocrState.percent}%` : "OCR"}
-                    </button>
                     <button
                       type="button"
                       className="ss-mini-btn"
@@ -731,18 +668,6 @@ export default function PdfExtractorPanel({
                     </button>
                   </div>
                 </div>
-
-                {selectedOcrRunning && (
-                  <div className="ss-pdf-ocr-progress" role="status" aria-live="polite">
-                    <span style={{ width: `${ocrState.percent}%` }} />
-                    <b>
-                      {ocrState.label}
-                      {ocrState.pageNumber
-                        ? ` - page ${ocrState.pageNumber}/${ocrState.totalPages}`
-                        : ""}
-                    </b>
-                  </div>
-                )}
 
                 {selected.warnings?.length > 0 && (
                   <div className={`ss-note ${selected.status === "failed" ? "danger" : "warning"}`}>
@@ -763,9 +688,6 @@ export default function PdfExtractorPanel({
                       <span>
                         <Eye size={14} /> Source PDF
                       </span>
-                      <em className={`ss-status ${statusClass(selected.status)}`}>
-                        {statusLabel(selected.status)}
-                      </em>
                     </div>
                     {selectedPreviewUrl ? (
                       <iframe
@@ -783,24 +705,6 @@ export default function PdfExtractorPanel({
                   </aside>
 
                   <div className="ss-pdf-review-pane">
-                    <div className="ss-chip-group" role="tablist" aria-label="Extraction detail">
-                      {TABS.map((tab) => {
-                        const Icon = tab.icon;
-                        return (
-                          <button
-                            type="button"
-                            key={tab.id}
-                            role="tab"
-                            aria-selected={activeTab === tab.id}
-                            className={`ss-chip ${activeTab === tab.id ? "active" : ""}`}
-                            onClick={() => setActiveTab(tab.id)}
-                          >
-                            <Icon size={14} /> {tab.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
                     {activeTab === "fields" && (
                       <div className="ss-pdf-field-editor">
                         <div className="ss-pdf-editor-head">
@@ -926,66 +830,8 @@ export default function PdfExtractorPanel({
                           <div className="ss-empty compact">
                             <Database size={24} />
                             <h2>No structured fields found</h2>
-                            <p>Run OCR or review the raw text tab.</p>
+                            <p>Re-upload a readable PDF to review its fields.</p>
                           </div>
-                        )}
-                      </div>
-                    )}
-
-                    {activeTab === "text" && (
-                      <pre className="ss-pdf-text">
-                        {selected.text || "No embedded text was extracted from this PDF."}
-                      </pre>
-                    )}
-
-                    {activeTab === "tables" && (
-                      <div className="ss-pdf-tables">
-                        {!selected.tables?.length ? (
-                          <div className="ss-empty compact">
-                            <Table2 size={24} />
-                            <h2>No table-like rows detected</h2>
-                            <p>Readable text columns appear here.</p>
-                          </div>
-                        ) : (
-                          selected.tables.map((table) => (
-                            <div className="ss-pdf-table" key={table.pageNumber}>
-                              <b>Page {table.pageNumber}</b>
-                              <div className="ss-pdf-table-scroll">
-                                <table>
-                                  <tbody>
-                                    {table.rows.map((row, rowIndex) => (
-                                      <tr key={`${table.pageNumber}-${rowIndex}`}>
-                                        {row.map((cell, cellIndex) => (
-                                          <td key={`${table.pageNumber}-${rowIndex}-${cellIndex}`}>
-                                            {cell}
-                                          </td>
-                                        ))}
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
-
-                    {activeTab === "metadata" && (
-                      <div className="ss-pdf-kv">
-                        {metadataRows.length === 0 ? (
-                          <div className="ss-empty compact">
-                            <Rows3 size={24} />
-                            <h2>No metadata embedded</h2>
-                            <p>This PDF did not expose title, author, producer, or dates.</p>
-                          </div>
-                        ) : (
-                          metadataRows.map(([key, value]) => (
-                            <div key={key} className="ss-pdf-kv-row">
-                              <b>{humanizeKey(key)}</b>
-                              <span>{formatValue(value)}</span>
-                            </div>
-                          ))
                         )}
                       </div>
                     )}
