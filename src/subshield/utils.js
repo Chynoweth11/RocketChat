@@ -41,6 +41,11 @@ const POLICY_TYPE_NAMES = {
   builders_risk: "Builder's Risk",
   pollution: "Pollution Liability",
   professional: "Professional Liability",
+  epl: "Employment Practices Liability",
+  directors: "Directors & Officers",
+  crime: "Crime / Fidelity",
+  liquor: "Liquor Liability",
+  garage: "Garage / Dealers",
   bonding: "Surety Bonding",
   license: "Trade License",
 };
@@ -57,6 +62,11 @@ const DEFAULT_POLICY_LIMITS = {
   builders_risk: "$500k project limit",
   pollution: "$1M pollution liability",
   professional: "$1M professional liability",
+  epl: "$1M employment practices",
+  directors: "$1M directors & officers",
+  crime: "$250k crime / fidelity",
+  liquor: "$1M liquor liability",
+  garage: "$1M garage liability",
   bonding: "$500k bond capacity",
   license: "Trade contractor license",
 };

@@ -794,25 +794,6 @@ export default function PdfExtractorPanel({
                           </div>
                         )}
 
-                        {selected.missingCoverages?.length > 0 && (
-                          <div className="ss-cov-missing">
-                            <b>Not listed on this document</b>
-                            <p className="ss-cov-missing-note">
-                              These coverage types weren't found on this document. They may be
-                              carried on a separate policy — this isn't a confirmation that coverage
-                              is missing.
-                            </p>
-                            <div className="ss-cov-missing-list">
-                              {selected.missingCoverages.map((name) => (
-                                <span className="ss-cov-missing-item" key={name}>
-                                  <AlertTriangle size={13} aria-hidden="true" /> {name}
-                                  <em>Not on this document</em>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
                         {additionalRows.length > 0 && (
                           <Disclosure title="Additional extracted data">
                             <div className="ss-pdf-kv">

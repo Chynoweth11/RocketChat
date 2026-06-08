@@ -382,6 +382,16 @@ const ACORD_COVERAGE_TYPES = [
   { re: /umbrella liab|excess liab/i, type: "Umbrella / Excess Liability" },
   { re: /workers'?\s*compensation/i, type: "Workers' Compensation" },
   { re: /employment practices liability/i, type: "Employment Practices Liability" },
+  // Specialty lines commonly written in an ACORD "Other" row.
+  { re: /professional liability|errors?\s*&?\s*omissions?|\bE\s*&\s*O\b/i, type: "Professional Liability" },
+  { re: /pollution liability|environmental/i, type: "Pollution Liability" },
+  { re: /cyber/i, type: "Cyber Liability" },
+  { re: /commercial crime|employee dishonesty|\bfidelity\b/i, type: "Crime / Fidelity" },
+  { re: /builder'?s risk|course of construction/i, type: "Builder's Risk" },
+  { re: /inland marine|contractors?\s*equipment|leased\s*&?\s*rented equipment/i, type: "Inland Marine / Equipment" },
+  { re: /liquor liability|dram shop/i, type: "Liquor Liability" },
+  { re: /directors?\s*&?\s*officers?|management liability|\bD\s*&\s*O\b/i, type: "Directors & Officers" },
+  { re: /installation floater/i, type: "Installation Floater" },
 ];
 
 const ACORD_LIMIT_NAMES = [

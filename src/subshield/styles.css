@@ -13087,29 +13087,28 @@ body {
   font-size: 12px;
 }
 
+/* Contained workspace: the shell fits the viewport, so the page does not
+   scroll the review content. The left PDF pane stays fixed; only the right
+   column scrolls (its own scrollbar), and the PDF moves via the iframe's
+   own internal scrollbar. */
 .ss-pdf-review-shell {
   flex: none;
   grid-template-columns: minmax(440px, 0.95fr) minmax(540px, 1.05fr);
   gap: 14px;
-  height: auto;
-  min-height: 0;
-  align-items: start;
+  height: calc(100vh - 132px);
+  min-height: 540px;
+  align-items: stretch;
 }
 
 .ss-pdf-preview-pane,
 .ss-pdf-review-pane {
-  height: auto;
+  height: 100%;
   min-height: 0;
 }
 
 .ss-pdf-preview-pane {
-  position: sticky;
-  top: 16px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 104px);
-  min-height: 540px;
-  max-height: 900px;
 }
 
 .ss-pdf-pane-head {
@@ -13118,8 +13117,7 @@ body {
   padding: 8px 11px;
 }
 
-/* Iframe fills the pane; PDF scrolls via its own internal scrollbar.
-   No outer empty space, no layout shift while scrolling the page. */
+/* Iframe fills the pane; the PDF scrolls only via its own internal scrollbar. */
 .ss-pdf-frame {
   flex: 1 1 auto;
   height: auto;
@@ -13131,8 +13129,10 @@ body {
   min-height: 0;
 }
 
+/* Right column scrolls internally instead of growing the page. */
 .ss-pdf-review-pane {
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px;
 }
 
@@ -13340,14 +13340,22 @@ body {
 }
 
 @media (max-width: 1120px) {
+  /* Stacked: return to normal page flow. */
   .ss-pdf-review-shell {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
   }
 
   .ss-pdf-preview-pane {
     position: static;
     height: auto;
     max-height: none;
+  }
+
+  .ss-pdf-review-pane {
+    height: auto;
+    overflow: visible;
   }
 
   .ss-pdf-frame {
@@ -13360,6 +13368,8 @@ body {
   .ss-pdf-workspace,
   .ss-pdf-review-shell {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
   }
 
   .ss-pdf-workspace.is-single .ss-pdf-list {
@@ -13370,6 +13380,11 @@ body {
     position: static;
     height: auto;
     max-height: none;
+  }
+
+  .ss-pdf-review-pane {
+    height: auto;
+    overflow: visible;
   }
 
   .ss-pdf-frame {

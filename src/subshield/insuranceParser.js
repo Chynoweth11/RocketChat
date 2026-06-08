@@ -48,6 +48,63 @@ const TYPE_MATCHERS = [
       /hired\s*(?:&|and)?\s*non[-\s]?owned/i,
     ],
   },
+  // Specialty liability lines — matched before the generic "liability" rule so
+  // an Employment Practices or Professional line is never mislabeled as GL.
+  {
+    type: "epl",
+    patterns: [/employment\s*practices?\s*liab/i, /\bEPLI?\b/],
+  },
+  {
+    type: "directors",
+    patterns: [
+      /directors?\s*(?:&|and)\s*officers?/i,
+      /\bD\s*&\s*O\b/,
+      /management\s*liability/i,
+    ],
+  },
+  {
+    type: "professional",
+    patterns: [
+      /professional\s*liability/i,
+      /errors?\s*(?:&|and)\s*omissions?/i,
+      /\bE\s*&\s*O\b/,
+      /malpractice/i,
+    ],
+  },
+  {
+    type: "cyber",
+    patterns: [
+      /cyber\s*(?:liability|risk|security)?/i,
+      /data\s*breach/i,
+      /privacy\s*liability/i,
+      /network\s*security/i,
+    ],
+  },
+  {
+    type: "pollution",
+    patterns: [
+      /pollution\s*liability/i,
+      /environmental\s*(?:liability|impairment)/i,
+      /contractors?\s*pollution/i,
+    ],
+  },
+  {
+    type: "liquor",
+    patterns: [/liquor\s*liability/i, /\bdram\s*shop\b/i],
+  },
+  {
+    type: "crime",
+    patterns: [
+      /commercial\s*crime/i,
+      /employee\s*dishonesty/i,
+      /\bfidelity\b/i,
+      /\bcrime\s*coverage\b/i,
+    ],
+  },
+  {
+    type: "garage",
+    patterns: [/garage\s*(?:liability|keepers)/i, /dealers?\s*(?:open\s*lot|physical\s*damage)/i],
+  },
   {
     type: "liability",
     patterns: [
@@ -64,6 +121,28 @@ const TYPE_MATCHERS = [
       /building\s*(?:&|and)\s*(?:contents|personal\s*property)/i,
       /\bproperty\s*coverage\b/i,
       /\binland\s*marine\b/i,
+    ],
+  },
+  {
+    type: "builders_risk",
+    patterns: [/builder'?s\s*risk/i, /course\s*of\s*construction/i],
+  },
+  {
+    type: "equipment",
+    patterns: [
+      /contractors?\s*equipment/i,
+      /scheduled\s*equipment/i,
+      /tools?\s*(?:&|and)\s*equipment/i,
+      /leased\s*(?:&|and)?\s*rented\s*equipment/i,
+    ],
+  },
+  {
+    type: "bonding",
+    patterns: [
+      /\bsurety\b/i,
+      /performance\s*bond/i,
+      /payment\s*bond/i,
+      /\bbid\s*bond\b/i,
     ],
   },
 ];
@@ -224,11 +303,22 @@ export function detectEndorsements(text) {
 
 const CARRIER_KEYWORDS = /(insurance\b|\bmutual\b|\bcasualty\b|\bindemnity\b|underwriters|assurance|\bsurety\b|specialty\s+insurance|ins(?:urance)?\s+co\b)/i;
 const KNOWN_CARRIERS = [
-  "Travelers", "The Hartford", "Hartford", "Liberty Mutual", "Nationwide",
-  "Progressive", "State Farm", "Chubb", "CNA", "Zurich", "AmTrust", "Hiscox",
-  "Acuity", "Cincinnati", "Selective", "Erie", "Markel", "Berkshire",
-  "Sentinel", "Sentry", "Allmerica", "Philadelphia", "Auto-Owners",
-  "StateFund", "Acme Mutual", "NEXT Insurance", "Employers",
+  // Longer / multi-word names first so they win over a shorter substring.
+  "The Hartford", "Liberty Mutual", "State Farm", "Auto-Owners",
+  "Acme Mutual", "NEXT Insurance", "Old Republic", "Great American",
+  "Western National", "Ohio Casualty", "Federal Insurance", "American Family",
+  "Farmers Insurance", "National General", "West Bend", "EMC Insurance",
+  "Grange Insurance", "Hanover Insurance", "Utica National", "FCCI Insurance",
+  "Builders Mutual", "Texas Mutual", "Pinnacol Assurance", "Berkshire Hathaway",
+  "Travelers", "Hartford", "Nationwide", "Progressive", "Chubb", "CNA",
+  "Zurich", "AmTrust", "Hiscox", "Acuity", "Cincinnati", "Selective",
+  "Erie", "Markel", "Berkshire", "Sentinel", "Sentry", "Allmerica",
+  "Philadelphia", "StateFund", "Employers", "Allstate", "GEICO", "USAA",
+  "MetLife", "AIG", "AXA", "Allianz", "Hartford Steam Boiler", "Kemper",
+  "Mercury", "Amica", "Safeco", "Esurance", "Foremost", "Hanover",
+  "Cincinnati Financial", "W.R. Berkley", "Berkley", "Argo", "RLI",
+  "Navigators", "QBE", "Tokio Marine", "Intact", "Munich Re", "Swiss Re",
+  "Coterie", "Thimble", "Pie Insurance", "Biberk", "Vouch", "Cowbell",
 ];
 
 function detectCarrier(text) {
