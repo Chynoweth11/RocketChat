@@ -28,12 +28,22 @@ import { Section } from "./Layout.jsx";
 
 function activityIcon(title = "") {
   const t = title.toLowerCase();
-  if (t.includes("certificate") || t.includes("sent to")) return <Send size={14} />;
-  if (t.includes("upload") || t.includes("document")) return <Upload size={14} />;
-  if (t.includes("sav") || t.includes("quote") || t.includes("coverage review")) return <BadgeDollarSign size={14} />;
-  if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return <Settings size={14} />;
-  if (t.includes("holder") || t.includes("advisor")) return <UserPlus size={14} />;
-  return <Shield size={14} />;
+  if (t.includes("certificate") || t.includes("sent to")) return <Send size={16} />;
+  if (t.includes("upload") || t.includes("document")) return <Upload size={16} />;
+  if (t.includes("sav") || t.includes("quote") || t.includes("coverage review")) return <BadgeDollarSign size={16} />;
+  if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return <Settings size={16} />;
+  if (t.includes("holder") || t.includes("advisor")) return <UserPlus size={16} />;
+  return <Shield size={16} />;
+}
+
+function activityTone(title = "") {
+  const t = title.toLowerCase();
+  if (t.includes("certificate") || t.includes("sent to")) return "certificate";
+  if (t.includes("upload") || t.includes("document")) return "document";
+  if (t.includes("sav") || t.includes("quote") || t.includes("coverage review")) return "savings";
+  if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return "neutral";
+  if (t.includes("holder") || t.includes("advisor")) return "holder";
+  return "policy";
 }
 
 function buildSpendBars(policies = []) {
@@ -103,6 +113,7 @@ export default function DashboardView({
   const spendBars = buildSpendBars(policyAccounts);
   const recentActivity = activity.slice(0, 5);
   const criticalRenewals = upcoming.filter((policy) => (policy.daysRemaining ?? 0) <= 10);
+  const primaryCriticalRenewal = criticalRenewals[0];
   const monthlySpend = Math.round(totalPremium / 12);
   const missingDocCount = missingDocuments.length;
   const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
@@ -336,77 +347,113 @@ export default function DashboardView({
         pendingCertificates={pendingCertificates}
       />
 
-      <section className="ss-card ss-dash-lower-left">
-        <Section
-          title="Upcoming renewals"
-          sub="Deadlines needing action first"
-          extra={
-            <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
-              View all <ArrowRight size={13} />
-            </button>
-          }
-        />
+      <div className="ss-dashboard-workspace ss-span">
+        <section className="ss-card ss-dash-renewals-card ss-dash-lower-left">
+          <Section
+            title="Upcoming renewals"
+            sub="Prioritized by deadline and policy impact"
+            extra={
+              <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
+                View all <ArrowRight size={13} />
+              </button>
+            }
+          />
 
-        {upcoming.length === 0 && (
-          <div className="ss-note success">
-            <CheckCircle2 size={16} />
-            <span>No upcoming renewals. Your coverage is in good shape.</span>
-          </div>
-        )}
-
-        {upcoming.map((policy) => {
-          const status = getStatus(policy.daysRemaining);
-          return (
-            <div className="ss-inline-row" key={policy.id}>
-              <div>
-                <span>{policy.name}</span>
-                <small style={{ display: "block" }}>
-                  {policy.carrier} | {formatShortDate(policy.renewalDate || policy.expires)}
+          {primaryCriticalRenewal && (
+            <div className="ss-renewal-alert" role="status">
+              <span className="ss-renewal-alert-icon" aria-hidden="true">
+                <AlertTriangle size={17} />
+              </span>
+              <div className="ss-renewal-alert-copy">
+                <span className="ss-renewal-alert-label">Critical window</span>
+                <b>
+                  {primaryCriticalRenewal.name} renews in {primaryCriticalRenewal.daysRemaining} day
+                  {primaryCriticalRenewal.daysRemaining === 1 ? "" : "s"}
+                </b>
+                <small>
+                  Confirm renewal direction before {formatShortDate(primaryCriticalRenewal.renewalDate || primaryCriticalRenewal.expires)}.
+                  {criticalRenewals.length > 1 && (
+                    <em> +{criticalRenewals.length - 1} more urgent</em>
+                  )}
                 </small>
               </div>
-              <small className={`ss-upcoming-days ${status.className}`}>{policy.daysRemaining}d</small>
+              <button type="button" className="ss-renewal-alert-action" onClick={onOpenPolicies}>
+                Review <ArrowRight size={13} />
+              </button>
             </div>
-          );
-        })}
+          )}
 
-        {criticalRenewals.length > 0 && (
-          <div className="ss-note danger" style={{ marginTop: 12 }}>
-            <AlertTriangle size={16} />
-            <span>
-              {criticalRenewals.length} {criticalRenewals.length === 1 ? "policy is" : "policies are"} in the critical window.
-            </span>
-          </div>
-        )}
-      </section>
-
-      <section className="ss-card ss-dash-lower-right">
-        <Section
-          title="Recent activity"
-          sub="Latest policy, certificate, and quote events"
-        />
-
-        {recentActivity.length === 0 && (
-          <div className="ss-note">
-            <CheckCircle2 size={16} />
-            <span>No activity yet. Actions like uploads, certificate sends, and savings will appear here.</span>
-          </div>
-        )}
-
-        <div className="ss-activity-feed">
-          {recentActivity.map((item) => (
-            <div className="ss-dash-activity-row" key={item.id}>
-              <span className="ss-dash-activity-icon" aria-hidden="true">
-                {activityIcon(item.title)}
-              </span>
-              <div className="ss-dash-activity-body">
-                <b>{item.title}</b>
-                <small>{item.body}</small>
-              </div>
-              <small className="ss-activity-time">{timeAgo(item.createdAt)}</small>
+          {upcoming.length === 0 && (
+            <div className="ss-note success">
+              <CheckCircle2 size={16} />
+              <span>No upcoming renewals. Your coverage is in good shape.</span>
             </div>
-          ))}
-        </div>
-      </section>
+          )}
+
+          {upcoming.length > 0 && (
+            <div className="ss-renewal-priority-list">
+              {upcoming.map((policy) => {
+                const status = getStatus(policy.daysRemaining);
+                return (
+                  <button
+                    type="button"
+                    className={`ss-renewal-priority-row ${status.className}`}
+                    key={policy.id}
+                    onClick={onOpenPolicies}
+                    aria-label={`Open ${policy.name} renewal details`}
+                  >
+                    <span className={`ss-renewal-date-chip ${status.className}`}>
+                      <strong>{policy.daysRemaining}</strong>
+                      <small>days</small>
+                    </span>
+                    <span className="ss-renewal-copy">
+                      <b title={policy.name}>{policy.name}</b>
+                      <small title={`${policy.carrier} | ${formatShortDate(policy.renewalDate || policy.expires)}`}>
+                        {policy.carrier} | Renews {formatShortDate(policy.renewalDate || policy.expires)}
+                      </small>
+                    </span>
+                    <ArrowRight className="ss-renewal-row-arrow" size={15} aria-hidden="true" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="ss-card ss-dash-activity-card ss-dash-lower-right">
+          <Section
+            title="Recent activity"
+            sub="Latest account movement"
+            extra={recentActivity.length > 0 && <span className="ss-activity-count">{recentActivity.length} latest</span>}
+          />
+
+          {recentActivity.length === 0 && (
+            <div className="ss-note">
+              <CheckCircle2 size={16} />
+              <span>No activity yet. Actions like uploads, certificate sends, and savings will appear here.</span>
+            </div>
+          )}
+
+          {recentActivity.length > 0 && (
+            <div className="ss-dash-activity-list">
+              {recentActivity.map((item) => (
+                <article className={`ss-dash-activity-row ss-dash-activity-row--${activityTone(item.title)}`} key={item.id}>
+                  <span className="ss-dash-activity-icon" aria-hidden="true">
+                    {activityIcon(item.title)}
+                  </span>
+                  <div className="ss-dash-activity-content">
+                    <div className="ss-dash-activity-mainline">
+                      <b title={item.title}>{item.title}</b>
+                      <small className="ss-activity-time">{timeAgo(item.createdAt)}</small>
+                    </div>
+                    <small title={item.body}>{item.body}</small>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
 
       {contractors.length > 0 && (
         <COIStatusCard
@@ -581,14 +628,26 @@ function COIStatusCard({ contractors, coiSends, onOpenCertificates }) {
       />
 
       <div className="ss-coi-overview">
-        <div className="ss-coi-overview-stat">
-          <b className="ss-coi-stat-num">{current}</b>
-          <small>of {contractors.length} holders current</small>
-          <div className="ss-coi-bar">
-            <div
-              className="ss-coi-bar-fill"
-              style={{ width: contractors.length ? `${Math.round((current / contractors.length) * 100)}%` : "0%" }}
-            />
+        <div className="ss-coi-summary">
+          <div className="ss-coi-summary-copy">
+            <span>Certificate readiness</span>
+            <b>
+              {current} of {contractors.length} holders current
+            </b>
+            <small>
+              {needsAction.length > 0
+                ? `${needsAction.length} holder${needsAction.length === 1 ? "" : "s"} need a current COI.`
+                : "Every tracked holder has current proof of insurance."}
+            </small>
+          </div>
+          <div className="ss-coi-summary-meter" aria-hidden="true">
+            <strong>{contractors.length ? Math.round((current / contractors.length) * 100) : 0}%</strong>
+            <span className="ss-coi-bar">
+              <span
+                className="ss-coi-bar-fill"
+                style={{ width: contractors.length ? `${Math.round((current / contractors.length) * 100)}%` : "0%" }}
+              />
+            </span>
           </div>
         </div>
       </div>
@@ -622,7 +681,7 @@ function COIStatusCard({ contractors, coiSends, onOpenCertificates }) {
         </div>
       )}
 
-      <button type="button" className="ss-button soft" style={{ width: "100%", marginTop: 12 }} onClick={onOpenCertificates}>
+      <button type="button" className="ss-button soft ss-coi-send-btn" onClick={onOpenCertificates}>
         <Send size={14} /> Send certificates
       </button>
     </section>

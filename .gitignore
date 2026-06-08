@@ -7,6 +7,27 @@ dev-dist/
 .env.*
 coverage/
 qa-main-screenshots/
+qa-screenshots/
+screenshots/
+test-results/
+playwright-report/
+blob-report/
+debug-captures/
+browser-captures/
+visual-test-results/
+visual-diffs/
+*.screenshot.png
+*-screenshot.png
+screenshot-*.png
+*.capture.png
+*-capture.png
+capture-*.png
+*.debug.png
+debug-*.png
+*.visual.png
+*.diff.png
+*.actual.png
+*.expected.png
 
 # Editor / harness temp artifacts
 ss-cphd.*

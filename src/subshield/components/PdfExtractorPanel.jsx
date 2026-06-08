@@ -60,6 +60,26 @@ const GENERIC_FIELDS = [
   { key: "invoiceNumber", label: "Invoice number" },
 ];
 
+const ACORD_FIELD_GROUPS = [
+  { id: "policy", title: "Policy information", keys: ["carrier", "naic", "policyNumber"] },
+  {
+    id: "parties",
+    title: "Parties",
+    keys: ["insuredName", "certificateHolder", "producer", "producerPhone"],
+  },
+  { id: "dates", title: "Dates", keys: ["effectiveDate", "expirationDate", "certificateDate"] },
+];
+
+const GENERIC_FIELD_GROUPS = [
+  {
+    id: "policy",
+    title: "Policy information",
+    keys: ["carrier", "policyNumber", "premium", "deductible", "coverageLimit", "invoiceNumber"],
+  },
+  { id: "parties", title: "Parties", keys: ["insuredName"] },
+  { id: "dates", title: "Dates", keys: ["effectiveDate", "expirationDate"] },
+];
+
 // Every key the editor manages, so address/array extras still route to the
 // "Additional extracted data" section instead of duplicating.
 const ALL_REVIEW_KEYS = new Set(
@@ -82,6 +102,18 @@ function safeFileName(name = "pdf-extraction") {
 
 function fieldDefsFor(item) {
   return item?.docKind === "acord25" ? ACORD_FIELDS : GENERIC_FIELDS;
+}
+
+function fieldGroupsFor(item) {
+  const fieldsByKey = new Map(fieldDefsFor(item).map((field) => [field.key, field]));
+  const groups = item?.docKind === "acord25" ? ACORD_FIELD_GROUPS : GENERIC_FIELD_GROUPS;
+
+  return groups
+    .map((group) => ({
+      ...group,
+      fields: group.keys.map((key) => fieldsByKey.get(key)).filter(Boolean),
+    }))
+    .filter((group) => group.fields.length > 0);
 }
 
 function Disclosure({ title, defaultOpen = false, children }) {
@@ -297,7 +329,7 @@ export default function PdfExtractorPanel({
   const fieldRows = selected?.fields ? Object.entries(selected.fields) : [];
   const metadataRows = selected?.metadata ? Object.entries(selected.metadata) : [];
   const additionalRows = fieldRows.filter(([key]) => !ALL_REVIEW_KEYS.has(key));
-  const reviewFieldDefs = selected ? fieldDefsFor(selected) : [];
+  const reviewFieldGroups = selected ? fieldGroupsFor(selected) : [];
   const selectedPreviewUrl = selected ? previewUrls[selected.id] : "";
   const selectedFile = selected ? fileByIdRef.current.get(selected.id) : null;
   const selectedOcrRunning = ocrState?.id === selected?.id;
@@ -510,7 +542,7 @@ export default function PdfExtractorPanel({
 
   return (
     <>
-      <section className="ss-card ss-span ss-pdf-intake-card">
+      <section className={`ss-card ss-span ss-pdf-intake-card${sorted.length ? " has-results" : ""}`}>
         <Section
           title="PDF Extraction Studio"
           sub="Scan, OCR, review, and export insurance document data."
@@ -633,7 +665,7 @@ export default function PdfExtractorPanel({
             }
           />
 
-          <div className="ss-pdf-workspace">
+          <div className={`ss-pdf-workspace${sorted.length === 1 ? " is-single" : ""}`}>
             <div className="ss-pdf-list" aria-label="Extracted PDFs">
               {sorted.map((item) => (
                 <button
@@ -782,29 +814,41 @@ export default function PdfExtractorPanel({
                             <Save size={14} /> Save
                           </button>
                         </div>
-                        <div className="ss-pdf-edit-grid">
-                          {reviewFieldDefs.map((field) => {
-                            const hasValue = Boolean(reviewFields[field.key]);
-                            const confidence =
-                              selected.fieldConfidence?.[field.key] || (hasValue ? 50 : 0);
-                            return (
-                              <label className="ss-pdf-edit-field" key={field.key}>
-                                <span>
-                                  {field.label}
-                                  <em className={`ss-conf ${confidenceTone(confidence)}`}>
-                                    {confidenceLabel(confidence)}
-                                  </em>
-                                </span>
-                                <input
-                                  value={reviewFields[field.key] || ""}
-                                  placeholder="Not found — review"
-                                  onChange={(event) =>
-                                    updateReviewField(field.key, event.target.value)
-                                  }
-                                />
-                              </label>
-                            );
-                          })}
+                        <div className="ss-pdf-field-groups">
+                          {reviewFieldGroups.map((group) => (
+                            <section
+                              className={`ss-pdf-field-group ss-pdf-field-group--${group.id}`}
+                              key={group.id}
+                            >
+                              <div className="ss-pdf-field-group-head">
+                                <b>{group.title}</b>
+                              </div>
+                              <div className="ss-pdf-edit-grid">
+                                {group.fields.map((field) => {
+                                  const hasValue = Boolean(reviewFields[field.key]);
+                                  const confidence =
+                                    selected.fieldConfidence?.[field.key] || (hasValue ? 50 : 0);
+                                  return (
+                                    <label className="ss-pdf-edit-field" key={field.key}>
+                                      <span>
+                                        {field.label}
+                                        <em className={`ss-conf ${confidenceTone(confidence)}`}>
+                                          {confidenceLabel(confidence)}
+                                        </em>
+                                      </span>
+                                      <input
+                                        value={reviewFields[field.key] || ""}
+                                        placeholder="Not found - review"
+                                        onChange={(event) =>
+                                          updateReviewField(field.key, event.target.value)
+                                        }
+                                      />
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </section>
+                          ))}
                         </div>
 
                         {selected.coverages?.length > 0 && (
