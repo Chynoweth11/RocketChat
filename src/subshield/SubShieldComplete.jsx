@@ -1713,10 +1713,7 @@ export default function SubShieldComplete() {
               onRemindLater={remindLaterOpportunity}
               onReactivate={reactivateOpportunity}
               onAddAdvisor={() => setModal("add-broker")}
-              coverageApplication={coverageApplication}
-              onSaveCoverageApplication={saveCoverageApplication}
-              onSubmitCoverageApplication={submitCoverageApplication}
-              onNavigate={setView}
+              onStartReview={() => openQuoteModal(null, "partner")}
             />
           )}
 
