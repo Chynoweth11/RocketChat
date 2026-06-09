@@ -14739,3 +14739,55 @@ body {
 .ss-doc-library-stats .is-flag b {
   color: var(--warning);
 }
+
+/* =====================================================================
+   Policies: anchored master-detail. The body fits the viewport and does
+   not scroll; the left Policy list stays locked at the top (content-sized,
+   scrolls internally only if it overflows), and the right detail column
+   scrolls on its own. No page-driven drift, no empty-space jumping.
+   ===================================================================== */
+.ss-policies-body {
+  height: calc(100vh - 104px);
+  min-height: 540px;
+  align-items: start;
+  overflow: hidden;
+}
+
+.ss-policies-list {
+  position: static;
+  align-self: start;
+  height: auto;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ss-policies-content {
+  align-self: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+/* Stacked layout: return to natural page flow. */
+@media (max-width: 1240px) {
+  .ss-policies-body {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .ss-policies-list {
+    position: static;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ss-policies-content {
+    height: auto;
+    overflow: visible;
+  }
+}
