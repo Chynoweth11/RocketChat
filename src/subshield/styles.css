@@ -14879,3 +14879,52 @@ body {
 .ss-app h2 { letter-spacing: -0.019em; }
 .ss-app h3 { letter-spacing: -0.015em; }
 .ss-section h2 { letter-spacing: -0.019em; }
+
+/* ===================== Certificate holder rows: calm, elegant status ===================== */
+/* One quiet dot-chip for COI status; color is earned only by an open gap.
+   Replaces the two clashing colored badges that read as AI-generated. */
+.ss-holder-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ss-holder-name-row .ss-coi-status,
+.ss-holder-name-row .ss-comply-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 24, 31, 0.1);
+  background: #ffffff;
+  color: #5b6573;
+  font-size: 11px;
+  font-weight: 560;
+  letter-spacing: -0.004em;
+  line-height: 1.55;
+}
+
+.ss-holder-name-row .ss-coi-status::before,
+.ss-holder-name-row .ss-comply-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #aab2bd;
+  flex: none;
+}
+
+.ss-holder-name-row .ss-coi-status.current::before { background: #1a7a4e; }
+.ss-holder-name-row .ss-coi-status.aging::before,
+.ss-holder-name-row .ss-coi-status.stale::before { background: #c0791f; }
+.ss-holder-name-row .ss-coi-status.unsent::before { background: #aab2bd; }
+
+/* A gap is the only thing that earns color — a quiet, intentional amber. */
+.ss-holder-name-row .ss-comply-badge.gap {
+  color: #8a5a16;
+  border-color: rgba(178, 94, 9, 0.22);
+  background: #fdf7ec;
+}
+.ss-holder-name-row .ss-comply-badge.gap::before { background: #c0791f; }

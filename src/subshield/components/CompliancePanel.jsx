@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, ShieldCheck, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
 
 const STATUS_LABEL = {
   met: "Meets requirement",
@@ -7,23 +7,17 @@ const STATUS_LABEL = {
 };
 
 /**
- * Compact pill for holder cards / lists. Shows compliant, a gap count, or that
- * no structured requirements have been set yet.
+ * Compact gap indicator for holder rows. We surface problems and imply
+ * success: nothing renders when the holder is compliant or has no
+ * requirements set — only an open coverage gap shows a chip.
  */
 export function ComplianceBadge({ result }) {
-  if (!result || !result.hasRequirements) {
-    return <span className="ss-comply-badge none">No requirements set</span>;
-  }
-  if (result.compliant) {
-    return (
-      <span className="ss-comply-badge ok">
-        <ShieldCheck size={11} /> Compliant
-      </span>
-    );
+  if (!result || !result.hasRequirements || result.compliant) {
+    return null;
   }
   return (
     <span className="ss-comply-badge gap">
-      <ShieldAlert size={11} /> {result.unmetCount} gap{result.unmetCount !== 1 ? "s" : ""}
+      {result.unmetCount} gap{result.unmetCount !== 1 ? "s" : ""}
     </span>
   );
 }

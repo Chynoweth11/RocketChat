@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Clock,
   FileCheck2,
   FileText,
   Plus,
@@ -14,7 +13,6 @@ import {
   Send,
   ShieldCheck,
   SquarePen,
-  TriangleAlert,
 } from "lucide-react";
 import { Section, Info } from "./Layout.jsx";
 import { ComplianceBadge, CompliancePanel } from "./CompliancePanel.jsx";
@@ -225,10 +223,10 @@ function coiStatusFor(sends) {
 }
 
 const COI_STATUS_LABEL = {
-  unsent: "No COI sent",
-  current: "COI current",
-  aging: "COI aging",
-  stale: "COI may need refresh",
+  unsent: "Not sent",
+  current: "Current",
+  aging: "Aging",
+  stale: "Refresh due",
 };
 
 function HolderCard({ contractor, sends, compliance, isExpanded, onToggle, onSend, onEdit }) {
@@ -245,13 +243,8 @@ function HolderCard({ contractor, sends, compliance, isExpanded, onToggle, onSen
         <div className="ss-holder-info">
           <div className="ss-holder-name-row">
             <b className="ss-holder-name">{contractor.name}</b>
-            <span className={`ss-coi-status ${status}`}>
-              {status === "unsent" && <TriangleAlert size={11} />}
-              {status === "current" && <CheckCircle2 size={11} />}
-              {(status === "aging" || status === "stale") && <Clock size={11} />}
-              {COI_STATUS_LABEL[status]}
-            </span>
-            {compliance?.hasRequirements && <ComplianceBadge result={compliance} />}
+            <span className={`ss-coi-status ${status}`}>{COI_STATUS_LABEL[status]}</span>
+            <ComplianceBadge result={compliance} />
           </div>
           <small className="ss-holder-meta">
             {contractor.email}
