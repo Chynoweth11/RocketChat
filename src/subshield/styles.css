@@ -9124,9 +9124,9 @@ body {
 }
 
 .ss-demo-pill {
-  background: #fffaeb;
-  border-color: #fedf89;
-  color: #b54708;
+  background: #f5f6f8;
+  border-color: rgba(20, 24, 31, 0.1);
+  color: #6b6258;
 }
 
 .ss-demo-load {
