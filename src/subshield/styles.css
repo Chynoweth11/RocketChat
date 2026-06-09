@@ -14865,3 +14865,17 @@ body {
   display: grid;
   gap: 11px;
 }
+
+/* ===================== P3: type + figures system polish ===================== */
+/* Aligned, tabular figures everywhere money and counts appear — the single
+   most consistent "financial-grade" signal, applied at the root so it
+   cascades to every stat, premium, limit, date, and count. */
+.ss-app {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Confident, consistent heading tracking across the product. */
+.ss-app h1 { letter-spacing: -0.024em; }
+.ss-app h2 { letter-spacing: -0.019em; }
+.ss-app h3 { letter-spacing: -0.015em; }
+.ss-section h2 { letter-spacing: -0.019em; }
