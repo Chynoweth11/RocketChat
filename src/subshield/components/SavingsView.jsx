@@ -34,7 +34,7 @@ const FILTERS = [
   { id: "pending_partner", label: "Awaiting partner" },
   { id: "quote_received", label: "Offer ready" },
   { id: "at_partner", label: "At partner" },
-  { id: "accepted", label: "Purchased" },
+  { id: "accepted", label: "Switched" },
   { id: "remind_later", label: "Snoozed" },
   { id: "dismissed", label: "Dismissed" },
 ];
@@ -306,7 +306,7 @@ export default function SavingsView({
               <Info label="Potential savings" value={`${formatMoney(potentialSavings)}/yr`} />
               <Info label="Realized savings" value={`${formatMoney(realizedSavings)}/yr`} />
               <Info label="Open opportunities" value={availableCount} />
-              <Info label="Purchased via partner" value={switchedCount} />
+              <Info label="Switched via partner" value={switchedCount} />
             </div>
             <PartnerDisclaimer compact />
           </section>
@@ -898,7 +898,7 @@ function OpportunityCard({
       <article className="ss-savings-card accepted">
         <div className="ss-savings-head">
           <div>
-            <span className="ss-eyebrow">Purchased via licensed partner</span>
+            <span className="ss-eyebrow">Switched via licensed partner</span>
             <h2>{name}</h2>
             <p className="ss-muted">
               Issued by {quote?.carrier || opportunity.currentCarrier}. Documents
@@ -913,7 +913,7 @@ function OpportunityCard({
         <div className="ss-note success">
           <BadgeCheck size={16} />
           <span>
-            Coverage purchased through the partner. SubShield will monitor your next renewal.
+            Coverage switched through the licensed partner. SubShield will monitor your next renewal.
           </span>
         </div>
       </article>
@@ -975,10 +975,10 @@ function OpportunityCard({
       <article className="ss-savings-card at-partner">
         <div className="ss-savings-head">
           <div>
-            <span className="ss-eyebrow">Sent to partner. Complete purchase there</span>
+            <span className="ss-eyebrow">Sent to partner. Review your options there</span>
             <h2>{name}</h2>
             <p className="ss-muted">
-              You were redirected to {partnerName} to finalize. Once you've purchased, come back here to save your new policy.
+              You were redirected to {partnerName} to review and finalize. Once you've switched, come back here to save your new policy.
             </p>
           </div>
           <div className="ss-savings-amount">
@@ -991,12 +991,12 @@ function OpportunityCard({
         <div className="ss-note">
           <TrendingDown size={16} />
           <span>
-            Purchased on {partnerName}'s platform? Come back and confirm so SubShield can update your policy record.
+            Switched on {partnerName}'s platform? Come back and confirm so SubShield can update your policy record.
           </span>
         </div>
         <div className="ss-row">
           <button type="button" className="ss-button" onClick={onConfirmPurchase}>
-            <BadgeCheck size={16} /> I've purchased. Save my policy
+            <BadgeCheck size={16} /> I switched coverage. Save my policy
           </button>
           <button type="button" className="ss-button soft" onClick={onGoToPurchase}>
             Re-open {partnerName}
@@ -1077,7 +1077,7 @@ function OpportunityCard({
 
         <div className="ss-row">
           <button type="button" className="ss-button" onClick={onGoToPurchase}>
-            <ArrowRight size={16} /> Go purchase at {partnerName}
+            <ArrowRight size={16} /> Review options at {partnerName}
           </button>
           <button type="button" className="ss-button soft" onClick={onKeepCurrent}>
             Keep current
@@ -1087,8 +1087,8 @@ function OpportunityCard({
           </button>
         </div>
         <p className="ss-fine">
-          This offer was provided by {partnerName}, a licensed insurance partner. Clicking "Go purchase"
-          will open their site in a new tab. Coverage is applied for, bound, and issued entirely
+          This offer was provided by {partnerName}, a licensed insurance partner. Clicking "Review options"
+          opens their site in a new tab. Coverage is reviewed, applied for, and issued entirely
           by the partner, not by SubShield. Return here to upload your new policy document.
           {quote.bindableUntil && ` Offer valid through ${formatLongDate(quote.bindableUntil)}.`}
         </p>

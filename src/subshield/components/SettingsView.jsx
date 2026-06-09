@@ -804,7 +804,7 @@ function EmailSettings({ initial, onSave }) {
         onChange={(value) => setForm((prev) => ({ ...prev, signature: value }))}
       />
       <div className="ss-footer">
-        <span className="ss-footer-info">Signatures are appended to outbound broker and GC emails.</span>
+        <span className="ss-footer-info">Signatures are appended to outbound advisor and GC emails.</span>
         <button type="button" className="ss-button" onClick={submit}>
           Save email preferences
         </button>
@@ -1404,7 +1404,7 @@ function DocumentSettings({ initial, onSave }) {
           options={[
             { value: "owner_only", label: "Owner only" },
             { value: "team", label: "Team" },
-            { value: "team_and_broker", label: "Team + Broker" },
+            { value: "team_and_broker", label: "Team + Advisor" },
           ]}
           onChange={(value) => setForm((prev) => ({ ...prev, defaultVisibility: value }))}
         />
@@ -1496,13 +1496,13 @@ function TemplateSettings({ initial, onSave }) {
         onChange={(value) => setForm((prev) => ({ ...prev, coiBody: value }))}
       />
       <Field
-        label="Broker Request Subject"
+        label="Advisor Request Subject"
         value={form.brokerRequestSubject}
         error={errors.brokerRequestSubject}
         onChange={(value) => setForm((prev) => ({ ...prev, brokerRequestSubject: value }))}
       />
       <TextAreaField
-        label="Broker Request Body"
+        label="Advisor Request Body"
         value={form.brokerRequestBody}
         error={errors.brokerRequestBody}
         onChange={(value) => setForm((prev) => ({ ...prev, brokerRequestBody: value }))}
@@ -1538,7 +1538,7 @@ function PrivacySettings({ initial, onSave }) {
         options={[
           { value: "private", label: "Private" },
           { value: "team_only", label: "Team only" },
-          { value: "broker_visible", label: "Team + broker contacts" },
+          { value: "broker_visible", label: "Team + advisor contacts" },
         ]}
         onChange={(value) => setForm((prev) => ({ ...prev, profileVisibility: value }))}
       />
@@ -1799,7 +1799,7 @@ function LogoutSettings({ onLogout, onReset, onLoadSample }) {
           SubShield earns revenue through partner arrangements, such as referral
           fees, affiliate commissions, or revenue share, when you connect with a
           licensed insurance partner. This never changes the price you pay. You are
-          always free to purchase coverage from any provider you choose.
+          always free to obtain coverage from any provider you choose.
         </p>
       </section>
 

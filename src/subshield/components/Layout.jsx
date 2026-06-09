@@ -46,7 +46,7 @@ export function Brand() {
       </span>
       <div>
         <b>SubShield</b>
-        <small className="ss-small">Insurance workspace for subcontractors</small>
+        <small className="ss-small">Insurance compliance for subcontractors</small>
       </div>
     </div>
   );
@@ -338,7 +338,7 @@ const PARTNER_JOURNEY_STEPS = [
   { id: "coverage", label: "Coverage info", detail: "Enter business & policy details" },
   { id: "review", label: "Partner review", detail: "Licensed partners review your info" },
   { id: "quotes", label: "Quote options", detail: "Compare returned quotes" },
-  { id: "purchase", label: "Purchase", detail: "Buy directly through the partner" },
+  { id: "purchase", label: "Review & choose", detail: "Review options with the partner" },
   { id: "documents", label: "Documents saved", detail: "Stored in SubShield after issuance" },
 ];
 

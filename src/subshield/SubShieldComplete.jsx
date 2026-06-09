@@ -703,7 +703,7 @@ export default function SubShieldComplete() {
         highlights: [
           "Comparable coverage and limits",
           `${formatMoney(base - partnerPremium)}/yr lower than current premium`,
-          "Purchase and documents completed through the partner",
+          "Review and documents completed through the partner",
         ],
       };
 
@@ -733,7 +733,7 @@ export default function SubShieldComplete() {
     }, 1800);
   }
 
-  // Step 2: user reviews partner's offer and clicks "Go purchase at [Partner]".
+  // Step 2: user reviews partner's offer and clicks "Review options at [Partner]".
   // We open the partner's URL in a new tab and mark the opportunity so the
   // user can come back to SubShield and confirm once they've completed purchase.
   function goToPurchaseAtPartner(opportunity) {
@@ -753,17 +753,17 @@ export default function SubShieldComplete() {
       }),
       activity: prependActivity(
         data.activity,
-        `Sent to ${quote.carrier} to purchase`,
-        `Opened ${quote.carrier} in a new tab. Return here to upload your new policy once purchased.`
+        `Sent to ${quote.carrier} to review options`,
+        `Opened ${quote.carrier} in a new tab. Return here to upload your new policy once you've switched.`
       ),
     });
     fireToast(
       `Opened ${quote.carrier}`,
-      "Complete your purchase there. Come back to upload your new policy document."
+      "Review your options there. Come back to upload your new policy document."
     );
   }
 
-  // Step 3: user returns after purchasing at the partner. We update SubShield's
+  // Step 3: user returns after switching coverage at the partner. We update SubShield's
   // policy record with the partner's numbers and open the upload/scan modal so
   // they can store the new declarations page directly in their vault.
   function confirmPurchaseAtPartner(opportunity) {
@@ -782,7 +782,7 @@ export default function SubShieldComplete() {
             deductible: quote.deductible ?? item.deductible,
             coverageLimits: quote.coverageLimits || item.coverageLimits,
             limit: quote.coverageLimits || item.limit,
-            statusNote: `Purchased through ${quote.carrier} | saving ${formatMoney(savings)}/yr. Upload your new declarations page.`,
+            statusNote: `Switched to ${quote.carrier} | saving ${formatMoney(savings)}/yr. Upload your new declarations page.`,
             lastQuotedAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }
@@ -798,7 +798,7 @@ export default function SubShieldComplete() {
       }),
       activity: prependActivity(
         data.activity,
-        `${policy?.name || "Policy"} purchased through ${quote.carrier}`,
+        `${policy?.name || "Policy"} switched to ${quote.carrier}`,
         `Saving ${formatMoney(savings)}/yr. Upload your new declarations page to keep SubShield current.`
       ),
     });
@@ -806,7 +806,7 @@ export default function SubShieldComplete() {
     // Open the scan/upload modal so the user can save their new policy document
     setModal("scan");
     fireToast(
-      "Purchase confirmed - upload your policy",
+      "Coverage switched - upload your policy",
       "SubShield is ready to store your new declarations page."
     );
   }

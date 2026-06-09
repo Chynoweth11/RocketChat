@@ -185,7 +185,7 @@ export default function QuoteRequestModal({
                 active={routeType === "broker"}
                 onClick={() => setRouteType("broker")}
                 title="My insurance advisor"
-                detail="Send to a broker you already work with."
+                detail="Send to a licensed advisor you already work with."
               />
             </div>
 
@@ -195,7 +195,7 @@ export default function QuoteRequestModal({
                   <option value="">Select partner</option>
                   {activePartners.map((partner) => (
                     <option key={partner.id} value={partner.id}>
-                      {partner.name} ({partner.type})
+                      {partner.name} ({partner.type === "carrier" ? "licensed carrier" : "licensed partner"})
                     </option>
                   ))}
                 </select>

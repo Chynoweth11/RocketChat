@@ -51,7 +51,7 @@ export default function AddBrokerModal({ onClose, onSave }) {
   return (
     <Modal
       title="Add insurance review partner"
-      subtitle="Save trusted advisors, brokers, or partner contacts for renewal, coverage, and savings reviews."
+      subtitle="Save trusted licensed advisors and partner contacts for renewal, coverage, and savings reviews."
       onClose={onClose}
     >
       <div className="ss-field-grid">
