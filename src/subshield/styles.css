@@ -15032,3 +15032,15 @@ body {
 .ss-nav:hover {
   background: #f0f0f2;
 }
+
+/* Restraint: the accent isn't scattered across every micro-label. Eyebrow
+   markers go neutral, and small caps labels relax their tracking. */
+.ss-eyebrow::before {
+  background: #c7c7cc;
+}
+.ss-info span,
+.ss-dash-metric span,
+.ss-eyebrow {
+  letter-spacing: 0.035em;
+  color: var(--faint);
+}
