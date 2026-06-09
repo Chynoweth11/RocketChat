@@ -82,10 +82,11 @@ export default function PoliciesView({
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("renewal");
 
   const filteredPolicies = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return policies.filter((policy) => {
+    const matches = policies.filter((policy) => {
       const status = getStatus(policy.daysRemaining).className;
       const matchesFilter = filter === "all" || status === filter;
       const matchesQuery =
@@ -95,7 +96,16 @@ export default function PoliciesView({
         policy.policyNumber.toLowerCase().includes(q);
       return matchesFilter && matchesQuery;
     });
-  }, [policies, query, filter]);
+    return [...matches].sort((a, b) => {
+      if (sortBy === "premium") {
+        return (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0);
+      }
+      if (sortBy === "carrier") {
+        return a.carrier.localeCompare(b.carrier) || a.name.localeCompare(b.name);
+      }
+      return (a.daysRemaining ?? 9999) - (b.daysRemaining ?? 9999);
+    });
+  }, [policies, query, filter, sortBy]);
 
   const selectedInFiltered = selectedPolicy
     ? filteredPolicies.some((policy) => policy.id === selectedPolicy.id)
@@ -166,18 +176,28 @@ export default function PoliciesView({
                 />
               </div>
 
-              <div className="ss-chip-group">
-                {FILTERS.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`ss-chip ${filter === item.id ? "active" : ""}`}
-                    aria-pressed={filter === item.id}
-                    onClick={() => setFilter(item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+              <div className="ss-sortbar">
+                <div className="ss-chip-group">
+                  {FILTERS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`ss-chip ${filter === item.id ? "active" : ""}`}
+                      aria-pressed={filter === item.id}
+                      onClick={() => setFilter(item.id)}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                <label className="ss-sort-control">
+                  Sort
+                  <select className="ss-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                    <option value="renewal">Renewal date</option>
+                    <option value="premium">Premium</option>
+                    <option value="carrier">Carrier</option>
+                  </select>
+                </label>
               </div>
             </>
           )}

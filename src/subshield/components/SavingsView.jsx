@@ -56,6 +56,7 @@ export default function SavingsView({
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("open");
+  const [sortBy, setSortBy] = useState("savings");
 
   const policyById = useMemo(
     () => new Map((policies || []).map((policy) => [policy.id, policy])),
@@ -72,7 +73,7 @@ export default function SavingsView({
 
   const filteredOpportunities = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return opportunities.filter((opportunity) => {
+    const matches = opportunities.filter((opportunity) => {
       const policy = policyById.get(opportunity.policyId);
       const policyLabel = policy?.name || policyLabelFromType(opportunity.policyType);
       const matchesQuery =
@@ -87,7 +88,22 @@ export default function SavingsView({
           : opportunity.status === statusFilter;
       return matchesQuery && matchesFilter;
     });
-  }, [opportunities, policyById, query, statusFilter]);
+    const statusRank = {
+      quote_received: 0,
+      available: 1,
+      pending_partner: 2,
+      at_partner: 3,
+      remind_later: 4,
+      dismissed: 5,
+      accepted: 6,
+    };
+    return [...matches].sort((a, b) => {
+      if (sortBy === "renewal") return new Date(a.renewalDate || 0) - new Date(b.renewalDate || 0);
+      if (sortBy === "status") return (statusRank[a.status] ?? 99) - (statusRank[b.status] ?? 99);
+      if (sortBy === "carrier") return a.currentCarrier.localeCompare(b.currentCarrier);
+      return savingsForOpportunity(b) - savingsForOpportunity(a);
+    });
+  }, [opportunities, policyById, query, statusFilter, sortBy]);
 
   const availableCount = opportunities.filter((item) =>
     ["available", "pending_partner", "quote_received", "at_partner"].includes(item.status)
@@ -132,18 +148,29 @@ export default function SavingsView({
                 aria-label="Search opportunities"
               />
             </div>
-            <div className="ss-chip-group">
-              {FILTERS.map((item) => (
-                <button
-                  type="button"
-                  key={item.id}
-                  className={`ss-chip ${statusFilter === item.id ? "active" : ""}`}
-                  aria-pressed={statusFilter === item.id}
-                  onClick={() => setStatusFilter(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <div className="ss-sortbar">
+              <div className="ss-chip-group">
+                {FILTERS.map((item) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    className={`ss-chip ${statusFilter === item.id ? "active" : ""}`}
+                    aria-pressed={statusFilter === item.id}
+                    onClick={() => setStatusFilter(item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <label className="ss-sort-control">
+                Sort
+                <select className="ss-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                  <option value="savings">Savings</option>
+                  <option value="renewal">Renewal date</option>
+                  <option value="status">Status</option>
+                  <option value="carrier">Carrier</option>
+                </select>
+              </label>
             </div>
           </>
         )}

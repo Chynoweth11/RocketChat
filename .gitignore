@@ -8,6 +8,7 @@ dev-dist/
 coverage/
 qa-main-screenshots/
 qa-screenshots/
+qa-screenshots-final/
 screenshots/
 test-results/
 playwright-report/

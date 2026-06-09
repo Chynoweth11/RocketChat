@@ -111,6 +111,7 @@ export default function DocumentsView({
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [groupBy, setGroupBy] = useState("policy");
+  const [sortBy, setSortBy] = useState("newest");
 
   const policyById = useMemo(
     () => new Map((policies || []).map((p) => [p.id, p])),
@@ -124,7 +125,7 @@ export default function DocumentsView({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return sorted.filter((doc) => {
+    const matches = sorted.filter((doc) => {
       const matchesStatus = statusFilter === "all" || doc.status === statusFilter;
       const matchesQuery =
         !q ||
@@ -132,7 +133,15 @@ export default function DocumentsView({
         (doc.carrier || "").toLowerCase().includes(q);
       return matchesStatus && matchesQuery;
     });
-  }, [sorted, query, statusFilter]);
+    return [...matches].sort((a, b) => {
+      if (sortBy === "name") return displayDocument(a).name.localeCompare(displayDocument(b).name);
+      if (sortBy === "status") {
+        return a.status.localeCompare(b.status) || displayDocument(a).name.localeCompare(displayDocument(b).name);
+      }
+      if (sortBy === "size") return (b.sizeKb || 0) - (a.sizeKb || 0);
+      return new Date(b.uploadedAt) - new Date(a.uploadedAt);
+    });
+  }, [sorted, query, statusFilter, sortBy]);
 
   const groups = useMemo(() => {
     const map = new Map();
@@ -238,20 +247,31 @@ export default function DocumentsView({
                   </button>
                 ))}
               </div>
-              <div className="ss-dx-groupby">
-                <span>Group by</span>
-                <div className="ss-seg" role="group" aria-label="Group documents by">
-                  {GROUP_BY.map((item) => (
-                    <button
-                      type="button"
-                      key={item.id}
-                      className={`ss-seg-btn ${groupBy === item.id ? "active" : ""}`}
-                      aria-pressed={groupBy === item.id}
-                      onClick={() => setGroupBy(item.id)}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
+              <div className="ss-dx-controls">
+                <label className="ss-sort-control">
+                  Sort
+                  <select className="ss-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                    <option value="newest">Newest</option>
+                    <option value="name">Name</option>
+                    <option value="status">Status</option>
+                    <option value="size">Size</option>
+                  </select>
+                </label>
+                <div className="ss-dx-groupby">
+                  <span>Group by</span>
+                  <div className="ss-seg" role="group" aria-label="Group documents by">
+                    {GROUP_BY.map((item) => (
+                      <button
+                        type="button"
+                        key={item.id}
+                        className={`ss-seg-btn ${groupBy === item.id ? "active" : ""}`}
+                        aria-pressed={groupBy === item.id}
+                        onClick={() => setGroupBy(item.id)}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

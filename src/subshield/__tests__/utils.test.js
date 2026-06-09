@@ -27,6 +27,7 @@ import {
   formatLimitShort,
   policyHasEndorsement,
   normalizeRequirements,
+  normalizeSavingsOpportunity,
   checkCompliance,
 } from "../utils.js";
 
@@ -121,6 +122,13 @@ describe("savingsForOpportunity", () => {
   });
   it("returns 0 for null input", () => {
     expect(savingsForOpportunity(null)).toBe(0);
+  });
+});
+
+describe("normalizeSavingsOpportunity", () => {
+  it("keeps submitted quote opportunities visible in the awaiting-partner lane", () => {
+    expect(normalizeSavingsOpportunity({ status: "sent_to_partner" }).status).toBe("pending_partner");
+    expect(normalizeSavingsOpportunity({ status: "requested" }).status).toBe("pending_partner");
   });
 });
 

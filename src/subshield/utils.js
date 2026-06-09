@@ -745,6 +745,10 @@ export function normalizeSavingsOpportunity(raw, policies = [], companyId = "sub
     0
   );
   const estimatedSavings = toNumber(raw.estimatedSavings, estimateSavings(currentPremium));
+  const status =
+    raw.status === "sent_to_partner" || raw.status === "requested"
+      ? "pending_partner"
+      : raw.status || "available";
   return {
     ...raw,
     id: raw.id || makeId("sav"),
@@ -755,7 +759,7 @@ export function normalizeSavingsOpportunity(raw, policies = [], companyId = "sub
     currentPremium,
     estimatedSavings,
     renewalDate,
-    status: raw.status || "available",
+    status,
     partnerId: raw.partnerId || null,
     alternateQuote: raw.alternateQuote || null,
     createdAt: raw.createdAt || new Date().toISOString(),

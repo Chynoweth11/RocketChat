@@ -1081,7 +1081,7 @@ export default function SubShieldComplete() {
       );
       if (existingOpportunity) {
         nextOpportunities = patchOpportunity(opportunities, existingOpportunity.id, {
-          status: preferredPartner ? "sent_to_partner" : "requested",
+          status: "pending_partner",
           partnerId: preferredPartner?.id || existingOpportunity.partnerId,
           currentCarrier: normalizedDraft.currentCarrier || existingOpportunity.currentCarrier,
           renewalDate,
@@ -1097,7 +1097,7 @@ export default function SubShieldComplete() {
               currentPremium: policyMatch.premiumAmount || 0,
               estimatedSavings: estimateSavings(policyMatch.premiumAmount || 0),
               renewalDate,
-              status: "requested",
+              status: "pending_partner",
               partnerId: preferredPartner?.id || null,
               notes: "Created from guided coverage review workflow.",
             },
@@ -1162,7 +1162,7 @@ export default function SubShieldComplete() {
       quoteRequests: [normalizedRequest, ...quoteRequests],
       savingsOpportunities: request.opportunityId
         ? patchOpportunity(opportunities, request.opportunityId, {
-            status: request.routeType === "partner" ? "sent_to_partner" : "requested",
+            status: "pending_partner",
             notes: `Quote request submitted to ${routeLabel}.`,
           })
         : opportunities,

@@ -29,6 +29,7 @@ export default function CertificatesView({
 }) {
   const [query, setQuery] = useState("");
   const [expandedId, setExpandedId] = useState(null);
+  const [sortBy, setSortBy] = useState("status");
 
   // Merge pastSends stored on each contractor with global coiSends, deduplicated by id
   const sendsByHolder = useMemo(() => {
@@ -78,15 +79,27 @@ export default function CertificatesView({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return contractors;
-    return contractors.filter(
+    const matches = !q ? contractors : contractors.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.contact || "").toLowerCase().includes(q) ||
         c.email.toLowerCase().includes(q) ||
         (c.projects || []).some((p) => p.toLowerCase().includes(q))
     );
-  }, [query, contractors]);
+    const statusRank = { unsent: 0, stale: 1, aging: 2, current: 3 };
+    return [...matches].sort((a, b) => {
+      const aSends = sendsByHolder.get(a.id) || [];
+      const bSends = sendsByHolder.get(b.id) || [];
+      if (sortBy === "recent") {
+        return new Date(bSends[0]?.sentAt || 0) - new Date(aSends[0]?.sentAt || 0);
+      }
+      if (sortBy === "projects") {
+        return (b.projects?.length || 0) - (a.projects?.length || 0) || a.name.localeCompare(b.name);
+      }
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      return statusRank[coiStatusFor(aSends)] - statusRank[coiStatusFor(bSends)] || a.name.localeCompare(b.name);
+    });
+  }, [query, contractors, sendsByHolder, sortBy]);
 
   return (
     <div className="ss-grid">
@@ -127,15 +140,26 @@ export default function CertificatesView({
         />
 
         {contractors.length > 0 && (
-          <div className="ss-search">
-            <Search size={16} className="ss-search-icon" aria-hidden="true" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search holders, contacts, or projects..."
-              aria-label="Search certificate holders"
-            />
+          <div className="ss-sortbar">
+            <div className="ss-search" style={{ flex: 1, marginBottom: 0 }}>
+              <Search size={16} className="ss-search-icon" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search holders, contacts, or projects..."
+                aria-label="Search certificate holders"
+              />
+            </div>
+            <label className="ss-sort-control">
+              Sort
+              <select className="ss-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                <option value="status">Action needed</option>
+                <option value="recent">Recently sent</option>
+                <option value="projects">Projects</option>
+                <option value="name">Name</option>
+              </select>
+            </label>
           </div>
         )}
 

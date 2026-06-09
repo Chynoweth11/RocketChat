@@ -12297,6 +12297,49 @@ body {
   gap: 12px;
   margin-bottom: 8px;
 }
+.ss-sortbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ss-sortbar .ss-chip-group {
+  margin-bottom: 0;
+}
+.ss-sort-control,
+.ss-dx-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ss-dx-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.ss-sort-control {
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ss-select {
+  min-height: 34px;
+  min-width: 124px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 5px 28px 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ss-select:focus-visible {
+  outline: 2px solid rgba(0, 113, 227, 0.25);
+  outline-offset: 2px;
+}
 .ss-dx-groupby {
   display: inline-flex;
   align-items: center;
