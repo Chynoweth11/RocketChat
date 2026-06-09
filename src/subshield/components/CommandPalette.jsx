@@ -59,7 +59,7 @@ export default function CommandPalette({
       {
         id: "action-upload",
         group: "Actions",
-        label: "Upload insurance document",
+        label: "Upload insurance",
         icon: Upload,
         run: () => onAction("upload"),
       },

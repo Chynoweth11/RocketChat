@@ -123,7 +123,7 @@ export default function PoliciesView({
                 <Plus size={16} /> Add policy
               </button>
               <button type="button" className="ss-button soft" onClick={onUpload}>
-                <Upload size={16} /> Upload document
+                <Upload size={16} /> Upload insurance
               </button>
               <button type="button" className="ss-button soft" onClick={onSend}>
                 <Send size={16} /> Send certificate

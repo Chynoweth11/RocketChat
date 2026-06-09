@@ -584,7 +584,7 @@ export default function PdfExtractorPanel({
               onClick={() => inputRef.current?.click()}
               disabled={Boolean(ocrState)}
             >
-              <FileSearch size={15} /> Select files
+              <FileSearch size={15} /> Choose PDFs
             </button>
           )}
         </div>
