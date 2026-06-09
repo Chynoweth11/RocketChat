@@ -14819,3 +14819,49 @@ body {
   flex: none;
   color: var(--success, #0f7a54);
 }
+
+/* ===================== P0 redesign: calmer header + honest dashboard ===================== */
+.ss-top-head {
+  min-width: 0;
+}
+
+.ss-top-sub {
+  margin: 3px 0 0;
+  color: #6b6258;
+  font-size: 13.5px;
+  font-weight: 450;
+  letter-spacing: -0.006em;
+}
+
+/* Dashboard hero: single honest "premium mix" replacing the projected chart */
+.ss-dash-mix {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(20, 24, 31, 0.08);
+}
+
+.ss-dash-mix-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ss-dash-mix-head b {
+  color: #16181d;
+  font-size: 13.5px;
+  font-weight: 660;
+  letter-spacing: -0.012em;
+}
+
+.ss-dash-mix-head small {
+  color: #8a8178;
+  font-size: 11.75px;
+  letter-spacing: -0.003em;
+}
+
+.ss-dash-mix .ss-dash-trend-bars {
+  display: grid;
+  gap: 11px;
+}

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -7,10 +6,8 @@ import {
   Clock3,
   FileCheck2,
   FileWarning,
-  PiggyBank,
   Plus,
   Send,
-  Shield,
   Sparkles,
   Upload,
 } from "lucide-react";
@@ -56,21 +53,6 @@ function greetingFor(date = new Date()) {
   return "Good evening";
 }
 
-const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-// Projected monthly pace: we only know the annual premium until a backend
-// supplies real spend history, so this charts an even 1/12 distribution
-// across the trailing six months ending with the current month. Labels are
-// derived from today's date so they never go stale.
-function buildMonthlySpend(totalPremium, now = new Date()) {
-  const monthly = Math.round(totalPremium / 12);
-  const points = [];
-  for (let offset = 5; offset >= 0; offset -= 1) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-    points.push({ label: MONTH_ABBR[date.getMonth()], value: monthly });
-  }
-  return points;
-}
 
 export default function DashboardView({
   firstName,
@@ -105,28 +87,6 @@ export default function DashboardView({
   const monthlySpend = Math.round(totalPremium / 12);
   const missingDocCount = missingDocuments.length;
   const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
-  const monthlySeries = buildMonthlySpend(totalPremium);
-  const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.value));
-  const [breakdownMonth, setBreakdownMonth] = useState(null);
-  const monthlyBreakdown = policyAccounts.map((policy) => {
-    const annual = policy.premiumAmount ?? policy.premium ?? 0;
-    return {
-      id: policy.id,
-      name: policyLabelFromType(policy.policyType || policy.type),
-      carrier: policy.carrier,
-      annual,
-      monthly: Math.round(annual / 12),
-    };
-  });
-
-  const metricCards = [
-    { label: "Total annual premium", value: `${formatMoney(totalPremium)}/yr` },
-    { label: "Active policies", value: activePolicies.length },
-    { label: "Estimated savings", value: `${formatMoney(potentialSavings)}/yr` },
-    { label: "Open quote reviews", value: openQuoteRequests.length },
-    { label: "Missing documents", value: missingDocCount, action: "Upload", target: "upload" },
-    { label: "Pending certificates", value: pendingCertificates, action: "Certificates", target: "certificates" },
-  ];
 
   if (policies.length === 0) {
     return (
@@ -191,54 +151,27 @@ export default function DashboardView({
               About {formatMoney(monthlySpend)}/month across {activePolicies.length} active policies.
             </p>
 
-            <div className="ss-spend-chart" aria-label="Projected monthly insurance spend, even pace across the trailing six months">
-              {monthlySeries.map((point, idx) => (
-                <button
-                  type="button"
-                  key={point.label}
-                  className={`ss-spend-point${idx === monthlySeries.length - 1 ? " is-current" : ""}`}
-                  onDoubleClick={() => setBreakdownMonth(`${point.label} ${new Date().getFullYear()}`)}
-                  title={`Double-click for the ${point.label} cost breakdown`}
-                  aria-label={`${point.label}: ${formatMoney(point.value)} estimated. Double-click for the cost breakdown.`}
-                >
-                  <em className="ss-spend-val">{formatMoney(point.value)}</em>
-                  <span style={{ height: `${Math.max(12, Math.round((point.value / monthlyPeak) * 70))}px` }} />
-                  <small>{point.label}</small>
-                </button>
-              ))}
-            </div>
-            <p className="ss-spend-hint">Double-click a month to see its cost breakdown.</p>
-            <div className="ss-dash-action-rail" aria-label="Dashboard primary actions">
-              <button type="button" className="ss-action-tile primary" onClick={onReviewSavings}>
-                <span className="ss-action-icon">
-                  <PiggyBank size={16} />
-                </span>
-                <span>
-                  <b>Review savings</b>
-                  <small>{formatMoney(potentialSavings)}/yr identified</small>
-                </span>
-                <ArrowRight size={15} />
-              </button>
-              <button type="button" className="ss-action-tile" onClick={onOpenPolicies}>
-                <span className="ss-action-icon">
-                  <Shield size={16} />
-                </span>
-                <span>
-                  <b>Open policies</b>
-                  <small>Limits, deductibles, renewals</small>
-                </span>
-                <ArrowRight size={15} />
-              </button>
-              <button type="button" className="ss-action-tile" onClick={onUpload}>
-                <span className="ss-action-icon">
-                  <Upload size={16} />
-                </span>
-                <span>
-                  <b>Upload document</b>
-                  <small>Declarations or certificates</small>
-                </span>
-                <ArrowRight size={15} />
-              </button>
+            <div className="ss-dash-mix">
+              <div className="ss-dash-mix-head">
+                <b>Where your premium goes</b>
+                <small>Monthly-equivalent by policy</small>
+              </div>
+              <div className="ss-dash-trend-bars">
+                {spendBars.map((item) => (
+                  <div className="ss-dash-trend-row" key={item.id}>
+                    <span className="ss-dash-trend-name" title={item.name}>{item.name}</span>
+                    <span className="ss-dash-trend-track">
+                      <span className="ss-dash-trend-fill" style={{ width: `${item.percent}%` }} />
+                    </span>
+                    <span className="ss-dash-trend-val">{formatMoney(item.value)}/mo</span>
+                  </div>
+                ))}
+                {spendBars.length === 0 && (
+                  <p className="ss-muted" style={{ margin: 0, fontSize: 13 }}>
+                    Add a policy to see your premium breakdown.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -278,49 +211,6 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div className="ss-dash-trend">
-          <div className="ss-dash-trend-head">
-            <b>Premium trend by policy group</b>
-            <small>Monthly-equivalent spend across your highest-cost policies</small>
-          </div>
-          <div className="ss-dash-trend-bars">
-            {spendBars.map((item) => (
-              <div className="ss-dash-trend-row" key={item.id}>
-                <span className="ss-dash-trend-name" title={item.name}>{item.name}</span>
-                <span className="ss-dash-trend-track">
-                  <span className="ss-dash-trend-fill" style={{ width: `${item.percent}%` }} />
-                </span>
-                <span className="ss-dash-trend-val">{formatMoney(item.value)}/mo</span>
-              </div>
-            ))}
-            {spendBars.length === 0 && (
-              <p className="ss-muted" style={{ margin: 0, fontSize: 13 }}>
-                Add a policy to see your premium breakdown.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="ss-dash-metrics">
-          {metricCards.map((item) => (
-            <div className="ss-dash-metric" key={item.label}>
-              <span>{item.label}</span>
-              <b>{item.value}</b>
-              {item.action && (
-                <button
-                  type="button"
-                  className="ss-copy-btn"
-                  onClick={() => {
-                    if (item.target === "upload") onUpload();
-                    else if (item.target === "certificates") onOpenCertificates();
-                  }}
-                >
-                  {item.action}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
       </section>
 
       <ActionCenter
@@ -508,71 +398,6 @@ export default function DashboardView({
           </div>
         </div>
       </section>
-
-      {breakdownMonth && (
-        <MonthBreakdownModal
-          month={breakdownMonth}
-          rows={monthlyBreakdown}
-          total={monthlySpend}
-          onClose={() => setBreakdownMonth(null)}
-        />
-      )}
-    </div>
-  );
-}
-
-function MonthBreakdownModal({ month, rows, total, onClose }) {
-  useEffect(() => {
-    function onKey(event) {
-      if (event.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  const peak = Math.max(1, ...rows.map((row) => row.monthly));
-
-  return (
-    <div
-      className="ss-breakdown-backdrop"
-      onClick={(event) => event.target === event.currentTarget && onClose()}
-    >
-      <div className="ss-breakdown" role="dialog" aria-modal="true" aria-label={`${month} cost breakdown`}>
-        <div className="ss-breakdown-head">
-          <div>
-            <span className="ss-eyebrow">Estimated monthly spend</span>
-            <h3>{month}</h3>
-          </div>
-          <button type="button" className="ss-breakdown-close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
-
-        <div className="ss-breakdown-total">
-          <span>Total this month</span>
-          <strong>{formatMoney(total)}</strong>
-        </div>
-
-        <div className="ss-breakdown-list">
-          {rows.map((row) => (
-            <div className="ss-breakdown-row" key={row.id}>
-              <div className="ss-breakdown-row-head">
-                <span className="ss-breakdown-name">{row.name}</span>
-                <strong>{formatMoney(row.monthly)}/mo</strong>
-              </div>
-              <div className="ss-breakdown-track" aria-hidden="true">
-                <span style={{ width: `${Math.round((row.monthly / peak) * 100)}%` }} />
-              </div>
-              <small>{row.carrier} · {formatMoney(row.annual)}/yr</small>
-            </div>
-          ))}
-        </div>
-
-        <p className="ss-breakdown-note">
-          Projected at one-twelfth of each active policy's annual premium. Actual billing may vary by
-          carrier schedule.
-        </p>
-      </div>
     </div>
   );
 }

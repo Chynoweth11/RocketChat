@@ -25,15 +25,15 @@ const NAV_SECTIONS = [
     label: "Coverage",
     items: [
       { id: "policies", label: "Policies", icon: ShieldCheck },
-      { id: "savings", label: "Savings", icon: BadgeDollarSign },
       { id: "certificates", label: "Certificates", icon: FileCheck2 },
+      { id: "documents", label: "Documents", icon: FolderOpen },
     ],
   },
   {
-    label: "Integrations",
+    label: "Connect",
     items: [
       { id: "connections", label: "Connections", icon: Link2 },
-      { id: "documents", label: "Documents", icon: FolderOpen },
+      { id: "savings", label: "Savings", icon: BadgeDollarSign },
     ],
   },
 ];
@@ -107,14 +107,12 @@ export function Sidebar({
         </nav>
 
         <div className="ss-side-card">
-          <span className="ss-eyebrow">{potentialSavings > 0 ? "Savings found" : "Coverage healthy"}</span>
-          <strong>
-            {potentialSavings > 0 ? `${formatMoney(potentialSavings)}/yr` : "You're set"}
-          </strong>
+          <span className="ss-eyebrow">{soon > 0 ? "Renewing soon" : "Coverage healthy"}</span>
+          <strong>{soon > 0 ? `${soon} renewal${soon === 1 ? "" : "s"}` : "You're set"}</strong>
           <p>
-            {potentialSavings > 0
-              ? "Lower-rate options are available. Review before renewal."
-              : "No new savings right now. We keep monitoring rates."}
+            {soon > 0
+              ? "Within 30 days. Review coverage before it lapses."
+              : "No renewals in the next 30 days."}
           </p>
           <div className="ss-savings-stack">
             <div>
@@ -126,10 +124,12 @@ export function Sidebar({
               <strong>{soon}</strong>
             </div>
           </div>
-          <button type="button" className="ss-button" onClick={onReviewSavings}>
-            {potentialSavings > 0 ? "Review savings" : "View savings"}
-            <ArrowRight size={15} />
-          </button>
+          {potentialSavings > 0 && (
+            <button type="button" className="ss-button soft" onClick={onReviewSavings}>
+              Review {formatMoney(potentialSavings)}/yr in savings
+              <ArrowRight size={15} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -201,21 +201,21 @@ export function Header({
     settings: "Settings",
     connections: "Connections",
   };
-  const eyebrow = {
-    dashboard: "Your insurance command center",
-    policies: "Coverage, premiums, renewals, and health scores",
-    savings: "Find better rates through licensed coverage partners",
-    certificates: "Send and track certificates of insurance",
-    documents: "Declarations, certificates, endorsements, and quotes",
-    settings: "Account, team, alerts, and workspace controls",
-    connections: "Link carriers to sync policies and verify coverage in real time",
+  const subtitle = {
+    dashboard: "What needs your attention today.",
+    policies: "Coverage, premiums, and renewals in one place.",
+    savings: "Review coverage and pricing with licensed partners.",
+    certificates: "Send and track certificates of insurance.",
+    documents: "Every insurance document, organized automatically.",
+    settings: "Profile, team, alerts, and workspace controls.",
+    connections: "Connect providers to import policies automatically.",
   };
 
   return (
     <header className="ss-top">
-      <div>
-        <span className="ss-eyebrow">{eyebrow[view]}</span>
+      <div className="ss-top-head">
         <h1>{titles[view]}</h1>
+        <p className="ss-top-sub">{subtitle[view]}</p>
       </div>
       <div className="ss-top-actions">
         {demoMode ? (
