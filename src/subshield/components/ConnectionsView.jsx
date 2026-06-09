@@ -15,7 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Section } from "./Layout.jsx";
-import { timeAgo } from "../utils.js";
+import { policyLabelFromType, timeAgo } from "../utils.js";
 import { CARRIER_CATALOG } from "../carriers.js";
 
 const CAPABILITY_LABELS = {
@@ -51,7 +51,7 @@ function CarrierLogo({ carrier, size = 44 }) {
   );
 }
 
-function ConnectModal({ carrier, onClose, onConnect }) {
+function ConnectModal({ carrier, onClose, onConnect, onViewDocuments }) {
   const [step, setStep] = useState("form"); // form | connecting | success
   const [creds, setCreds] = useState({ accountId: "", apiKey: "" });
   const [error, setError] = useState("");
@@ -69,6 +69,7 @@ function ConnectModal({ carrier, onClose, onConnect }) {
   function handleDone() {
     onConnect(carrier.id, creds);
     onClose();
+    onViewDocuments?.();
   }
 
   return (
@@ -82,7 +83,7 @@ function ConnectModal({ carrier, onClose, onConnect }) {
               <CarrierLogo carrier={carrier} size={52} />
               <div>
                 <h2 id="connect-title">Connect {carrier.name}</h2>
-                <p>Sync policies, verify coverage in real time, and receive renewal alerts automatically.</p>
+                <p>Securely link {carrier.name} and SubShield automatically retrieves your policies, declarations, COIs, endorsements, and renewal dates — no manual uploads.</p>
               </div>
             </div>
 
@@ -155,15 +156,23 @@ function ConnectModal({ carrier, onClose, onConnect }) {
             </div>
             <h2>{carrier.name} connected</h2>
             <p>
-              Your policies are synced. SubShield will automatically verify coverage and send renewal alerts.
+              SubShield retrieved your coverage automatically. Everything below was imported and organized for you.
             </p>
-            <div className="ss-connect-steps">
-              <div className="ss-connect-step done"><CheckCircle2 size={15} /> Authenticated</div>
-              <div className="ss-connect-step done"><CheckCircle2 size={15} /> Policies synced</div>
-              <div className="ss-connect-step done"><CheckCircle2 size={15} /> Coverage mapped</div>
-            </div>
+            <ul className="ss-connect-retrieved">
+              {(carrier.policyTypes || []).map((type) => (
+                <li key={type}>
+                  <CheckCircle2 size={14} /> {policyLabelFromType(type)} policy &amp; declarations
+                </li>
+              ))}
+              <li>
+                <CheckCircle2 size={14} /> Certificate of Insurance package
+              </li>
+              <li>
+                <CheckCircle2 size={14} /> Renewal dates &amp; coverage limits
+              </li>
+            </ul>
             <button type="button" className="ss-button" onClick={handleDone} style={{ marginTop: 8 }}>
-              Done <ArrowRight size={15} />
+              View imported documents <ArrowRight size={15} />
             </button>
           </div>
         )}
@@ -251,7 +260,7 @@ function CarrierCard({ carrier, connection, onConnect, onDisconnect, onSync }) {
   );
 }
 
-export default function ConnectionsView({ connections, onConnect, onDisconnect, onSync }) {
+export default function ConnectionsView({ connections, onConnect, onDisconnect, onSync, onViewDocuments }) {
   const [connecting, setConnecting] = useState(null); // carrier being connected
   const [filter, setFilter] = useState("all");
 
@@ -268,8 +277,8 @@ export default function ConnectionsView({ connections, onConnect, onDisconnect, 
     <div className="ss-grid">
       <section className="ss-card ss-span">
         <Section
-          title="Carrier Connections"
-          sub="Link your insurance carriers to sync policies automatically, verify coverage in real time, and get renewal alerts before they hit."
+          title="Insurance Connections"
+          sub="Securely connect your carriers, agencies, and platforms — then SubShield retrieves your policies, COIs, endorsements, and renewals automatically, the way Plaid links your bank."
         />
         <div className="ss-command-metrics">
           <div className="ss-info">
@@ -299,15 +308,15 @@ export default function ConnectionsView({ connections, onConnect, onDisconnect, 
                 <CarrierLogo key={c.id} carrier={c} size={40} />
               ))}
             </div>
-            <h2>Connect your carriers</h2>
+            <h2>Connect your insurance providers</h2>
             <p>
-              Link your insurance carriers and your policies sync automatically. No manual entry, and no hunting through emails for dec pages.
+              Link a carrier, agency, or platform once and SubShield pulls in your policies, dec pages, COIs, and endorsements automatically. No manual entry, and no hunting through emails.
             </p>
             <div className="ss-connections-hero-points">
+              <div><RefreshCw size={15} /> Policies, COIs, and endorsements import automatically</div>
               <div><ShieldCheck size={15} /> Verify coverage in real time when GCs request a COI</div>
-              <div><RefreshCw size={15} /> Policies auto-sync whenever your carrier updates them</div>
-              <div><AlertTriangle size={15} /> Get renewal alerts 30, 14, and 7 days before expiration</div>
-              <div><Zap size={15} /> Instant COI generation for connected carriers</div>
+              <div><AlertTriangle size={15} /> Renewal alerts 30, 14, and 7 days before expiration</div>
+              <div><Zap size={15} /> Coverage gaps and savings surfaced as they're found</div>
             </div>
           </div>
         </section>
@@ -366,6 +375,7 @@ export default function ConnectionsView({ connections, onConnect, onDisconnect, 
             onConnect(id, creds, connecting);
             setConnecting(null);
           }}
+          onViewDocuments={onViewDocuments}
         />
       )}
     </div>

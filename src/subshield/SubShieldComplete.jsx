@@ -122,6 +122,25 @@ function scannedDocumentLabels(raw) {
 
 const COVERAGE_APPLICATION_STAGES = ["start", "coverage", "application", "quote", "purchase"];
 
+// Representative annual premiums used when a connected provider retrieves a
+// coverage line the user is not yet tracking (illustrative, editable later).
+const CONNECT_PREMIUM = {
+  workers: 3120,
+  liability: 1840,
+  auto: 2460,
+  umbrella: 980,
+  property: 2150,
+  cyber: 1200,
+  professional: 1600,
+  epl: 1100,
+  directors: 1400,
+  crime: 700,
+  pollution: 1300,
+  builders_risk: 1500,
+  equipment: 600,
+  bonding: 900,
+};
+
 function defaultCoverageApplication(company, partners = []) {
   return {
     status: "draft",
@@ -385,21 +404,139 @@ export default function SubShieldComplete() {
     window.localStorage.setItem("subshield.connections", JSON.stringify(next));
   }
 
+  // Plaid-style retrieval: connecting a provider pulls its policies and
+  // documents straight into SubShield. Coverage lines the user doesn't have
+  // yet are imported as new policies (gap-fill); each import lands a
+  // declarations page, and the connection lands a refreshed COI package.
   function connectCarrier(carrierId, creds, carrierMeta) {
+    const carrierName = carrierMeta?.name || "Insurance provider";
+    const types = (carrierMeta?.policyTypes || []).filter((t) => t && t !== "license");
+
+    let workingPolicies = [...data.policies];
+    let workingOpportunities = [...opportunities];
+    const newDocuments = [];
+    let importedPolicies = 0;
+
+    types.forEach((policyType) => {
+      const existing = workingPolicies.find(
+        (p) => (p.policyType || p.type) === policyType && (p.policyType || p.type) !== "license"
+      );
+
+      if (existing) {
+        // Already tracked — mark it verified through this connection.
+        workingPolicies = workingPolicies.map((p) =>
+          p.id === existing.id
+            ? { ...p, carrierConnected: carrierId, statusNote: `Synced from ${carrierName}.`, updatedAt: new Date().toISOString() }
+            : p
+        );
+        return;
+      }
+
+      // Gap-fill: retrieve this coverage line as a new policy.
+      const premium = CONNECT_PREMIUM[policyType] || 1500;
+      const renewal = dateFromToday(45 + importedPolicies * 60);
+      const policy = normalizePolicy(
+        {
+          policyType,
+          carrier: carrierName,
+          premiumAmount: premium,
+          premium,
+          policyNumber: `${(carrierMeta?.logoMark || "POL").toUpperCase()}-${Math.floor(100000 + Math.random() * 899999)}`,
+          renewalDate: renewal,
+          expirationDate: renewal,
+          carrierConnected: carrierId,
+          source: "connection",
+          statusNote: `Imported from ${carrierName}.`,
+        },
+        company.id
+      );
+      workingPolicies = [...workingPolicies, policy];
+      importedPolicies += 1;
+
+      newDocuments.push(
+        normalizeDocument({
+          name: `${policy.name} Declarations`,
+          docType: "declaration",
+          policyId: policy.id,
+          policyType,
+          carrier: carrierName,
+          fileType: "PDF",
+          sizeKb: 180,
+          status: "verified",
+          addedBy: carrierName,
+          source: "connection",
+        })
+      );
+
+      if (renewal && policy.daysRemaining <= 120) {
+        workingOpportunities = [
+          normalizeSavingsOpportunity(
+            {
+              policyId: policy.id,
+              policyType,
+              currentCarrier: carrierName,
+              currentPremium: premium,
+              estimatedSavings: estimateSavings(premium),
+              renewalDate: renewal,
+              status: policy.daysRemaining <= 90 ? "available" : "monitoring",
+            },
+            workingPolicies,
+            company.id
+          ),
+          ...workingOpportunities,
+        ];
+      }
+    });
+
+    // The connection always lands a refreshed certificate package.
+    newDocuments.push(
+      normalizeDocument({
+        name: `${carrierName} Certificate of Insurance`,
+        docType: "certificate",
+        policyType: null,
+        carrier: carrierName,
+        fileType: "PDF",
+        sizeKb: 210,
+        status: "verified",
+        addedBy: carrierName,
+        source: "connection",
+      })
+    );
+
     const next = {
       ...carrierConnections,
       [carrierId]: {
         carrierId,
         connectedAt: new Date().toISOString(),
         syncedAt: new Date().toISOString(),
-        policyCount: data.policies.filter((p) => p.carrier &&
-          carrierMeta?.name && p.carrier.toLowerCase().includes(carrierId)).length || 0,
+        policyCount: types.length,
+        importedPolicies,
+        importedDocuments: newDocuments.length,
         capabilities: carrierMeta?.capabilities || [],
         accountId: creds.accountId,
       },
     };
     saveConnections(next);
-    fireToast(`${carrierMeta?.name || "Carrier"} connected`, "Policies synced and coverage verification enabled.", "success");
+
+    commit({
+      ...data,
+      policies: workingPolicies,
+      savingsOpportunities: workingOpportunities,
+      documents: [...newDocuments, ...(data.documents || [])],
+      activity: prependActivity(
+        data.activity,
+        `${carrierName} connected`,
+        `Retrieved ${importedPolicies} ${importedPolicies === 1 ? "policy" : "policies"} and ${newDocuments.length} document${newDocuments.length === 1 ? "" : "s"} automatically.`
+      ),
+    });
+
+    fireToast(
+      `${carrierName} connected`,
+      importedPolicies > 0
+        ? `Retrieved ${importedPolicies} ${importedPolicies === 1 ? "policy" : "policies"} and ${newDocuments.length} documents automatically.`
+        : `Synced your coverage and imported ${newDocuments.length} document${newDocuments.length === 1 ? "" : "s"}.`,
+      "success"
+    );
   }
 
   function disconnectCarrier(carrierId) {
@@ -1625,6 +1762,7 @@ export default function SubShieldComplete() {
               onConnect={connectCarrier}
               onDisconnect={disconnectCarrier}
               onSync={syncCarrier}
+              onViewDocuments={() => setView("documents")}
             />
           )}
           </Suspense>
