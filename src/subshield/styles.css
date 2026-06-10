@@ -15224,3 +15224,72 @@ body {
   letter-spacing: 0.035em;
   color: var(--faint);
 }
+
+/* =====================================================================
+   ELEGANT STATUS + ACTION ICONS (final) — replace loud filled pills and
+   pastel icon bubbles with quiet, minimal treatments.
+   ===================================================================== */
+
+/* Status labels -> a small colored dot + calm text (no filled pill). */
+.ss-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 11.5px;
+  font-weight: 560;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #5b6573;
+  box-shadow: none;
+}
+.ss-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #aab2bd;
+  flex: none;
+}
+.ss-status.success {
+  color: #5b6573;
+  background: transparent;
+  border: 0;
+}
+.ss-status.success::before { background: #1a7a4e; }
+.ss-status.warning {
+  color: #8a5a16;
+  background: transparent;
+  border: 0;
+}
+.ss-status.warning::before { background: #c0791f; }
+.ss-status.danger {
+  color: #b24a40;
+  background: transparent;
+  border: 0;
+}
+.ss-status.danger::before { background: #cf4c40; }
+
+/* Action Center icons -> a quiet neutral tile with a softly tinted glyph
+   (was a loud pastel circle). */
+.ss-action-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #ecedf1;
+  background: #f6f7f9;
+  color: #6b7280;
+  box-shadow: none;
+}
+.ss-action-dot.danger,
+.ss-action-dot.warning,
+.ss-action-dot.info {
+  background: #f6f7f9;
+  border-color: #ecedf1;
+}
+.ss-action-dot.danger { color: #c0524a; }
+.ss-action-dot.warning { color: #b07a1e; }
+.ss-action-dot.info { color: #3b6ae0; }
