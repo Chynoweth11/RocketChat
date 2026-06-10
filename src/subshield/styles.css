@@ -15293,3 +15293,47 @@ body {
 .ss-action-dot.danger { color: #c0524a; }
 .ss-action-dot.warning { color: #b07a1e; }
 .ss-action-dot.info { color: #3b6ae0; }
+
+/* =====================================================================
+   MORE QUIET BADGES (final) — certificate holder status + compliance,
+   and connections carrier rating/category. Strip the filled pills back
+   to a dot + calm text (holders) or a whisper-light marker (carriers).
+   ===================================================================== */
+
+/* Certificate holder: status + gap -> dot + calm text, no pill shell. */
+.ss-holder-name-row .ss-coi-status,
+.ss-holder-name-row .ss-comply-badge {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ss-holder-name-row .ss-comply-badge.gap {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8a5a16;
+}
+
+/* Connections: carrier rating -> refined whisper chip; category -> quiet
+   uppercase label (was two loud filled pills). */
+.ss-carrier-rating {
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: #f3f7f4;
+  border: 1px solid #e4ede7;
+  color: #3f7a5a;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.ss-carrier-category {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9aa1ad;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
