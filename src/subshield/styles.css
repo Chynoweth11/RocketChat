@@ -15687,3 +15687,415 @@ body {
   padding: 24px;
   border-radius: 14px;
 }
+
+/* ====================================================================
+   DASHBOARD (.ssd) — rebuilt, self-contained command center.
+   Airy spacing, hairline cards, one royal-blue accent, refined type.
+   Nothing here depends on the legacy .ss-* dashboard rules.
+   ==================================================================== */
+.ssd {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #1a2433;
+  animation: ss-view-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- KPI strip ---- */
+.ssd-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.ssd-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  justify-content: center;
+  min-height: 108px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e7e9ef;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+.ssd-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ssd-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a909c;
+}
+.ssd-kpi-icon { color: #c2c8d2; }
+.ssd-kpi-value {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: #101727;
+}
+.ssd-kpi-sub { font-size: 12.5px; color: #6b7280; }
+.ssd-kpi.is-accent .ssd-kpi-value { color: #2563eb; }
+.ssd-kpi.is-ok .ssd-kpi-head::after,
+.ssd-kpi.is-warning .ssd-kpi-head::after,
+.ssd-kpi.is-danger .ssd-kpi-head::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+}
+.ssd-kpi.is-ok .ssd-kpi-head::after { background: #1a7a4e; }
+.ssd-kpi.is-warning .ssd-kpi-head::after { background: #c0791f; }
+.ssd-kpi.is-danger .ssd-kpi-head::after { background: #cf4c40; }
+
+/* ---- Layout grid ---- */
+.ssd-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.ssd-main,
+.ssd-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ---- Card shell ---- */
+.ssd-card {
+  background: #fff;
+  border: 1px solid #e7e9ef;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+.ssd-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ssd-card-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 640;
+  letter-spacing: -0.01em;
+  color: #101727;
+}
+.ssd-card-head p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: #6b7280;
+}
+.ssd-total { font-size: 13px; font-weight: 600; color: #101727; white-space: nowrap; }
+.ssd-muted-xs { font-size: 11.5px; color: #9aa1ad; }
+
+/* ---- Links + buttons ---- */
+.ssd-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 560;
+  color: #6b7280;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+.ssd-link:hover { color: #2563eb; }
+.ssd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font-size: 13.5px;
+  font-weight: 580;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.18s ease, transform 0.12s ease;
+}
+.ssd-btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+.ssd-btn-primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+}
+.ssd-btn-ghost {
+  background: #fff;
+  border-color: #e2e5ec;
+  color: #374151;
+}
+.ssd-btn-ghost:hover { background: #f7f8fa; border-color: #d3d7e0; }
+.ssd-btn-block { width: 100%; }
+
+/* ---- "Needs attention" actions ---- */
+.ssd-actions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ssd-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  border: 1px solid #eceef3;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.ssd-action:hover { border-color: #dfe3ea; background: #fafbfc; }
+.ssd-action-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ssd-action.is-danger .ssd-action-icon { background: #fdeceb; color: #cf4c40; }
+.ssd-action.is-warning .ssd-action-icon { background: #fdf4e7; color: #b8791f; }
+.ssd-action.is-info .ssd-action-icon { background: #eef4ff; color: #2563eb; }
+.ssd-action-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ssd-action-title { font-size: 13.5px; font-weight: 580; color: #1a2433; }
+.ssd-action-detail {
+  font-size: 12px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssd-action-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* ---- Renewals list ---- */
+.ssd-renewals { list-style: none; margin: 0; padding: 0; }
+.ssd-renewal {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 8px;
+  border: 0;
+  border-bottom: 1px solid #f0f1f4;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.ssd-renewals li:last-child .ssd-renewal { border-bottom: 0; }
+.ssd-renewal:hover { background: #fafbfc; }
+.ssd-renewal-date { width: 70px; flex: none; display: flex; flex-direction: column; }
+.ssd-renewal-date b { font-size: 13px; font-weight: 600; color: #101727; }
+.ssd-renewal-date small { font-size: 11px; color: #9aa1ad; }
+.ssd-renewal-date.is-danger b { color: #cf4c40; }
+.ssd-renewal-date.is-warning b { color: #b8791f; }
+.ssd-renewal-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ssd-renewal-body b {
+  font-size: 13.5px;
+  font-weight: 560;
+  color: #1a2433;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssd-renewal-body small { font-size: 12px; color: #6b7280; }
+.ssd-renewal-arrow { color: #c8cdd6; flex: none; }
+
+/* ---- Status pills + dots ---- */
+.ssd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 560;
+  background: #fff;
+}
+.ssd-pill::before { content: ""; width: 5px; height: 5px; border-radius: 999px; }
+.ssd-pill.is-ok { color: #1a7a4e; border-color: rgba(26, 122, 78, 0.24); }
+.ssd-pill.is-ok::before { background: #1a7a4e; }
+.ssd-pill.is-warning { color: #8a5a16; border-color: rgba(178, 94, 9, 0.24); }
+.ssd-pill.is-warning::before { background: #c0791f; }
+.ssd-pill.is-danger { color: #b24a40; border-color: rgba(178, 74, 64, 0.28); }
+.ssd-pill.is-danger::before { background: #cf4c40; }
+.ssd-dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+.ssd-dot.is-ok { background: #1a7a4e; }
+.ssd-dot.is-warning { background: #c0791f; }
+.ssd-dot.is-danger { background: #cf4c40; }
+
+/* ---- Premium-by-policy bars ---- */
+.ssd-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+.ssd-bar-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 80px; align-items: center; gap: 14px; }
+.ssd-bar-name {
+  font-size: 13px;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssd-bar-track { height: 8px; border-radius: 999px; background: #eef1f6; overflow: hidden; }
+.ssd-bar-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2563eb, #4b82f0); }
+.ssd-bar-val { font-size: 13px; font-weight: 600; color: #101727; text-align: right; }
+
+/* ---- Policy health ---- */
+.ssd-health { list-style: none; margin: 0; padding: 0; }
+.ssd-health-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #f0f1f4; }
+.ssd-health-row:last-child { border-bottom: 0; }
+.ssd-health-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ssd-health-body b {
+  font-size: 13px;
+  font-weight: 560;
+  color: #1a2433;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssd-health-body small { font-size: 11.5px; color: #6b7280; }
+.ssd-health-amt { font-size: 13px; font-weight: 600; color: #101727; white-space: nowrap; }
+
+/* ---- Savings card ---- */
+.ssd-savings-figure { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+.ssd-savings-amt { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; color: #2563eb; }
+.ssd-savings-unit { font-size: 12.5px; color: #6b7280; }
+.ssd-savings-copy { margin: 0 0 16px; font-size: 12.5px; line-height: 1.55; color: #6b7280; }
+.ssd-savings-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.ssd-savings-meta small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #9aa1ad;
+}
+.ssd-savings-meta b { font-size: 14px; font-weight: 600; color: #101727; }
+
+/* ---- Recent activity ---- */
+.ssd-activity { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.ssd-activity-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f4f5f7; }
+.ssd-activity-row:last-child { border-bottom: 0; }
+.ssd-activity-mark { width: 7px; height: 7px; border-radius: 999px; margin-top: 5px; flex: none; background: #c2c8d2; }
+.ssd-activity-row.is-certificate .ssd-activity-mark { background: #2563eb; }
+.ssd-activity-row.is-savings .ssd-activity-mark { background: #1a7a4e; }
+.ssd-activity-row.is-document .ssd-activity-mark { background: #8a909c; }
+.ssd-activity-row.is-holder .ssd-activity-mark { background: #b8791f; }
+.ssd-activity-row > div { flex: 1; min-width: 0; }
+.ssd-activity-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.ssd-activity-top b {
+  font-size: 13px;
+  font-weight: 560;
+  color: #1a2433;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssd-activity-top small { font-size: 11px; color: #9aa1ad; flex: none; }
+.ssd-activity-row > div > small {
+  display: block;
+  margin-top: 1px;
+  font-size: 12px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- All-clear state ---- */
+.ssd-allclear {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e3efe8;
+  border-radius: 12px;
+  background: #f3f9f5;
+  font-size: 13px;
+  color: #2c6048;
+}
+.ssd-allclear svg { color: #1a7a4e; flex: none; }
+
+/* ---- Footnote ---- */
+.ssd-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 2px 4px 0;
+  font-size: 12.5px;
+  color: #6b7280;
+}
+.ssd-foot svg { color: #2563eb; flex: none; }
+.ssd-foot b { color: #374151; font-weight: 600; }
+
+/* ---- Empty / onboarding state ---- */
+.ssd-empty-state { align-items: stretch; }
+.ssd-onboard { max-width: 760px; width: 100%; margin: 6px auto; padding: 30px 32px; }
+.ssd-eyebrow {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a909c;
+}
+.ssd-onboard h2 { margin: 10px 0 8px; font-size: 24px; font-weight: 640; letter-spacing: -0.02em; color: #101727; }
+.ssd-onboard > p { margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #6b7280; max-width: 58ch; }
+.ssd-onboard-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+.ssd-onboard-steps { display: grid; gap: 16px; }
+.ssd-onboard-step { display: flex; gap: 12px; align-items: flex-start; }
+.ssd-onboard-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ssd-onboard-step b { display: block; font-size: 14px; font-weight: 600; color: #1a2433; }
+.ssd-onboard-step small { font-size: 13px; color: #6b7280; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1180px) {
+  .ssd-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .ssd-kpis { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .ssd-kpis { grid-template-columns: 1fr; }
+  .ssd-bar-row { grid-template-columns: 104px minmax(0, 1fr) 68px; gap: 10px; }
+  .ssd-card { padding: 18px; }
+}
