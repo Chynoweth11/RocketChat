@@ -57,6 +57,7 @@ function greetingFor(date = new Date()) {
 }
 
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const POLICY_HEALTH_LIMIT = 4;
 
 // Projected monthly pace: until a backend supplies real spend history, this
 // charts an even 1/12 distribution across the trailing six months ending with
@@ -71,6 +72,35 @@ function buildMonthlySpend(totalPremium, now = new Date()) {
   return points;
 }
 
+function compactAnnualPremium(value) {
+  const amount = Number(value) || 0;
+  if (amount >= 1000) {
+    const compact = (amount / 1000).toFixed(amount >= 10000 ? 1 : 1).replace(/\.0$/, "");
+    return `$${compact}k / yr`;
+  }
+  return `${formatMoney(amount)} / yr`;
+}
+
+function dashboardPolicyStatus(policy) {
+  const days = policy.daysRemaining ?? 999;
+  if (days <= 10) return { label: "Critical", className: "danger", rank: 0 };
+  if (days <= 60) return { label: "Review Soon", className: "warning", rank: 1 };
+  return { label: "Active", className: "success", rank: 2 };
+}
+
+function policyHealthTypeRank(policy) {
+  const key = `${policy.policyType || policy.type || ""} ${policy.name || ""}`.toLowerCase();
+  if (key.includes("worker")) return 0;
+  if (key.includes("auto")) return 1;
+  if (key.includes("general") || (key.includes("liability") && !key.includes("umbrella"))) return 2;
+  if (key.includes("umbrella")) return 3;
+  if (key.includes("property")) return 4;
+  return 9;
+}
+
+function dashboardPolicyName(policy) {
+  return policy.name === "Umbrella / Excess Liability" ? "Umbrella / Excess" : policy.name;
+}
 
 export default function DashboardView({
   firstName,
@@ -107,6 +137,19 @@ export default function DashboardView({
   const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
   const monthlySeries = buildMonthlySpend(totalPremium);
   const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.value));
+  const criticalPolicyCount = activePolicies.filter((policy) => dashboardPolicyStatus(policy).className === "danger").length;
+  const policyHealthRows = [...activePolicies]
+    .sort((a, b) => {
+      const aStatus = dashboardPolicyStatus(a);
+      const bStatus = dashboardPolicyStatus(b);
+      return (
+        policyHealthTypeRank(a) - policyHealthTypeRank(b) ||
+        aStatus.rank - bStatus.rank ||
+        (a.daysRemaining ?? 9999) - (b.daysRemaining ?? 9999) ||
+        (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0)
+      );
+    })
+    .slice(0, POLICY_HEALTH_LIMIT);
   const [breakdownMonth, setBreakdownMonth] = useState(null);
   const monthlyBreakdown = policyAccounts.map((policy) => {
     const annual = policy.premiumAmount ?? policy.premium ?? 0;
@@ -235,36 +278,43 @@ export default function DashboardView({
 
           <div className="ss-dash-accounts-panel">
             <Section
-              title="Insurance policies"
-              sub="Carrier, renewal status, and annual spend"
-              extra={
-                <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
-                  View all <ArrowRight size={13} />
-                </button>
-              }
+              title="Policy Health"
+              sub="Active coverage, renewals, and risk items"
             />
-            {policyAccounts.slice(0, 6).map((policy) => {
-              const status = getStatus(policy.daysRemaining);
+
+            <div className="ss-policy-health-summary" aria-label="Policy health summary">
+              <span><b>{activePolicies.length}</b> Active</span>
+              <span><b>{criticalPolicyCount}</b> Critical</span>
+              <span><b>{compactAnnualPremium(totalPremium)}</b></span>
+            </div>
+
+            {policyHealthRows.map((policy) => {
+              const status = dashboardPolicyStatus(policy);
               return (
-                <div className="ss-dash-account-row" key={policy.id}>
-                  <div>
-                    <b>{policy.name}</b>
+                <div className="ss-policy-health-row" key={policy.id}>
+                  <div className="ss-policy-health-copy">
+                    <b>{dashboardPolicyName(policy)}</b>
                     <small>
-                      {policy.carrier} | {policy.daysRemaining}d to renew
+                      {policy.carrier} · Renews in {policy.daysRemaining} day{policy.daysRemaining === 1 ? "" : "s"}
                     </small>
                   </div>
-                  <div className="ss-insight-amount">
+                  <div className="ss-policy-health-meta">
                     <strong>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</strong>
                     <em className={`ss-status ${status.className}`}>{status.label}</em>
                   </div>
                 </div>
               );
             })}
-            {policyAccounts.length === 0 && (
+            {policyHealthRows.length === 0 && (
               <div className="ss-note">
                 <FileWarning size={16} />
                 <span>No policies added yet. Upload a policy to start tracking spend.</span>
               </div>
+            )}
+            {policyHealthRows.length > 0 && (
+              <button type="button" className="ss-policy-health-action" onClick={onOpenPolicies}>
+                View all policies <ArrowRight size={14} />
+              </button>
             )}
           </div>
         </div>
