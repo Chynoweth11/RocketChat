@@ -12,7 +12,6 @@ import {
   Search,
   Settings,
   ShieldCheck,
-  Upload,
   X,
 } from "lucide-react";
 import { formatMoney } from "../utils.js";
@@ -179,7 +178,6 @@ export function NavButton({ active, icon: Icon, label, onClick, badge }) {
 
 export function Header({
   view,
-  onUpload,
   onSearch,
   unread,
   demoMode = false,
@@ -258,13 +256,6 @@ export function Header({
             <kbd>⌘K</kbd>
           </button>
         )}
-        <button
-          type="button"
-          className="ss-button soft ss-upload-btn"
-          onClick={onUpload}
-        >
-          <Upload size={16} /> Upload insurance
-        </button>
         {unread > 0 && (
           <span className="ss-alert-chip" role="status" aria-label={`${unread} policies need attention`}>
             <Bell size={13} aria-hidden="true" />

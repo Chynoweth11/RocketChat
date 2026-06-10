@@ -1639,7 +1639,6 @@ export default function SubShieldComplete() {
         <main className="ss-main">
           <Header
             view={view}
-            onUpload={() => setModal("scan")}
             onSearch={() => setPaletteOpen(true)}
             unread={critical.length + reminders.length}
             demoMode={Boolean(data.demoMode)}
