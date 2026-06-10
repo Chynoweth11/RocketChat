@@ -15394,3 +15394,217 @@ body {
 .ss-main {
   scrollbar-color: #d3d7e0 transparent;
 }
+
+/* =====================================================================
+   ELEGANCE PASS (final) — a cohesive, professional finish.
+   Sidebar aligned to the accent, refined section headers, calmer
+   stat tiles + status chips, quieter notes, tactile rows. Last in
+   the cascade so it governs the finished look.
+   ===================================================================== */
+
+/* ---- Sidebar: deep, refined navy with one aligned accent ---- */
+.ss-sidebar {
+  background: linear-gradient(180deg, #0a1322 0%, #0b1626 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px 14px 16px;
+}
+.ss-brand {
+  padding: 4px 6px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.ss-brand b {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.ss-brand small {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+/* Nav: quiet by default, a clear accent rail when active. */
+.ss-nav {
+  min-height: 38px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+.ss-nav:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+}
+.ss-nav.active {
+  background: rgba(89, 130, 226, 0.16);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #6f9bff;
+}
+.ss-nav.active::before {
+  display: none;
+}
+.ss-nav.active svg {
+  color: #8fb4ff;
+}
+.ss-nav-section {
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Sidebar cards + account aligned to the accent family. */
+.ss-side-card .ss-eyebrow::before { background: #6f9bff; }
+.ss-side-card .ss-button,
+.ss-side-card .ss-button:hover:not(:disabled) {
+  background: #3b6ae0;
+  border-color: #3b6ae0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.ss-account-avatar {
+  background: linear-gradient(135deg, #5b86ee 0%, #2563eb 100%);
+}
+.ss-account.active {
+  border-color: rgba(111, 155, 255, 0.42);
+  background: rgba(111, 155, 255, 0.14);
+}
+.ss-account-plan {
+  background: rgba(111, 155, 255, 0.18);
+  border-color: rgba(111, 155, 255, 0.32);
+  color: #9bbcff;
+}
+.ss-nav-badge {
+  background: #3b6ae0;
+}
+
+/* ---- Section headers: confident title, quiet supporting copy ---- */
+.ss-section h2 {
+  font-size: 15.5px;
+  font-weight: 660;
+  letter-spacing: -0.02em;
+  color: #101727;
+}
+.ss-section p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.ss-eyebrow {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+}
+
+/* ---- Stat tiles: calm surface, hero figure, quiet label ---- */
+.ss-info {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.ss-info:hover {
+  border-color: #dcdfe7;
+  box-shadow: var(--shadow-sm);
+}
+.ss-info span {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.ss-info b {
+  font-weight: 640;
+  letter-spacing: -0.03em;
+  color: #101727;
+}
+
+/* ---- Status: one calm dot-chip system ---- */
+.ss-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 24, 31, 0.1);
+  background: #fff;
+  font-size: 11px;
+  font-weight: 560;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+.ss-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #aab2bd;
+  flex: none;
+}
+.ss-status.success { color: #1a7a4e; background: #fff; border-color: rgba(26, 122, 78, 0.22); }
+.ss-status.success::before { background: #1a7a4e; }
+.ss-status.warning { color: #8a5a16; background: #fff; border-color: rgba(178, 94, 9, 0.22); }
+.ss-status.warning::before { background: #c0791f; }
+.ss-status.danger { color: #b24a40; background: #fff; border-color: rgba(178, 74, 64, 0.26); }
+.ss-status.danger::before { background: #cf4c40; }
+
+/* ---- Notes + empty states: quieter, more refined ---- */
+.ss-note {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--muted);
+  line-height: 1.55;
+}
+.ss-note.success {
+  border-color: rgba(26, 122, 78, 0.2);
+  background: #f1f8f3;
+  color: #2c6048;
+}
+.ss-empty {
+  border-radius: 14px;
+  border: 1px dashed var(--line);
+  background: var(--surface-soft);
+}
+
+/* ---- Filter chips: crisp, restrained active state ---- */
+.ss-chip {
+  border-radius: 999px;
+  font-weight: 540;
+}
+.ss-chip.active {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand-strong);
+}
+
+/* ---- Tactile rows: a quiet hover lift across list surfaces ---- */
+.ss-renewal-timeline-row,
+.ss-policy-health-row,
+.ss-doc-row,
+.ss-coi-holder-row,
+.ss-dash-save-row {
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.ss-renewal-timeline-row:hover,
+.ss-doc-row:hover {
+  background: var(--surface-soft);
+}
+
+/* ---- Header control row: even, refined pills ---- */
+.ss-top-date,
+.ss-demo-pill,
+.ss-demo-load,
+.ss-search-trigger,
+.ss-alert-chip {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+.ss-search-trigger:hover,
+.ss-demo-load:hover {
+  border-color: #d3d7e0;
+  background: var(--surface-soft);
+}
