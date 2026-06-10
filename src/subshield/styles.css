@@ -15374,12 +15374,16 @@ body {
   border-color: var(--line);
 }
 .ss-spend-point span:not(.ss-spend-val) {
-  background: linear-gradient(180deg, #dfe5f1, #e9edf6);
+  background: linear-gradient(180deg, #9cbcf6, #76a0f1);
   border-radius: 7px 7px 0 0;
+  transition: filter 0.15s ease;
+}
+.ss-spend-point:hover span:not(.ss-spend-val) {
+  filter: brightness(1.04);
 }
 .ss-spend-point.is-current span:not(.ss-spend-val) {
   background: linear-gradient(180deg, #3b76ef, var(--brand));
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
 }
 .ss-dash-trend-fill {
   background: linear-gradient(90deg, var(--brand), #3b76ef);

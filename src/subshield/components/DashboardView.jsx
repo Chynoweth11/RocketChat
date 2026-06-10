@@ -59,15 +59,23 @@ function greetingFor(date = new Date()) {
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const POLICY_HEALTH_LIMIT = 4;
 
-// Projected monthly pace: until a backend supplies real spend history, this
-// charts an even 1/12 distribution across the trailing six months ending with
-// the current month. Labels derive from today's date so they never go stale.
+// Cumulative spend pace: until a backend supplies real billing history, this
+// charts the even 1/12 monthly run-rate accumulated across the trailing six
+// months ending with the current month — an honest, rising curve of how spend
+// adds up. `value` is the single-month run-rate (used by the breakdown modal);
+// `cumulative` drives the ascending bars. Labels derive from today's date so
+// they never go stale.
 function buildMonthlySpend(totalPremium, now = new Date()) {
   const monthly = Math.round(totalPremium / 12);
   const points = [];
   for (let offset = 5; offset >= 0; offset -= 1) {
     const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-    points.push({ label: MONTH_ABBR[date.getMonth()], value: monthly });
+    const monthsElapsed = 6 - offset; // 1 (oldest) … 6 (current)
+    points.push({
+      label: MONTH_ABBR[date.getMonth()],
+      value: monthly,
+      cumulative: monthly * monthsElapsed,
+    });
   }
   return points;
 }
@@ -136,7 +144,7 @@ export default function DashboardView({
   const missingDocCount = missingDocuments.length;
   const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
   const monthlySeries = buildMonthlySpend(totalPremium);
-  const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.value));
+  const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.cumulative));
   const criticalPolicyCount = activePolicies.filter((policy) => dashboardPolicyStatus(policy).className === "danger").length;
   const policyHealthRows = [...activePolicies]
     .sort((a, b) => {
@@ -225,7 +233,7 @@ export default function DashboardView({
               About {formatMoney(monthlySpend)}/month across {activePolicies.length} active policies.
             </p>
 
-            <div className="ss-spend-chart" aria-label="Projected monthly insurance spend, even pace across the trailing six months">
+            <div className="ss-spend-chart" aria-label="Cumulative insurance spend across the trailing six months">
               {monthlySeries.map((point, idx) => (
                 <button
                   type="button"
@@ -233,15 +241,15 @@ export default function DashboardView({
                   className={`ss-spend-point${idx === monthlySeries.length - 1 ? " is-current" : ""}`}
                   onDoubleClick={() => setBreakdownMonth(`${point.label} ${new Date().getFullYear()}`)}
                   title={`Double-click for the ${point.label} cost breakdown`}
-                  aria-label={`${point.label}: ${formatMoney(point.value)} estimated. Double-click for the cost breakdown.`}
+                  aria-label={`${point.label}: ${formatMoney(point.cumulative)} cumulative (${formatMoney(point.value)} that month). Double-click for the cost breakdown.`}
                 >
-                  <em className="ss-spend-val">{formatMoney(point.value)}</em>
-                  <span style={{ height: `${Math.max(12, Math.round((point.value / monthlyPeak) * 70))}px` }} />
+                  <em className="ss-spend-val">{formatMoney(point.cumulative)}</em>
+                  <span style={{ height: `${Math.max(12, Math.round((point.cumulative / monthlyPeak) * 78))}px` }} />
                   <small>{point.label}</small>
                 </button>
               ))}
             </div>
-            <p className="ss-spend-hint">Double-click a month to see its cost breakdown.</p>
+            <p className="ss-spend-hint">Cumulative spend over the last 6 months. Double-click a month for its cost breakdown.</p>
             <div className="ss-dash-action-rail" aria-label="Dashboard primary actions">
               <button type="button" className="ss-action-tile primary" onClick={onReviewSavings}>
                 <span className="ss-action-icon">
