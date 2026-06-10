@@ -15224,3 +15224,173 @@ body {
   letter-spacing: 0.035em;
   color: var(--faint);
 }
+
+/* =====================================================================
+   LAUNCH POLISH (final layer) — premium, airy, confident.
+   Richer royal-blue accent, larger/lighter display type, more
+   breathing room, tactile buttons, whisper card depth. Defined last
+   so it cleanly cascades over every earlier layer.
+   ===================================================================== */
+.ss-app {
+  /* Refined royal-blue accent (matches the marketing system). */
+  --brand: #2563eb;
+  --brand-strong: #1d4ed8;
+  --brand-soft: #eef4ff;
+  --brand-line: #cbddfb;
+  --ink-btn: #2563eb;
+  --ink-btn-hover: #1d4ed8;
+  --ring: 0 0 0 3px rgba(37, 99, 235, 0.20);
+
+  /* Cooler neutrals + a calmer canvas for the airy, premium feel. */
+  --surface-soft: #f7f8fa;
+  --line: #e7e9ef;
+  --line-soft: #eef0f4;
+  --muted: #5b6270;
+  --faint: #8a909c;
+
+  /* Whisper elevation — surfaces lift gently off the canvas. */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 8px 28px rgba(16, 24, 40, 0.08), 0 2px 8px rgba(16, 24, 40, 0.04);
+
+  background: #f6f7f9;
+}
+
+.ss-main,
+.ss-layout {
+  background: #f6f7f9;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.16);
+  color: #0f1b33;
+}
+
+/* ---- Roomier rhythm: airy margins read as premium ---- */
+.ss-main {
+  padding: 38px 48px 48px;
+}
+.ss-section {
+  margin-bottom: 24px;
+}
+.ss-grid {
+  gap: 20px;
+}
+
+/* ---- Confident, refined display typography ---- */
+.ss-top {
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+}
+.ss-top h1 {
+  font-size: clamp(28px, 2.5vw, 34px);
+  font-weight: 660;
+  letter-spacing: -0.026em;
+  line-height: 1.08;
+  color: #101727;
+}
+.ss-top-sub {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.ss-dash-spend-value {
+  font-weight: 640;
+  letter-spacing: -0.038em;
+  color: #101727;
+}
+.ss-dash-spend-panel h2,
+.ss-section h2 {
+  color: #101727;
+}
+
+/* ---- Cards: hairline + whisper depth (lift off the canvas) ---- */
+.ss-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.ss-card:hover {
+  border-color: #dcdfe7;
+  box-shadow: var(--shadow-md);
+}
+
+/* ---- Primary button: solid accent, tactile, smooth lift ---- */
+.ss-button {
+  border-radius: 11px;
+  min-height: 44px;
+  font-weight: 600;
+  letter-spacing: -0.006em;
+  background: var(--brand);
+  border: 1px solid var(--brand);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.22);
+  transition: background 0.16s ease, border-color 0.16s ease,
+    box-shadow 0.18s ease, transform 0.12s ease;
+}
+.ss-button:hover:not(:disabled) {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.26);
+}
+.ss-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.22);
+}
+.ss-button.soft {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+}
+.ss-button.soft:hover:not(:disabled) {
+  background: var(--surface-soft);
+  border-color: #d3d7e0;
+  color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Controls: hairline, new-accent focus ring ---- */
+.ss-app input:focus,
+.ss-app select:focus,
+.ss-app textarea:focus,
+.ss-search input:focus,
+.ss-field input:focus,
+.ss-field select:focus,
+.ss-field textarea:focus,
+.ss-settings-search:focus-within {
+  border-color: var(--brand-line);
+  box-shadow: var(--ring);
+  outline: none;
+}
+
+/* ---- Spend chart: intentional muted bars (not skeletons) ---- */
+.ss-spend-chart {
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+.ss-spend-point span:not(.ss-spend-val) {
+  background: linear-gradient(180deg, #dfe5f1, #e9edf6);
+  border-radius: 7px 7px 0 0;
+}
+.ss-spend-point.is-current span:not(.ss-spend-val) {
+  background: linear-gradient(180deg, #3b76ef, var(--brand));
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+}
+.ss-dash-trend-fill {
+  background: linear-gradient(90deg, var(--brand), #3b76ef);
+}
+
+/* ---- Eyebrow marker picks the accent back up, subtly ---- */
+.ss-eyebrow::before {
+  background: var(--brand);
+}
+
+/* ---- Quiet, neutral scrollbars ---- */
+.ss-main {
+  scrollbar-color: #d3d7e0 transparent;
+}
