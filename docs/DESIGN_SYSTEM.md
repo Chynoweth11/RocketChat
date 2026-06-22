@@ -97,8 +97,89 @@ Weight ramp: Medium 500 · Semibold 590 · Bold 640 · Heavy 780.
 
 ---
 
+## Spacing & Radii
+
+4px base grid · 16px card padding · 10px controls · full pills for status.
+
+| Token | px |  | Token | px |
+|---|---|---|---|---|
+| `--space-1` | 4 |  | `--space-7` | 28 |
+| `--space-2` | 8 |  | `--space-8` | 32 |
+| `--space-3` | 12 |  | `--space-10` | 40 |
+| `--space-4` | 16 |  | `--space-12` | 48 |
+| `--space-5` | 20 |  |  |  |
+| `--space-6` | 24 |  |  |  |
+
+| Radius | px | Use |
+|---|---|---|
+| `--radius-sm` | 8 | Chips, small fills |
+| `--radius-control` | 9 | Buttons, inputs |
+| `--radius-inner` | 12 | Nested panels |
+| `--radius-card` | 14 | Cards |
+| `--radius-pill` | 999 | Status pills, switches |
+
+---
+
+## Elevation
+
+Premium, restrained depth · cards earn a whisper-soft lift · modals go deeper.
+
+| Level | Token | Notes |
+|---|---|---|
+| Resting | `--shadow-xs` | + hairline border |
+| Hover | `--shadow-sm` | Card hover lift |
+| Popover | `--shadow-md` | Menus, popovers |
+| Modal | `--shadow-lg` | Dialogs |
+
+---
+
+## Components
+
+### Buttons
+Ink-primary for the **one** decisive action; secondary, danger, ghost for the rest.
+
+| Variant | Look |
+|---|---|
+| Ink primary | Dark `--ss-ink-btn` fill, white text (e.g. Upload policy, Submit) |
+| Secondary | White fill, `--ss-line` border, ink text (Add manually) |
+| Danger | Red fill, white text (Delete) |
+| Ghost | No fill, ink/brand text, optional arrow (Review →) |
+| Icon-only | Square, ghost or soft `…` menu |
+
+- **Sizes:** Medium · Small · Small soft.
+- **States:** loading (spinner + "Sending…", disabled look) · disabled (muted gray).
+
+### Metrics
+Eyebrow label + big value + one quiet support line.
+`ANNUAL PREMIUM / $10,935 / 6 policies` · `TRACKED SAVINGS / $1,195/yr / +$540` ·
+`COVERAGE HEALTH / 92 / Strong`. Grouped inside a bordered metrics panel.
+
+### Coverage card
+Eyebrow (`COVERAGE`) → title → `carrier · renews in N days` → tag row.
+Tags: status dot pill (`• Workers' Comp`), id chip (`WC-90183321`),
+type chip (`DECLARATION`), accent chip (`Growth plan`, brand-tinted).
+
+### Status tiles (Status & Notes)
+Row of labeled tiles, each = eyebrow + icon + value + sub:
+`DOT STATUS / • Active / No action required` · `POLICY STATUS / ◇ Current / Updated …` ·
+`REVIEW STATUS / ◷ Review soon / Next review in N days` · `RISK STATUS / Low` ·
+`VERIFIED / 100% / All requirements met`. Dark app header bar above page title.
+Update rows: icon tile + title + body + right meta (label + DATE + time) + chevron.
+
+### Forms
+Crisp inputs, refined labels. Required fields marked with red `*`.
+- **Fieldset:** eyebrow section label (`APPLICANT DETAILS`) bordering grouped fields.
+- **TextField:** label above, hairline border, 9px radius, soft placeholder.
+- **Select:** same frame + chevron.
+- **FilterChip:** pill with label + count (`Declarations 4`); active = filled/bordered.
+- **Switch:** pill track, dark when on (`--ss-ink-btn`).
+
+---
+
 ## Principles
 1. Monochrome by default; color only when it carries meaning.
 2. Surfaces defined by hairlines, not shadows.
 3. One accent at a time (blue primary, gold secondary).
 4. Generous spacing, tight letter-tracking on large type.
+5. Exactly one ink-primary action per view; everything else recedes.
+6. 4px grid governs all spacing; radii are consistent per element class.
