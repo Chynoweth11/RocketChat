@@ -49,15 +49,15 @@ textarea {
   --text: #1a1714;
   --muted: #6b6158;
   --faint: #9e9589;
-  --brand: #2558d6;
-  --brand-soft: #f0f4ff;
-  --brand-line: #c0d0f8;
-  --brand-strong: #1840a8;
-  --accent: #9a6c3a;
+  --brand: #2552b5;
+  --brand-soft: #eef2fb;
+  --brand-line: #d3dcef;
+  --brand-strong: #1a3c8a;
+  --accent: #6f5526;
   --accent-soft: #fdf6ec;
   --success: #0f7a54;
   --success-soft: #eaf8f3;
-  --warning: #a86c1e;
+  --warning: #9c7b3e;
   --warning-soft: #fef7ec;
   --danger: #b83830;
   --danger-soft: #fff1ef;
@@ -731,7 +731,7 @@ textarea {
   padding: 8px 12px;
   border-radius: 999px;
   border: 1px dashed var(--brand-line, #c7d6fb);
-  background: var(--brand-soft, #eef4ff);
+  background: var(--brand-soft, #eef2fb);
   color: var(--brand-strong, #1d49c4);
   font-size: 12px;
   font-weight: 800;
@@ -970,7 +970,7 @@ textarea {
 .ss-chip.active {
   color: #1746ad;
   border-color: #adc4ff;
-  background: #eff5ff;
+  background: #eef2fb;
   box-shadow: 0 1px 3px rgba(37, 87, 210, 0.1);
   font-weight: 600;
 }
@@ -1826,7 +1826,7 @@ textarea {
 }
 
 .ss-policy-health-dot.success { background: #16a34a; }
-.ss-policy-health-dot.warning { background: #d97706; }
+.ss-policy-health-dot.warning { background: #9c7b3e; }
 .ss-policy-health-dot.danger  { background: #dc2626; }
 
 .ss-mini-btn {
@@ -2662,7 +2662,7 @@ textarea {
   height: 18px;
   border-radius: 50%;
   border: 2px solid rgba(17, 24, 39, 0.15);
-  border-top-color: var(--brand, #2563eb);
+  border-top-color: var(--brand, #2552b5);
   animation: ss-spin 0.75s linear infinite;
 }
 
@@ -2826,7 +2826,7 @@ textarea {
 
 .ss-pdf-dropzone.active {
   border-color: #7ea2ef;
-  background: #f0f6ff;
+  background: #eef2fb;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
@@ -3298,7 +3298,7 @@ textarea {
 
 .ss-coverage-step.active {
   border-color: #bdd0ff;
-  background: #eef4ff;
+  background: #eef2fb;
 }
 
 .ss-coverage-step.active span {
@@ -4681,7 +4681,7 @@ textarea {
 }
 
 .ss-cmd-item.active {
-  background: var(--brand-soft, #eef4ff);
+  background: var(--brand-soft, #eef2fb);
   color: var(--brand, #2457d4);
 }
 
@@ -5171,7 +5171,7 @@ h1, h2, h3 {
 }
 
 .ss-action-item--danger::before  { background: #ef4444; }
-.ss-action-item--warning::before { background: #f59e0b; }
+.ss-action-item--warning::before { background: #9c7b3e; }
 .ss-action-item--info::before    { background: var(--brand); }
 
 .ss-action-item:hover {
@@ -5192,7 +5192,7 @@ h1, h2, h3 {
 }
 
 .ss-action-dot.danger  { background: #fff0f0; color: #dc2626; }
-.ss-action-dot.warning { background: #fffbeb; color: #d97706; }
+.ss-action-dot.warning { background: #f8f2e6; color: #9c7b3e; }
 .ss-action-dot.info    { background: var(--brand-soft); color: var(--brand); }
 
 .ss-action-text {
@@ -5339,7 +5339,7 @@ h1, h2, h3 {
 }
 
 .ss-health-item.good { color: #15803d; }
-.ss-health-item.issue { color: #b45309; }
+.ss-health-item.issue { color: #6f5526; }
 
 /* =====================================================
    Renewal grid (in Policies view)
@@ -5433,7 +5433,7 @@ h1, h2, h3 {
 
 .ss-journey-step.active {
   border-color: #a0bffe;
-  background: #f0f6ff;
+  background: #eef2fb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
@@ -5469,7 +5469,7 @@ h1, h2, h3 {
   gap: 10px;
   padding: 12px 14px;
   border: 1px solid #c8d9fe;
-  background: #f0f6ff;
+  background: #eef2fb;
   border-radius: 11px;
   font-size: 12.5px;
   line-height: 1.55;
@@ -5522,7 +5522,7 @@ h1, h2, h3 {
   font-weight: 400;
 }
 
-.ss-savings-card.pending { border-left: 3px solid #f59e0b; }
+.ss-savings-card.pending { border-left: 3px solid #9c7b3e; }
 .ss-savings-card.at-partner { border-left: 3px solid var(--brand); }
 .ss-savings-card.accepted { border-left: 3px solid #16a34a; }
 .ss-savings-card.muted { border-left: 3px solid var(--line); opacity: 0.75; }
@@ -5694,9 +5694,9 @@ h1, h2, h3 {
 }
 
 .ss-coi-status.aging {
-  color: #b45309;
-  background: #fef3c7;
-  border-color: #fde68a;
+  color: #6f5526;
+  background: #f8f2e6;
+  border-color: #e7d8bb;
 }
 
 .ss-coi-status.stale {
@@ -6017,9 +6017,9 @@ h1, h2, h3 {
 }
 
 .ss-comply-badge.gap {
-  color: #b45309;
-  background: #fef3c7;
-  border-color: #fde68a;
+  color: #6f5526;
+  background: #f8f2e6;
+  border-color: #e7d8bb;
 }
 
 .ss-comply-badge.none {
@@ -6065,7 +6065,7 @@ h1, h2, h3 {
 }
 
 .ss-comply-ico.ok { color: #16a34a; flex-shrink: 0; }
-.ss-comply-ico.no { color: #d97706; flex-shrink: 0; }
+.ss-comply-ico.no { color: #9c7b3e; flex-shrink: 0; }
 
 .ss-comply-req-status {
   margin-left: auto;
@@ -6076,7 +6076,7 @@ h1, h2, h3 {
 
 .ss-comply-req.met .ss-comply-req-status { color: #15803d; }
 .ss-comply-req.unmet .ss-comply-req-status,
-.ss-comply-req.missing .ss-comply-req-status { color: #b45309; }
+.ss-comply-req.missing .ss-comply-req-status { color: #6f5526; }
 
 .ss-comply-checks {
   display: flex;
@@ -6091,7 +6091,7 @@ h1, h2, h3 {
 }
 
 .ss-comply-check.ok { color: #166534; }
-.ss-comply-check.no { color: #b45309; font-weight: 500; }
+.ss-comply-check.no { color: #6f5526; font-weight: 500; }
 .ss-comply-check em { font-style: normal; color: var(--muted); }
 
 /* Send-flow compliance banner */
@@ -6108,8 +6108,8 @@ h1, h2, h3 {
 }
 
 .ss-comply-banner.gap {
-  border-color: #fde68a;
-  background: #fffbeb;
+  border-color: #e7d8bb;
+  background: #f8f2e6;
 }
 
 .ss-comply-banner-head {
@@ -6124,7 +6124,7 @@ h1, h2, h3 {
 }
 
 .ss-comply-banner.ok .ss-comply-banner-icon { color: #16a34a; }
-.ss-comply-banner.gap .ss-comply-banner-icon { color: #d97706; }
+.ss-comply-banner.gap .ss-comply-banner-icon { color: #9c7b3e; }
 
 .ss-comply-banner-copy {
   flex: 1;
@@ -6436,7 +6436,7 @@ h1, h2, h3 {
 }
 .ss-policy-editor-warn {
   font-size: 12px;
-  color: var(--warning, #d97706);
+  color: var(--warning, #9c7b3e);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -6453,7 +6453,7 @@ h1, h2, h3 {
   background: #22c55e;
 }
 .ss-conf-dot.med {
-  background: #f59e0b;
+  background: #9c7b3e;
 }
 .ss-conf-dot.low {
   background: #ef4444;
@@ -7165,7 +7165,7 @@ h1, h2, h3 {
   --text: #131922;
   --muted: #665f56;
   --faint: #958b7f;
-  --brand: #182844;
+  --brand: var(--ss-brand);
   --brand-soft: #eef2f8;
   --brand-line: #c9d3e4;
   --brand-strong: #0e1b31;
@@ -8484,8 +8484,8 @@ body {
   --text: #101828;
   --muted: #667085;
   --faint: #98a2b3;
-  --brand: #3157d5;
-  --brand-soft: #eef4ff;
+  --brand: #2552b5;
+  --brand-soft: #eef2fb;
   --brand-line: #d5e2ff;
   --brand-strong: #1d3ea6;
   --accent: #0f766e;
@@ -8493,7 +8493,7 @@ body {
   --success: #0e7a57;
   --success-soft: #ecfdf5;
   --warning: #b7791f;
-  --warning-soft: #fffbeb;
+  --warning-soft: #f8f2e6;
   --danger: #c2413b;
   --danger-soft: #fff1f0;
   --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
@@ -8592,7 +8592,7 @@ body {
 
 .ss-nav.active {
   color: #17347f;
-  background: #edf3ff;
+  background: #eef2fb;
   box-shadow: none;
 }
 
@@ -8606,7 +8606,7 @@ body {
 }
 
 .ss-nav-badge {
-  background: #3157d5;
+  background: #2552b5;
   color: #fff;
 }
 
@@ -8629,7 +8629,7 @@ body {
 }
 
 .ss-side-card .ss-eyebrow::before {
-  background: #3157d5;
+  background: #2552b5;
 }
 
 .ss-side-card strong,
@@ -8642,8 +8642,8 @@ body {
 }
 
 .ss-side-card .ss-button {
-  background: #3157d5;
-  border-color: #3157d5;
+  background: #2552b5;
+  border-color: #2552b5;
   box-shadow: 0 8px 18px rgba(49, 87, 213, 0.18);
 }
 
@@ -8662,9 +8662,9 @@ body {
 }
 
 .ss-sidebar .ss-account-plan {
-  color: #3157d5;
+  color: #2552b5;
   border-color: #d6e1ff;
-  background: #eef4ff;
+  background: #eef2fb;
 }
 
 .ss-account-avatar,
@@ -8692,7 +8692,7 @@ body {
 }
 
 .ss-eyebrow::before {
-  background: #3157d5;
+  background: #2552b5;
 }
 
 .ss-top-actions {
@@ -8794,7 +8794,7 @@ body {
 }
 
 .ss-chip.active {
-  background: #eef4ff;
+  background: #eef2fb;
   color: #2446b4;
   border-color: #cfdcff;
 }
@@ -8877,7 +8877,7 @@ body {
 }
 
 .ss-empty svg {
-  color: #3157d5;
+  color: #2552b5;
 }
 
 .ss-status {
@@ -8991,7 +8991,7 @@ body {
 }
 
 .ss-policy.selected {
-  background: #f0f6ff;
+  background: #eef2fb;
   border-color: #bcd0ff;
   box-shadow: 0 0 0 1px rgba(49, 87, 213, 0.06);
 }
@@ -9002,7 +9002,7 @@ body {
 .ss-dash-activity-icon {
   border-color: #e1e7f0;
   background: #f7f9fc;
-  color: #3157d5;
+  color: #2552b5;
 }
 
 .ss-doc,
@@ -9062,7 +9062,7 @@ body {
 }
 
 .ss-settings-tab.active {
-  background: #eef4ff;
+  background: #eef2fb;
   color: #2446b4;
   box-shadow: none;
 }
@@ -9112,8 +9112,8 @@ body {
 }
 
 .ss-pdf-drop-icon {
-  background: #eef4ff;
-  color: #3157d5;
+  background: #eef2fb;
+  color: #2552b5;
   border-color: #d5e2ff;
 }
 
@@ -9130,7 +9130,7 @@ body {
 }
 
 .ss-demo-load {
-  background: #eef4ff;
+  background: #eef2fb;
   border-color: #cfdcff;
   color: #2446b4;
 }
@@ -9289,7 +9289,7 @@ body {
 .ss-app {
   --row-hover: #f8fafc;
   --selected-row: #f6f9ff;
-  --quiet-blue: #3157d5;
+  --quiet-blue: #2552b5;
   --quiet-green: #12805c;
   --quiet-red: #b93832;
   --quiet-amber: #a86411;
@@ -9382,8 +9382,8 @@ body {
 }
 
 .ss-policy.selected .ss-icon-tile {
-  background: #e8f0ff;
-  color: #3157d5;
+  background: #eef2fb;
+  color: #2552b5;
 }
 
 .ss-policy-copy b {
@@ -9748,7 +9748,7 @@ body {
 }
 
 .ss-coverage-step.active {
-  box-shadow: inset 0 -2px 0 #3157d5;
+  box-shadow: inset 0 -2px 0 #2552b5;
 }
 
 .ss-coverage-step.done {
@@ -10023,7 +10023,7 @@ body {
 
 .ss-coverage-step.active {
   background: transparent;
-  box-shadow: inset 0 -2px 0 #3157d5;
+  box-shadow: inset 0 -2px 0 #2552b5;
 }
 
 .ss-coverage-step.done {
@@ -10185,12 +10185,12 @@ body {
   background: #14a06a;
 }
 .ss-journey-status-step.active {
-  background: color-mix(in srgb, var(--brand, #2563eb) 8%, transparent);
-  border-color: color-mix(in srgb, var(--brand, #2563eb) 35%, transparent);
+  background: color-mix(in srgb, var(--brand, #2552b5) 8%, transparent);
+  border-color: color-mix(in srgb, var(--brand, #2552b5) 35%, transparent);
 }
 .ss-journey-status-step.active .ss-journey-status-dot {
-  background: var(--brand, #2563eb);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand, #2563eb) 18%, transparent);
+  background: var(--brand, #2552b5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand, #2552b5) 18%, transparent);
 }
 .ss-journey-status-step.active .ss-journey-status-label {
   color: var(--text, #0a1421);
@@ -10214,7 +10214,7 @@ body {
   --text: #1a2231;
   --muted: #5d6b7e;
   --faint: #93a0b1;
-  --brand: #2f5bd7;
+  --brand: var(--ss-brand);
   --brand-soft: #eef3ff;
   --brand-line: #d4e0fb;
   --brand-strong: #2247b0;
@@ -10222,7 +10222,7 @@ body {
   --ink-btn-hover: #1c2638;
   --success: #0e7a57;
   --success-soft: #ecfdf3;
-  --warning: #b25e09;
+  --warning: #9c7b3e;
   --warning-soft: #fff8ec;
   --danger: #c2413b;
   --danger-soft: #fdf1f0;
@@ -13797,9 +13797,9 @@ body {
 
 .ss-dash-activity-row--certificate .ss-dash-activity-icon,
 .ss-dash-activity-row--policy .ss-dash-activity-icon {
-  background: #eef4ff;
+  background: #eef2fb;
   border-color: #dce7fb;
-  color: #2558d6;
+  color: #2552b5;
 }
 
 .ss-dash-activity-row--document .ss-dash-activity-icon {
@@ -13974,7 +13974,7 @@ body {
   padding: 0;
   align-self: end;
   justify-self: start;
-  color: #2558d6;
+  color: #2552b5;
   font-size: 11.25px;
   font-weight: 740;
 }
@@ -14782,7 +14782,7 @@ body {
 }
 
 .ss-policy-health-action:hover {
-  color: #0066cc;
+  color: #1a3c8a;
 }
 
 /* ---- Action Center ---- */
@@ -15156,16 +15156,16 @@ body {
 
 .ss-holder-name-row .ss-coi-status.current::before { background: #1a7a4e; }
 .ss-holder-name-row .ss-coi-status.aging::before,
-.ss-holder-name-row .ss-coi-status.stale::before { background: #c0791f; }
+.ss-holder-name-row .ss-coi-status.stale::before { background: #9c7b3e; }
 .ss-holder-name-row .ss-coi-status.unsent::before { background: #aab2bd; }
 
 /* A gap is the only thing that earns color — a quiet, intentional amber. */
 .ss-holder-name-row .ss-comply-badge.gap {
-  color: #8a5a16;
+  color: #6f5526;
   border-color: rgba(178, 94, 9, 0.22);
-  background: #fdf7ec;
+  background: #f8f2e6;
 }
-.ss-holder-name-row .ss-comply-badge.gap::before { background: #c0791f; }
+.ss-holder-name-row .ss-comply-badge.gap::before { background: #9c7b3e; }
 
 /* =====================================================================
    DESIGN SYSTEM v2 — calm, monochrome, hairline-defined surfaces.
@@ -15174,35 +15174,35 @@ body {
    geometry. Defined last so it cascades over every earlier token layer.
    ===================================================================== */
 .ss-app {
-  /* Neutrals: near-black ink, Apple greys, true hairlines */
-  --ink: #1d1d1f;
-  --text: #1d1d1f;
-  --muted: #6e6e73;
-  --faint: #86868b;
-  --surface: #ffffff;
-  --surface-soft: #fafafa;
-  --surface-raised: #ffffff;
-  --line: #e6e6eb;
-  --line-soft: #f0f0f2;
+  /* Neutrals — mapped onto SubShield design-system tokens */
+  --ink: var(--ss-text);
+  --text: var(--ss-text);
+  --muted: var(--ss-muted);
+  --faint: var(--ss-faint);
+  --surface: var(--ss-surface);
+  --surface-soft: var(--ss-surface-soft);
+  --surface-raised: var(--ss-surface);
+  --line: var(--ss-line);
+  --line-soft: var(--ss-line-soft);
 
-  /* A single accent, used sparingly */
-  --brand: #0071e3;
-  --brand-strong: #0064c8;
-  --brand-soft: #f0f6ff;
-  --brand-line: #d6e6fb;
+  /* Single institutional accent (blue) */
+  --brand: var(--ss-brand);
+  --brand-strong: var(--ss-brand-strong);
+  --brand-soft: var(--ss-brand-soft);
+  --brand-line: var(--ss-brand-line);
 
-  /* Refined geometry — enterprise, not bubbly */
-  --radius-card: 14px;
-  --radius-control: 9px;
+  /* Geometry from the system */
+  --radius-card: var(--ss-radius-card);
+  --radius-control: var(--ss-radius-control);
 
-  /* Near-flat: surfaces are defined by hairlines, not drop shadows */
-  --shadow-xs: none;
-  --shadow-sm: 0 1px 2px rgba(17, 17, 19, 0.04);
-  --shadow-md: 0 6px 24px rgba(17, 17, 19, 0.07);
-  --shadow-lg: 0 18px 50px rgba(17, 17, 19, 0.12);
-  --ring: 0 0 0 3px rgba(0, 113, 227, 0.18);
+  /* Near-flat: surfaces defined by hairlines, restrained depth */
+  --shadow-xs: 0 1px 2px rgba(14, 20, 34, 0.04);
+  --shadow-sm: 0 1px 2px rgba(14, 20, 34, 0.05);
+  --shadow-md: 0 6px 24px rgba(14, 20, 34, 0.07);
+  --shadow-lg: 0 18px 50px rgba(14, 20, 34, 0.12);
+  --ring: 0 0 0 3px rgba(37, 82, 181, 0.18);
 
-  background: #f5f5f7;
+  background: var(--ss-surface-sunken);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
@@ -15319,11 +15319,11 @@ body {
 }
 .ss-status.success::before { background: #1a7a4e; }
 .ss-status.warning {
-  color: #8a5a16;
+  color: #6f5526;
   background: transparent;
   border: 0;
 }
-.ss-status.warning::before { background: #c0791f; }
+.ss-status.warning::before { background: #9c7b3e; }
 .ss-status.danger {
   color: #b24a40;
   background: transparent;
@@ -15370,7 +15370,7 @@ body {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #8a5a16;
+  color: #6f5526;
 }
 
 /* Connections: carrier rating -> refined whisper chip; category -> quiet
