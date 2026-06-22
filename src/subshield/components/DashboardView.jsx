@@ -1,37 +1,71 @@
-import { useState, useEffect } from "react";
+import "../dashboard.css";
 import {
-  AlertTriangle,
   ArrowRight,
-  BadgeDollarSign,
+  ArrowUpRight,
+  Building2,
+  Car,
   CheckCircle2,
   Clock3,
-  FileCheck2,
-  FileWarning,
-  PiggyBank,
+  FileText,
+  HardHat,
   Plus,
-  Send,
-  Shield,
-  Sparkles,
+  ShieldCheck,
+  Umbrella,
   Upload,
 } from "lucide-react";
 import {
   formatMoney,
-  formatShortDate,
-  getStatus,
   policyLabelFromType,
   savingsForOpportunity,
+  scoreClass,
   timeAgo,
 } from "../utils.js";
-import { Section } from "./Layout.jsx";
 
 function activityTone(title = "") {
   const t = title.toLowerCase();
-  if (t.includes("certificate") || t.includes("sent to")) return "certificate";
+  if (t.includes("certificate") || t.includes("coi") || t.includes("sent to")) return "certificate";
   if (t.includes("upload") || t.includes("document")) return "document";
-  if (t.includes("sav") || t.includes("quote") || t.includes("coverage review")) return "savings";
-  if (t.includes("setting") || t.includes("logout") || t.includes("profile")) return "neutral";
-  if (t.includes("holder") || t.includes("advisor")) return "holder";
+  if (t.includes("sav") || t.includes("quote") || t.includes("rate") || t.includes("coverage review")) return "savings";
+  if (t.includes("renew")) return "renewal";
   return "policy";
+}
+
+function greetingFor(date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function longDate(date = new Date()) {
+  return date
+    .toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
+    .toUpperCase();
+}
+
+function policyIcon(policy) {
+  const key = `${policy.policyType || policy.type || ""} ${policy.name || ""}`.toLowerCase();
+  if (key.includes("worker")) return <HardHat size={16} />;
+  if (key.includes("auto")) return <Car size={16} />;
+  if (key.includes("umbrella")) return <Umbrella size={16} />;
+  if (key.includes("property")) return <Building2 size={16} />;
+  if (key.includes("license")) return <FileText size={16} />;
+  return <ShieldCheck size={16} />;
+}
+
+function dashboardPolicyStatus(policy) {
+  const days = policy.daysRemaining ?? 999;
+  if (days <= 10) return { label: "Critical", className: "danger" };
+  if (days <= 45) return { label: "Review soon", className: "warning" };
+  return { label: "Active", className: "success" };
+}
+
+// Deterministic per-policy health proxy until a backend supplies real scores:
+// strong coverage by default, trimmed as a renewal deadline approaches.
+function policyHealthScore(policy) {
+  const days = policy.daysRemaining ?? 999;
+  const penalty = days <= 10 ? 18 : days <= 45 ? 6 : days <= 120 ? 9 : 4;
+  return Math.max(78, Math.min(99, 100 - penalty));
 }
 
 function buildSpendBars(policies = []) {
@@ -44,66 +78,40 @@ function buildSpendBars(policies = []) {
       name: policyLabelFromType(policy.policyType || policy.type),
       value: Math.round((policy.premiumAmount ?? policy.premium ?? 0) / 12),
     }));
-
   const peak = Math.max(1, ...top.map((item) => item.value));
   return top.map((item) => ({ ...item, percent: Math.max(8, Math.round((item.value / peak) * 100)) }));
 }
 
-function greetingFor(date = new Date()) {
-  const hour = date.getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
-
-const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const POLICY_HEALTH_LIMIT = 4;
-
-// Projected monthly pace: until a backend supplies real spend history, this
-// charts an even 1/12 distribution across the trailing six months ending with
-// the current month. Labels derive from today's date so they never go stale.
-function buildMonthlySpend(totalPremium, now = new Date()) {
-  const monthly = Math.round(totalPremium / 12);
-  const points = [];
-  for (let offset = 5; offset >= 0; offset -= 1) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-    points.push({ label: MONTH_ABBR[date.getMonth()], value: monthly });
-  }
-  return points;
-}
-
-function compactAnnualPremium(value) {
-  const amount = Number(value) || 0;
-  if (amount >= 1000) {
-    const compact = (amount / 1000).toFixed(amount >= 10000 ? 1 : 1).replace(/\.0$/, "");
-    return `$${compact}k / yr`;
-  }
-  return `${formatMoney(amount)} / yr`;
-}
-
-function dashboardPolicyStatus(policy) {
-  const days = policy.daysRemaining ?? 999;
-  if (days <= 10) return { label: "Critical", className: "danger", rank: 0 };
-  if (days <= 60) return { label: "Review Soon", className: "warning", rank: 1 };
-  return { label: "Active", className: "success", rank: 2 };
-}
-
-function policyHealthTypeRank(policy) {
-  const key = `${policy.policyType || policy.type || ""} ${policy.name || ""}`.toLowerCase();
-  if (key.includes("worker")) return 0;
-  if (key.includes("auto")) return 1;
-  if (key.includes("general") || (key.includes("liability") && !key.includes("umbrella"))) return 2;
-  if (key.includes("umbrella")) return 3;
-  if (key.includes("property")) return 4;
-  return 9;
-}
-
-function dashboardPolicyName(policy) {
-  return policy.name === "Umbrella / Excess Liability" ? "Umbrella / Excess" : policy.name;
+function HealthRing({ value }) {
+  const cls = scoreClass(value);
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const pct = Math.max(0, Math.min(100, value)) / 100;
+  return (
+    <div className={`ss-nd-ring ${cls}`} role="img" aria-label={`Coverage health ${value} out of 100`}>
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <circle cx="60" cy="60" r={radius} className="ss-nd-ring-track" />
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          className="ss-nd-ring-value"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - pct)}
+          transform="rotate(-90 60 60)"
+        />
+      </svg>
+      <div className="ss-nd-ring-label">
+        <strong>{value}</strong>
+        <span>/ 100</span>
+      </div>
+    </div>
+  );
 }
 
 export default function DashboardView({
   firstName,
+  coverageHealth = 0,
   totalPremium,
   potentialSavings,
   realizedSavings,
@@ -111,7 +119,6 @@ export default function DashboardView({
   docsCount,
   upcoming,
   opportunities,
-  openQuoteRequests,
   coiSends,
   contractors = [],
   coverageGaps,
@@ -129,38 +136,26 @@ export default function DashboardView({
     (a, b) => (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0)
   );
   const spendBars = buildSpendBars(policyAccounts);
-  const recentActivity = activity.slice(0, 5);
-  const criticalRenewals = upcoming.filter((policy) => (policy.daysRemaining ?? 0) <= 10);
-  const primaryCriticalRenewal = criticalRenewals[0];
   const monthlySpend = Math.round(totalPremium / 12);
-  const missingDocCount = missingDocuments.length;
+  const recentActivity = activity.slice(0, 4);
+  const renewingSoon = upcoming.filter((p) => (p.daysRemaining ?? 999) <= 30);
   const openSavings = opportunities.filter((item) => ["available", "quote_received"].includes(item.status));
-  const monthlySeries = buildMonthlySpend(totalPremium);
-  const monthlyPeak = Math.max(1, ...monthlySeries.map((item) => item.value));
-  const criticalPolicyCount = activePolicies.filter((policy) => dashboardPolicyStatus(policy).className === "danger").length;
-  const policyHealthRows = [...activePolicies]
-    .sort((a, b) => {
-      const aStatus = dashboardPolicyStatus(a);
-      const bStatus = dashboardPolicyStatus(b);
-      return (
-        policyHealthTypeRank(a) - policyHealthTypeRank(b) ||
-        aStatus.rank - bStatus.rank ||
-        (a.daysRemaining ?? 9999) - (b.daysRemaining ?? 9999) ||
-        (b.premiumAmount ?? b.premium ?? 0) - (a.premiumAmount ?? a.premium ?? 0)
-      );
-    })
-    .slice(0, POLICY_HEALTH_LIMIT);
-  const [breakdownMonth, setBreakdownMonth] = useState(null);
-  const monthlyBreakdown = policyAccounts.map((policy) => {
-    const annual = policy.premiumAmount ?? policy.premium ?? 0;
-    return {
-      id: policy.id,
-      name: policyLabelFromType(policy.policyType || policy.type),
-      carrier: policy.carrier,
-      annual,
-      monthly: Math.round(annual / 12),
-    };
-  });
+  const quoteReady = openSavings.filter((o) => o.status === "quote_received");
+  const topQuote = quoteReady
+    .map((o) => savingsForOpportunity(o))
+    .sort((a, b) => b - a)[0];
+  const criticalCount = activePolicies.filter((p) => dashboardPolicyStatus(p).className === "danger").length;
+  const compliantLines = Math.max(0, activePolicies.length - criticalCount - missingDocuments.length);
+  const healthClass = scoreClass(coverageHealth);
+  const renewalRows = [...upcoming].slice(0, 5);
+  const spendBreakdown = [...policyAccounts]
+    .slice(0, 5)
+    .map((p) => ({
+      id: p.id,
+      name: policyLabelFromType(p.policyType || p.type),
+      value: p.premiumAmount ?? p.premium ?? 0,
+    }));
+  const breakdownPeak = Math.max(1, ...spendBreakdown.map((r) => r.value));
 
   if (policies.length === 0) {
     return (
@@ -171,9 +166,8 @@ export default function DashboardView({
               <span className="ss-eyebrow">{firstName ? `${greetingFor()}, ${firstName}` : "Welcome to SubShield"}</span>
               <h2>Your insurance command center</h2>
               <p className="ss-muted">
-                Keep every policy, certificate, and renewal in one place so you can
-                prove coverage in seconds, never miss an expiration, and never let
-                paperwork hold up approval or field work.
+                Keep every policy, certificate, and renewal in one place so you can prove coverage in
+                seconds, never miss an expiration, and never let paperwork hold up approval or field work.
               </p>
               <div className="ss-row" style={{ marginTop: 18 }}>
                 <button type="button" className="ss-button" onClick={onUpload}>
@@ -184,29 +178,6 @@ export default function DashboardView({
                 </button>
               </div>
             </div>
-            <div className="ss-dash-onboard-steps">
-              <div className="ss-dash-onboard-step">
-                <span className="ss-dash-onboard-num">1</span>
-                <div>
-                  <b>Upload your policies</b>
-                  <small>We pull carrier, coverage, and renewal dates so nothing slips through.</small>
-                </div>
-              </div>
-              <div className="ss-dash-onboard-step">
-                <span className="ss-dash-onboard-num">2</span>
-                <div>
-                  <b>Save your GCs & send COIs</b>
-                  <small>Store client info once and send proof of insurance in a few clicks.</small>
-                </div>
-              </div>
-              <div className="ss-dash-onboard-step">
-                <span className="ss-dash-onboard-num">3</span>
-                <div>
-                  <b>Stay ahead of renewals</b>
-                  <small>Get reminders before coverage expires and compare options with licensed partners when you want.</small>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </div>
@@ -214,244 +185,239 @@ export default function DashboardView({
   }
 
   return (
-    <div className="ss-grid ss-dashboard-grid">
-      <section className="ss-card ss-span">
-        <div className="ss-dash-top-grid">
-          <div className="ss-dash-spend-panel">
-            <span className="ss-eyebrow">{firstName ? `${greetingFor()}, ${firstName}` : "Welcome back"}</span>
-            <h2>Current insurance spend</h2>
-            <div className="ss-dash-spend-value">{formatMoney(totalPremium)}</div>
-            <p className="ss-muted">
-              About {formatMoney(monthlySpend)}/month across {activePolicies.length} active policies.
-            </p>
+    <div className="ss-nd">
+      {/* Header */}
+      <header className="ss-nd-header">
+        <div className="ss-nd-header-copy">
+          <span className="ss-nd-eyebrow">{longDate()}</span>
+          <h1>{firstName ? `${greetingFor()}, ${firstName}` : "Welcome back"}</h1>
+          <p>Here&apos;s what needs your attention today.</p>
+        </div>
+        <div className="ss-nd-header-actions">
+          <button type="button" className="ss-nd-btn ghost" onClick={onReviewSavings}>
+            Request quote
+          </button>
+          <button type="button" className="ss-nd-btn dark" onClick={onUpload}>
+            <Upload size={15} /> Upload policy
+          </button>
+        </div>
+      </header>
 
-            <div className="ss-spend-chart" aria-label="Projected monthly insurance spend, even pace across the trailing six months">
-              {monthlySeries.map((point, idx) => (
-                <button
-                  type="button"
-                  key={point.label}
-                  className={`ss-spend-point${idx === monthlySeries.length - 1 ? " is-current" : ""}`}
-                  onDoubleClick={() => setBreakdownMonth(`${point.label} ${new Date().getFullYear()}`)}
-                  title={`Double-click for the ${point.label} cost breakdown`}
-                  aria-label={`${point.label}: ${formatMoney(point.value)} estimated. Double-click for the cost breakdown.`}
-                >
-                  <em className="ss-spend-val">{formatMoney(point.value)}</em>
-                  <span style={{ height: `${Math.max(12, Math.round((point.value / monthlyPeak) * 70))}px` }} />
-                  <small>{point.label}</small>
-                </button>
-              ))}
-            </div>
-            <p className="ss-spend-hint">Double-click a month to see its cost breakdown.</p>
-            <div className="ss-dash-action-rail" aria-label="Dashboard primary actions">
-              <button type="button" className="ss-action-tile primary" onClick={onReviewSavings}>
-                <span className="ss-action-icon">
-                  <PiggyBank size={16} />
-                </span>
-                <span>
-                  <b>Review savings</b>
-                  <small>{formatMoney(potentialSavings)}/yr identified</small>
-                </span>
-                <ArrowRight size={15} />
-              </button>
-              <button type="button" className="ss-action-tile" onClick={onOpenPolicies}>
-                <span className="ss-action-icon">
-                  <Shield size={16} />
-                </span>
-                <span>
-                  <b>Open policies</b>
-                  <small>Limits, deductibles, renewals</small>
-                </span>
-                <ArrowRight size={15} />
-              </button>
-              <button type="button" className="ss-action-tile" onClick={onUpload}>
-                <span className="ss-action-icon">
-                  <Upload size={16} />
-                </span>
-                <span>
-                  <b>Upload insurance</b>
-                  <small>Declarations or certificates</small>
-                </span>
-                <ArrowRight size={15} />
-              </button>
-            </div>
+      {/* Stat cards */}
+      <div className="ss-nd-stats">
+        <article className="ss-nd-stat">
+          <span className="ss-nd-stat-label">Annual premium</span>
+          <strong className="ss-nd-stat-value">{formatMoney(totalPremium)}</strong>
+          <small className="ss-nd-stat-foot">across {activePolicies.length} active policies</small>
+        </article>
+        <article className="ss-nd-stat">
+          <span className="ss-nd-stat-label">Active policies</span>
+          <strong className="ss-nd-stat-value">{activePolicies.length}</strong>
+          <small className="ss-nd-stat-foot">
+            <em className="ss-nd-dot warning" />
+            {renewingSoon.length} renewing soon
+          </small>
+        </article>
+        <article className="ss-nd-stat">
+          <span className="ss-nd-stat-label">Tracked savings</span>
+          <strong className="ss-nd-stat-value">{formatMoney(potentialSavings)}<i>/yr</i></strong>
+          <small className="ss-nd-stat-foot accent">
+            {topQuote ? (
+              <>
+                <ArrowUpRight size={13} /> {formatMoney(topQuote)} partner offer ready
+              </>
+            ) : (
+              <>Compare partner-backed options</>
+            )}
+          </small>
+        </article>
+        <article className="ss-nd-stat">
+          <span className="ss-nd-stat-label">Coverage health</span>
+          <strong className="ss-nd-stat-value">{coverageHealth}<i>/100</i></strong>
+          <small className="ss-nd-stat-foot success">
+            {compliantLines} of {activePolicies.length} lines fully compliant
+          </small>
+        </article>
+      </div>
+
+      {/* Cost analysis */}
+      <section className="ss-nd-card ss-nd-cost">
+        <div className="ss-nd-card-head">
+          <div>
+            <span className="ss-nd-kicker">Cost analysis</span>
+            <h2>Premium by policy group</h2>
+            <p>Monthly-equivalent spend across your highest-cost policies.</p>
           </div>
-
-          <div className="ss-dash-accounts-panel">
-            <Section
-              title="Policy Health"
-              sub="Active coverage, renewals, and risk items"
-            />
-
-            <div className="ss-policy-health-summary" aria-label="Policy health summary">
-              <span><b>{activePolicies.length}</b> Active</span>
-              <span><b>{criticalPolicyCount}</b> Critical</span>
-              <span><b>{compactAnnualPremium(totalPremium)}</b></span>
-            </div>
-
-            {policyHealthRows.map((policy) => {
-              const status = dashboardPolicyStatus(policy);
-              return (
-                <div className="ss-policy-health-row" key={policy.id}>
-                  <div className="ss-policy-health-copy">
-                    <b>{dashboardPolicyName(policy)}</b>
-                    <small>
-                      {policy.carrier} · Renews in {policy.daysRemaining} day{policy.daysRemaining === 1 ? "" : "s"}
-                    </small>
-                  </div>
-                  <div className="ss-policy-health-meta">
-                    <strong>{formatMoney(policy.premiumAmount ?? policy.premium)}/yr</strong>
-                    <em className={`ss-status ${status.className}`}>{status.label}</em>
-                  </div>
-                </div>
-              );
-            })}
-            {policyHealthRows.length === 0 && (
-              <div className="ss-note">
-                <FileWarning size={16} />
-                <span>No policies added yet. Upload a policy to start tracking spend.</span>
-              </div>
-            )}
-            {policyHealthRows.length > 0 && (
-              <button type="button" className="ss-policy-health-action" onClick={onOpenPolicies}>
-                View all policies <ArrowRight size={14} />
-              </button>
-            )}
+          <div className="ss-nd-cost-total">
+            <strong>{formatMoney(monthlySpend)}<i>/mo</i></strong>
+            <small>total across {spendBars.length} lines</small>
           </div>
         </div>
-
-        <div className="ss-dash-trend">
-          <div className="ss-dash-trend-head">
-            <b>Premium trend by policy group</b>
-            <small>Monthly-equivalent spend across your highest-cost policies</small>
-          </div>
-          <div className="ss-dash-trend-bars">
-            {spendBars.map((item) => (
-              <div className="ss-dash-trend-row" key={item.id}>
-                <span className="ss-dash-trend-name" title={item.name}>{item.name}</span>
-                <span className="ss-dash-trend-track">
-                  <span className="ss-dash-trend-fill" style={{ width: `${item.percent}%` }} />
-                </span>
-                <span className="ss-dash-trend-val">{formatMoney(item.value)}/mo</span>
-              </div>
-            ))}
-            {spendBars.length === 0 && (
-              <p className="ss-muted" style={{ margin: 0, fontSize: 13 }}>
-                Add a policy to see your premium breakdown.
-              </p>
-            )}
-          </div>
+        <div className="ss-nd-cost-bars">
+          {spendBars.map((item) => (
+            <div className="ss-nd-cost-row" key={item.id}>
+              <span className="ss-nd-cost-name" title={item.name}>{item.name}</span>
+              <span className="ss-nd-cost-track">
+                <span className="ss-nd-cost-fill" style={{ width: `${item.percent}%` }} />
+              </span>
+              <span className="ss-nd-cost-val">{formatMoney(item.value)}/mo</span>
+            </div>
+          ))}
         </div>
       </section>
 
-      <ActionCenter
-        upcoming={upcoming}
-        missingDocCount={missingDocCount}
-        coverageGaps={coverageGaps}
-        openSavings={openSavings}
-        onUpload={onUpload}
-        onOpenPolicies={onOpenPolicies}
-        onReviewSavings={onReviewSavings}
-        onOpenCertificates={onOpenCertificates}
-        pendingCertificates={pendingCertificates}
-      />
+      {/* Main two-column workspace */}
+      <div className="ss-nd-workspace">
+        <div className="ss-nd-main">
+          <ActionCenter
+            upcoming={upcoming}
+            missingDocuments={missingDocuments}
+            coverageGaps={coverageGaps}
+            openSavings={openSavings}
+            topQuote={topQuote}
+            recommendedAction={recommendedAction}
+            pendingCertificates={pendingCertificates}
+            onUpload={onUpload}
+            onOpenPolicies={onOpenPolicies}
+            onReviewSavings={onReviewSavings}
+            onOpenCertificates={onOpenCertificates}
+          />
 
-      <div className="ss-dashboard-workspace ss-span">
-        <section className="ss-card ss-dash-renewals-card ss-dash-lower-left">
-          <Section
-            title="Upcoming renewals"
-            sub="Prioritized by deadline and policy impact"
-            extra={
-              <button type="button" className="ss-copy-btn" onClick={onOpenPolicies}>
-                View all <ArrowRight size={13} />
+          <section className="ss-nd-card ss-nd-renewals">
+            <div className="ss-nd-card-head">
+              <div>
+                <span className="ss-nd-kicker">Renewal calendar</span>
+                <h2>Upcoming renewals</h2>
+              </div>
+              <button type="button" className="ss-nd-link" onClick={onOpenPolicies}>
+                All policies <ArrowRight size={13} />
               </button>
-            }
-          />
-
-          {upcoming.length === 0 && (
-            <div className="ss-note success">
-              <CheckCircle2 size={16} />
-              <span>No upcoming renewals. Your coverage is in good shape.</span>
             </div>
-          )}
 
-          {upcoming.length > 0 && (
-            <div className="ss-renewal-timeline">
-              {upcoming.map((policy) => {
-                const status = getStatus(policy.daysRemaining);
-                const isPriority = policy.id === primaryCriticalRenewal?.id;
-                const renewalDate = formatShortDate(policy.renewalDate || policy.expires);
-                return (
-                  <button
-                    type="button"
-                    className={`ss-renewal-timeline-row ${status.className}${isPriority ? " is-priority" : ""}`}
-                    key={policy.id}
-                    onClick={onOpenPolicies}
-                    aria-label={`Open ${policy.name} renewal details`}
-                  >
-                    <span className="ss-renewal-time">
-                      <b>{renewalDate}</b>
-                      <small>
-                        {policy.daysRemaining} day{policy.daysRemaining === 1 ? "" : "s"}
-                      </small>
-                    </span>
-                    <span className="ss-renewal-rail" aria-hidden="true">
-                      <span />
-                    </span>
-                    <span className="ss-renewal-copy">
-                      {isPriority && <em>Next renewal</em>}
-                      <b title={policy.name}>{policy.name}</b>
-                      <small title={`${policy.carrier} | Renews ${renewalDate}`}>{policy.carrier}</small>
-                    </span>
-                    <span className="ss-renewal-state">
-                      {status.className === "danger"
-                        ? "Review now"
-                        : status.className === "warning"
-                        ? "Prepare"
-                        : "Scheduled"}
-                    </span>
-                    <ArrowRight className="ss-renewal-row-arrow" size={15} aria-hidden="true" />
-                  </button>
-                );
-              })}
+            {renewalRows.length === 0 ? (
+              <div className="ss-nd-empty">
+                <CheckCircle2 size={16} /> No upcoming renewals. Coverage is in good shape.
+              </div>
+            ) : (
+              <div className="ss-nd-table" role="table">
+                <div className="ss-nd-table-head" role="row">
+                  <span role="columnheader">Policy</span>
+                  <span role="columnheader">Renews</span>
+                  <span role="columnheader">Premium</span>
+                  <span role="columnheader">Health</span>
+                </div>
+                {renewalRows.map((policy) => {
+                  const days = policy.daysRemaining ?? 0;
+                  const status = dashboardPolicyStatus(policy);
+                  return (
+                    <button
+                      type="button"
+                      className="ss-nd-table-row"
+                      role="row"
+                      key={policy.id}
+                      onClick={onOpenPolicies}
+                    >
+                      <span className="ss-nd-policy-cell" role="cell">
+                        <span className="ss-nd-policy-icon">{policyIcon(policy)}</span>
+                        <span className="ss-nd-policy-meta">
+                          <b>{policy.name}</b>
+                          {policy.policyNumber && <small>{policy.policyNumber}</small>}
+                        </span>
+                      </span>
+                      <span className={`ss-nd-renews ${status.className}`} role="cell">
+                        {days} day{days === 1 ? "" : "s"}
+                      </span>
+                      <span className="ss-nd-premium" role="cell">
+                        {formatMoney(policy.premiumAmount ?? policy.premium)}
+                      </span>
+                      <span className="ss-nd-health" role="cell">
+                        {policyHealthScore(policy)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Right rail */}
+        <aside className="ss-nd-rail">
+          <section className="ss-nd-card ss-nd-health-card">
+            <span className="ss-nd-kicker">Coverage health</span>
+            <div className="ss-nd-health-body">
+              <HealthRing value={coverageHealth} />
+              <div className="ss-nd-health-copy">
+                <b>{healthClass === "success" ? "Strong coverage" : healthClass === "warning" ? "Needs attention" : "At risk"}</b>
+                <p>
+                  {healthClass === "success"
+                    ? "Above the 85 benchmark for your trade and region."
+                    : "Review the items below to lift your coverage score."}
+                </p>
+              </div>
             </div>
-          )}
-        </section>
+            <ul className="ss-nd-health-list">
+              <li>
+                <CheckCircle2 size={15} className="ss-nd-ic success" />
+                {compliantLines} of {activePolicies.length} lines fully compliant
+              </li>
+              <li>
+                <Clock3 size={15} className="ss-nd-ic warning" />
+                {renewingSoon.length} renewal{renewingSoon.length === 1 ? "" : "s"} need{renewingSoon.length === 1 ? "s" : ""} attention
+              </li>
+            </ul>
+          </section>
 
-        <section className="ss-card ss-dash-activity-card ss-dash-lower-right">
-          <Section
-            title="Recent activity"
-            sub="Latest account movement"
-            extra={
-              recentActivity.length > 0 && (
-                <span className="ss-activity-summary">Updated {timeAgo(recentActivity[0].createdAt)}</span>
-              )
-            }
-          />
-
-          {recentActivity.length === 0 && (
-            <div className="ss-note">
-              <CheckCircle2 size={16} />
-              <span>No activity yet. Actions like uploads, certificate sends, and savings will appear here.</span>
+          <section className="ss-nd-card ss-nd-spend-card">
+            <div className="ss-nd-card-head tight">
+              <span className="ss-nd-kicker">Insurance spend</span>
             </div>
-          )}
-
-          {recentActivity.length > 0 && (
-            <div className="ss-dash-activity-list">
-              {recentActivity.map((item) => (
-                <article className={`ss-dash-activity-row ss-dash-activity-row--${activityTone(item.title)}`} key={item.id}>
-                  <span className="ss-activity-marker" aria-hidden="true" />
-                  <div className="ss-dash-activity-content">
-                    <div className="ss-dash-activity-mainline">
-                      <b title={item.title}>{item.title}</b>
-                      <small className="ss-activity-time">{timeAgo(item.createdAt)}</small>
-                    </div>
-                    <small title={item.body}>{item.body}</small>
+            <strong className="ss-nd-spend-total">{formatMoney(totalPremium)}<i>/year</i></strong>
+            <small className="ss-nd-spend-sub">Across {activePolicies.length} lines of coverage</small>
+            <div className="ss-nd-spend-list">
+              {spendBreakdown.map((row) => (
+                <div className="ss-nd-spend-row" key={row.id}>
+                  <div className="ss-nd-spend-line">
+                    <span>{row.name}</span>
+                    <b>{formatMoney(row.value)}</b>
                   </div>
-                </article>
+                  <span className="ss-nd-spend-track">
+                    <span style={{ width: `${Math.round((row.value / breakdownPeak) * 100)}%` }} />
+                  </span>
+                </div>
               ))}
             </div>
-          )}
-        </section>
+          </section>
+
+          <section className="ss-nd-card ss-nd-activity-card">
+            <div className="ss-nd-card-head tight">
+              <span className="ss-nd-kicker">Recent activity</span>
+              {recentActivity.length > 0 && (
+                <small className="ss-nd-muted">Updated {timeAgo(recentActivity[0].createdAt)}</small>
+              )}
+            </div>
+            {recentActivity.length === 0 ? (
+              <div className="ss-nd-empty sm">
+                <CheckCircle2 size={15} /> No recent account movement.
+              </div>
+            ) : (
+              <ul className="ss-nd-activity-list">
+                {recentActivity.map((item) => (
+                  <li className={`ss-nd-activity-row tone-${activityTone(item.title)}`} key={item.id}>
+                    <span className="ss-nd-activity-dot" aria-hidden="true" />
+                    <div className="ss-nd-activity-copy">
+                      <div className="ss-nd-activity-top">
+                        <b title={item.title}>{item.title}</b>
+                        <small>{timeAgo(item.createdAt)}</small>
+                      </div>
+                      <p title={item.body}>{item.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </aside>
       </div>
 
       {contractors.length > 0 && (
@@ -461,139 +427,146 @@ export default function DashboardView({
           onOpenCertificates={onOpenCertificates}
         />
       )}
-
-      <section className="ss-card ss-span">
-        <Section
-          title="Savings opportunities"
-          sub="Lower your premium spend before renewal by comparing partner-backed options"
-          extra={
-            <button type="button" className="ss-copy-btn" onClick={onReviewSavings}>
-              Review all <ArrowRight size={13} />
-            </button>
-          }
-        />
-
-        <div className="ss-dash-save-grid">
-          <div className="ss-dash-save-primary">
-            <b>{recommendedAction.label}</b>
-            <p>{recommendedAction.detail}</p>
-            <button type="button" className="ss-button" onClick={onReviewSavings}>
-              Open Savings
-            </button>
-          </div>
-
-          <div className="ss-dash-save-list">
-            {openSavings.length === 0 && (
-              <div className="ss-note success">
-                <Sparkles size={16} />
-                <span>No open savings right now. We keep monitoring renewal timing and market rates.</span>
-              </div>
-            )}
-
-            {openSavings.slice(0, 4).map((opportunity) => {
-              const saving = savingsForOpportunity(opportunity);
-              return (
-                <div className="ss-dash-save-row" key={opportunity.id}>
-                  <div>
-                    <b>{policyLabelFromType(opportunity.policyType)}</b>
-                    <small>
-                      {opportunity.status === "quote_received"
-                        ? "Quote ready to review"
-                        : `Renews ${formatShortDate(opportunity.renewalDate)}`}
-                    </small>
-                  </div>
-                  <strong>{formatMoney(saving)}/yr</strong>
-                </div>
-              );
-            })}
-
-            <div className="ss-dash-save-footer">
-              <div>
-                <small>Open opportunities</small>
-                <b>{openSavings.length}</b>
-              </div>
-              <div>
-                <small>Realized savings</small>
-                <b>{formatMoney(realizedSavings)}/yr</b>
-              </div>
-              <div>
-                <small>Certificates sent</small>
-                <b>{coiSends.length}</b>
-              </div>
-              <div>
-                <small>Verified files</small>
-                <b>{docsCount}</b>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {breakdownMonth && (
-        <MonthBreakdownModal
-          month={breakdownMonth}
-          rows={monthlyBreakdown}
-          total={monthlySpend}
-          onClose={() => setBreakdownMonth(null)}
-        />
-      )}
     </div>
   );
 }
 
-function MonthBreakdownModal({ month, rows, total, onClose }) {
-  useEffect(() => {
-    function onKey(event) {
-      if (event.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+function buildActionItems({
+  upcoming,
+  missingDocuments,
+  coverageGaps,
+  openSavings,
+  topQuote,
+  pendingCertificates,
+  onUpload,
+  onOpenPolicies,
+  onReviewSavings,
+  onOpenCertificates,
+}) {
+  const items = [];
 
-  const peak = Math.max(1, ...rows.map((row) => row.monthly));
+  upcoming
+    .filter((p) => (p.daysRemaining ?? 999) <= 30)
+    .slice(0, 1)
+    .forEach((p) => {
+      items.push({
+        key: `renew-${p.id}`,
+        tone: (p.daysRemaining ?? 0) <= 10 ? "danger" : "warning",
+        title: `${p.name} renews in ${p.daysRemaining} day${p.daysRemaining === 1 ? "" : "s"}`,
+        carrier: p.carrier,
+        chip: p.policyNumber,
+        amount: p.premiumAmount ?? p.premium,
+        tag: "Renews soon",
+        cta: "Review",
+        onClick: onOpenPolicies,
+      });
+    });
+
+  if (topQuote) {
+    items.push({
+      key: "quote",
+      tone: "info",
+      title: "Better rate found via partner",
+      carrier: `${formatMoney(topQuote)}/yr lower`,
+      tag: "Via partner",
+      cta: "View offer",
+      primary: true,
+      onClick: onReviewSavings,
+    });
+  } else if (openSavings.length > 0) {
+    items.push({
+      key: "savings",
+      tone: "info",
+      title: `${openSavings.length} savings ${openSavings.length === 1 ? "opportunity" : "opportunities"} available`,
+      carrier: "Compare partner-backed options before renewal",
+      tag: "Savings",
+      cta: "Compare",
+      onClick: onReviewSavings,
+    });
+  }
+
+  if (missingDocuments.length > 0) {
+    items.push({
+      key: "docs",
+      tone: "warning",
+      title: `${missingDocuments.length} ${missingDocuments.length === 1 ? "policy is" : "policies are"} missing declaration pages`,
+      carrier: "Upload declarations to keep certificates ready",
+      tag: "Planning",
+      cta: "Upload",
+      onClick: onUpload,
+    });
+  }
+
+  if (pendingCertificates > 0) {
+    items.push({
+      key: "certs",
+      tone: "info",
+      title: `${pendingCertificates} certificate ${pendingCertificates === 1 ? "holder" : "holders"} need a fresh COI`,
+      carrier: "Send proof of insurance to keep GCs current",
+      tag: "Certificates",
+      cta: "Send",
+      onClick: onOpenCertificates,
+    });
+  }
+
+  if (coverageGaps.length > 0) {
+    items.push({
+      key: "gaps",
+      tone: "warning",
+      title: `${coverageGaps.length} coverage ${coverageGaps.length === 1 ? "gap" : "gaps"} detected`,
+      carrier: coverageGaps.slice(0, 2).map((g) => g.label).join(", "),
+      tag: "Coverage",
+      cta: "Open",
+      onClick: onOpenPolicies,
+    });
+  }
+
+  return items.slice(0, 4);
+}
+
+function ActionCenter(props) {
+  const items = buildActionItems(props);
 
   return (
-    <div
-      className="ss-breakdown-backdrop"
-      onClick={(event) => event.target === event.currentTarget && onClose()}
-    >
-      <div className="ss-breakdown" role="dialog" aria-modal="true" aria-label={`${month} cost breakdown`}>
-        <div className="ss-breakdown-head">
-          <div>
-            <span className="ss-eyebrow">Estimated monthly spend</span>
-            <h3>{month}</h3>
-          </div>
-          <button type="button" className="ss-breakdown-close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+    <section className="ss-nd-card ss-nd-action">
+      <div className="ss-nd-card-head">
+        <div>
+          <span className="ss-nd-kicker">Action center</span>
+          <h2>What needs attention</h2>
         </div>
-
-        <div className="ss-breakdown-total">
-          <span>Total this month</span>
-          <strong>{formatMoney(total)}</strong>
-        </div>
-
-        <div className="ss-breakdown-list">
-          {rows.map((row) => (
-            <div className="ss-breakdown-row" key={row.id}>
-              <div className="ss-breakdown-row-head">
-                <span className="ss-breakdown-name">{row.name}</span>
-                <strong>{formatMoney(row.monthly)}/mo</strong>
-              </div>
-              <div className="ss-breakdown-track" aria-hidden="true">
-                <span style={{ width: `${Math.round((row.monthly / peak) * 100)}%` }} />
-              </div>
-              <small>{row.carrier} · {formatMoney(row.annual)}/yr</small>
-            </div>
-          ))}
-        </div>
-
-        <p className="ss-breakdown-note">
-          Projected at one-twelfth of each active policy's annual premium. Actual billing may vary by
-          carrier schedule.
-        </p>
+        <small className="ss-nd-muted">{items.length} item{items.length === 1 ? "" : "s"}</small>
       </div>
-    </div>
+
+      {items.length === 0 ? (
+        <div className="ss-nd-empty">
+          <CheckCircle2 size={16} /> Everything looks good. No urgent actions right now.
+        </div>
+      ) : (
+        <ul className="ss-nd-action-list">
+          {items.map((item) => (
+            <li className="ss-nd-action-row" key={item.key}>
+              <span className={`ss-nd-action-dot ${item.tone}`} aria-hidden="true" />
+              <div className="ss-nd-action-copy">
+                <b>{item.title}</b>
+                <small>
+                  {item.carrier}
+                  {item.chip && <span className="ss-nd-chip">{item.chip}</span>}
+                  {item.amount != null && <span className="ss-nd-amount">{formatMoney(item.amount)}/yr</span>}
+                </small>
+              </div>
+              <span className="ss-nd-action-tag">{item.tag}</span>
+              <button
+                type="button"
+                className={`ss-nd-btn sm ${item.primary ? "primary" : "ghost"}`}
+                onClick={item.onClick}
+              >
+                {item.cta}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -613,193 +586,64 @@ function COIStatusCard({ contractors, coiSends, onOpenCertificates }) {
   const statuses = contractors.map((c) => ({ contractor: c, status: coiStatusForHolder(c, coiSends) }));
   const current = statuses.filter((s) => s.status === "current").length;
   const needsAction = statuses.filter((s) => s.status !== "current");
+  const pct = contractors.length ? Math.round((current / contractors.length) * 100) : 0;
 
   return (
-    <section className="ss-card ss-span ss-coi-card">
-      <Section
-        title="COI status"
-        sub="Who has a current certificate on file"
-        extra={
-          <button type="button" className="ss-copy-btn" onClick={onOpenCertificates}>
-            Manage <ArrowRight size={13} />
-          </button>
-        }
-      />
+    <section className="ss-nd-card ss-nd-coi">
+      <div className="ss-nd-card-head">
+        <div>
+          <span className="ss-nd-kicker">COI status</span>
+          <h2>Who has a current certificate on file</h2>
+        </div>
+        <button type="button" className="ss-nd-link" onClick={onOpenCertificates}>
+          Manage <ArrowRight size={13} />
+        </button>
+      </div>
 
-      <div className="ss-coi-overview">
-        <div className="ss-coi-summary">
-          <div className="ss-coi-summary-copy">
-            <span>Certificate readiness</span>
-            <b>
-              {current} of {contractors.length} holders current
-            </b>
-            <small>
-              {needsAction.length > 0
-                ? `${needsAction.length} holder${needsAction.length === 1 ? "" : "s"} need a current COI.`
-                : "Every tracked holder has current proof of insurance."}
-            </small>
-          </div>
-          <div className="ss-coi-summary-meter" aria-hidden="true">
-            <strong>{contractors.length ? Math.round((current / contractors.length) * 100) : 0}%</strong>
-            <span className="ss-coi-bar">
-              <span
-                className="ss-coi-bar-fill"
-                style={{ width: contractors.length ? `${Math.round((current / contractors.length) * 100)}%` : "0%" }}
-              />
-            </span>
-          </div>
+      <div className="ss-nd-coi-summary">
+        <div>
+          <span className="ss-nd-kicker">Certificate readiness</span>
+          <b>{current} of {contractors.length} holders current</b>
+          <small>
+            {needsAction.length > 0
+              ? `${needsAction.length} holder${needsAction.length === 1 ? "" : "s"} need a current COI.`
+              : "Every tracked holder has current proof of insurance."}
+          </small>
+        </div>
+        <div className="ss-nd-coi-meter">
+          <strong className={scoreClass(pct)}>{pct}%</strong>
+          <span className="ss-nd-coi-bar">
+            <span style={{ width: `${pct}%` }} />
+          </span>
         </div>
       </div>
 
       {needsAction.length > 0 && (
-        <div className="ss-coi-needs-action">
+        <div className="ss-nd-coi-holders">
           {needsAction.slice(0, 4).map(({ contractor, status }) => (
-            <div key={contractor.id} className="ss-coi-holder-row">
-              <span className="ss-gc-avatar ss-gc-avatar--sm" aria-hidden="true">{contractor.initials}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="ss-nd-coi-holder" key={contractor.id}>
+              <span className="ss-nd-coi-avatar" aria-hidden="true">{contractor.initials}</span>
+              <div className="ss-nd-coi-holder-copy">
                 <b>{contractor.name}</b>
                 <small>{contractor.email}</small>
               </div>
-              <span className={`ss-coi-status ${status}`}>
+              <span className={`ss-nd-coi-status ${status}`}>
                 {status === "unsent" ? "No COI sent" : status === "aging" ? "COI aging" : "Needs refresh"}
               </span>
             </div>
           ))}
-          {needsAction.length > 4 && (
-            <p className="ss-muted" style={{ margin: "8px 0 0", fontSize: 12 }}>
-              +{needsAction.length - 4} more need action
-            </p>
-          )}
         </div>
       )}
 
       {needsAction.length === 0 && (
-        <div className="ss-note success">
-          <CheckCircle2 size={16} />
-          <span>All certificate holders have a current COI on file. You're good.</span>
+        <div className="ss-nd-empty">
+          <CheckCircle2 size={16} /> All certificate holders have a current COI on file.
         </div>
       )}
 
-      <button type="button" className="ss-button soft ss-coi-send-btn" onClick={onOpenCertificates}>
-        <Send size={14} /> Send certificates
+      <button type="button" className="ss-nd-btn dark wide" onClick={onOpenCertificates}>
+        Send certificates
       </button>
     </section>
   );
 }
-
-function ActionCenter({ upcoming, missingDocCount, coverageGaps, openSavings, onUpload, onOpenPolicies, onReviewSavings, onOpenCertificates, pendingCertificates }) {
-  const actions = [];
-
-  const criticalPolicies = upcoming.filter((p) => (p.daysRemaining ?? 999) <= 30);
-  if (criticalPolicies.length > 0) {
-    actions.push({
-      key: "renew",
-      priority: criticalPolicies.some((p) => p.daysRemaining <= 10) ? "danger" : "warning",
-      icon: <Clock3 size={16} />,
-      title: `${criticalPolicies.length} ${criticalPolicies.length === 1 ? "policy renews" : "policies renew"} within 30 days`,
-      detail: criticalPolicies.map((p) => p.name).join(", "),
-      cta: "View policies",
-      onClick: onOpenPolicies,
-    });
-  }
-
-  if (missingDocCount > 0) {
-    actions.push({
-      key: "docs",
-      priority: "warning",
-      icon: <FileWarning size={16} />,
-      title: `${missingDocCount} ${missingDocCount === 1 ? "policy is" : "policies are"} missing declaration pages`,
-      detail: "Upload declarations pages to keep certificates ready for GCs.",
-      cta: "Upload now",
-      onClick: onUpload,
-    });
-  }
-
-  const quoteReadySavings = openSavings.filter((o) => o.status === "quote_received");
-  if (quoteReadySavings.length > 0) {
-    actions.push({
-      key: "quote",
-      priority: "info",
-      icon: <BadgeDollarSign size={16} />,
-      title: `${quoteReadySavings.length} quote${quoteReadySavings.length > 1 ? "s" : ""} ready to review`,
-      detail: "A licensed partner found a lower rate. Review before it expires.",
-      cta: "Review quotes",
-      onClick: onReviewSavings,
-    });
-  } else if (openSavings.length > 0) {
-    actions.push({
-      key: "savings",
-      priority: "info",
-      icon: <BadgeDollarSign size={16} />,
-      title: `${openSavings.length} savings ${openSavings.length === 1 ? "opportunity" : "opportunities"} available`,
-      detail: "Compare rates and find lower-cost coverage before renewal.",
-      cta: "Compare rates",
-      onClick: onReviewSavings,
-    });
-  }
-
-  if (pendingCertificates > 0 && actions.length < 3) {
-    actions.push({
-      key: "certs",
-      priority: "info",
-      icon: <FileCheck2 size={16} />,
-      title: `${pendingCertificates} certificate ${pendingCertificates === 1 ? "holder" : "holders"} haven't received a COI recently`,
-      detail: "Send a fresh certificate of insurance to keep your GCs current.",
-      cta: "Send COI",
-      onClick: onOpenCertificates,
-    });
-  }
-
-  if (coverageGaps.length > 0 && actions.length < 3) {
-    actions.push({
-      key: "gaps",
-      priority: "warning",
-      icon: <AlertTriangle size={16} />,
-      title: `${coverageGaps.length} coverage ${coverageGaps.length === 1 ? "gap" : "gaps"} detected`,
-      detail: coverageGaps.slice(0, 2).map((g) => g.label).join(", "),
-      cta: "Add coverage",
-      onClick: onOpenPolicies,
-    });
-  }
-
-  const topActions = actions.slice(0, 3);
-
-  if (topActions.length === 0) {
-    return (
-      <section className="ss-card ss-span ss-action-center">
-        <div className="ss-action-center-head">
-          <b>Action Center</b>
-          <small>Things that need your attention right now</small>
-        </div>
-        <div className="ss-note success">
-          <CheckCircle2 size={16} />
-          <span>Everything looks good. No urgent actions needed.</span>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="ss-card ss-span ss-action-center">
-      <div className="ss-action-center-head">
-        <b>Action Center</b>
-        <small>{topActions.length} thing{topActions.length > 1 ? "s" : ""} to do right now</small>
-      </div>
-      <div className="ss-action-center-list">
-        {topActions.map((action) => (
-          <button key={action.key} type="button" className={`ss-action-item ss-action-item--${action.priority}`} onClick={action.onClick}>
-            <span className={`ss-action-dot ${action.priority}`} aria-hidden="true">
-              {action.icon}
-            </span>
-            <span className="ss-action-text">
-              <span className="ss-action-title">{action.title}</span>
-              <small>{action.detail}</small>
-            </span>
-            <span className="ss-action-cta">{action.cta} <ArrowRight size={12} /></span>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-

@@ -1650,6 +1650,7 @@ export default function SubShieldComplete() {
           {view === "dashboard" && (
             <DashboardView
               firstName={firstName}
+              coverageHealth={score}
               totalPremium={totalPremium}
               potentialSavings={potentialSavings}
               realizedSavings={realizedSavings}
