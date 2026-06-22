@@ -10536,34 +10536,93 @@ body,
 }
 
 .ss-app {
-  --surface: #ffffff;
-  --surface-soft: #f5f5f7;
-  --line: #e5e5ea;
-  --line-soft: #f0f0f3;
-  --ink: #1d1d1f;
-  --text: #1d1d1f;
-  --muted: #6e6e73;
-  --faint: #8a8a8e;
-  --brand: #0071e3;
-  --brand-soft: #eaf3ff;
-  --brand-line: #cfe4ff;
-  --brand-strong: #0066cc;
-  --ink-btn: #0071e3;
-  --ink-btn-hover: #0077ed;
-  --success: #1d8a4e;
-  --success-soft: #e9f7ee;
-  --warning: #b25e09;
-  --warning-soft: #fdf4e7;
-  --danger: #d63a31;
-  --danger-soft: #fdf0ef;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 28px 64px rgba(0, 0, 0, 0.18);
-  --ring: 0 0 0 4px rgba(0, 113, 227, 0.22);
-  --radius-card: 18px;
-  --radius-control: 12px;
-  background: #f5f5f7;
+  /* ===== SubShield design system tokens ===== */
+  /* Dark — sidebar / primary action */
+  --ss-ink: #0e1422;
+  --ss-ink-btn: #11192a;
+  --ss-ink-btn-hover: #1d2840;
+  --ss-nav-dark: #0d1320;
+  --ss-nav-dark-raise: #121a2c;
+  /* Neutral / text */
+  --ss-text: #1d1d1f;
+  --ss-muted: #6e6e73;
+  --ss-faint: #86868b;
+  --ss-line-strong: #d9d9de;
+  --ss-line: #e6e6eb;
+  --ss-line-soft: #f0f0f2;
+  /* Blue — institutional accent */
+  --ss-brand: #2552b5;
+  --ss-brand-strong: #1a3c8a;
+  --ss-brand-soft: #eef2fb;
+  --ss-brand-line: #d3dcef;
+  --ss-brand-ink: #1a3678;
+  /* Gold — antique secondary accent */
+  --ss-gold: #9c7b3e;
+  --ss-gold-strong: #856630;
+  --ss-gold-soft: #f8f2e6;
+  --ss-gold-line: #e7d8bb;
+  --ss-gold-text: #6f5526;
+  /* Status */
+  --ss-success: #1d8a4e;
+  --ss-success-soft: #e9f7ee;
+  --ss-danger: #c0392b;
+  --ss-danger-soft: #fbeceb;
+  /* Surfaces */
+  --ss-surface: #ffffff;
+  --ss-surface-soft: #fafafa;
+  --ss-surface-sunken: #f5f5f7;
+  --ss-surface-nav: #ececf0;
+  /* Radii */
+  --ss-radius-card: 16px;
+  --ss-radius-inner: 12px;
+  --ss-radius-control: 10px;
+  --ss-radius-field: 7px;
+  --ss-radius-pill: 999px;
+  /* Metrics / controls */
+  --ss-card-pad: 26px;
+  --ss-control-h: 42px;
+  /* Type scale */
+  --ss-text-display: 34px;
+  --ss-text-h1: 28px;
+  --ss-text-h2: 22px;
+  --ss-text-h3: 17px;
+  --ss-text-base: 14px;
+  --ss-text-small: 13px;
+  --ss-text-eyebrow: 11px;
+  --ss-weight-heavy: 760;
+  --ss-tracking-tight: -0.026em;
+
+  /* ===== Mapped onto existing semantic variables ===== */
+  --surface: var(--ss-surface);
+  --surface-soft: var(--ss-surface-soft);
+  --line: var(--ss-line);
+  --line-soft: var(--ss-line-soft);
+  --ink: var(--ss-text);
+  --text: var(--ss-text);
+  --muted: var(--ss-muted);
+  --faint: var(--ss-faint);
+  --brand: var(--ss-brand);
+  --brand-soft: var(--ss-brand-soft);
+  --brand-line: var(--ss-brand-line);
+  --brand-strong: var(--ss-brand-strong);
+  --ink-btn: var(--ss-ink-btn);
+  --ink-btn-hover: var(--ss-ink-btn-hover);
+  --accent: var(--ss-gold);
+  --accent-soft: var(--ss-gold-soft);
+  --success: var(--ss-success);
+  --success-soft: var(--ss-success-soft);
+  --warning: var(--ss-gold);
+  --warning-soft: var(--ss-gold-soft);
+  --danger: var(--ss-danger);
+  --danger-soft: var(--ss-danger-soft);
+  --shadow-xs: 0 1px 2px rgba(14, 20, 34, 0.04);
+  --shadow-sm: 0 1px 3px rgba(14, 20, 34, 0.06), 0 1px 2px rgba(14, 20, 34, 0.04);
+  --shadow-md: 0 12px 32px rgba(14, 20, 34, 0.10), 0 2px 8px rgba(14, 20, 34, 0.05);
+  --shadow-lg: 0 28px 64px rgba(14, 20, 34, 0.18);
+  --ring: 0 0 0 4px rgba(37, 82, 181, 0.22);
+  --radius-card: var(--ss-radius-card);
+  --radius-control: var(--ss-radius-control);
+  background: var(--ss-surface-sunken);
   color: var(--text);
 }
 

@@ -63,11 +63,11 @@
 .ss-nd-btn:hover { background: var(--surface-soft); }
 .ss-nd-btn:active { transform: translateY(1px); }
 .ss-nd-btn.dark {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--ss-ink-btn);
+  border-color: var(--ss-ink-btn);
   color: #fff;
 }
-.ss-nd-btn.dark:hover { background: #000; }
+.ss-nd-btn.dark:hover { background: var(--ss-ink-btn-hover); border-color: var(--ss-ink-btn-hover); }
 .ss-nd-btn.primary {
   background: var(--brand);
   border-color: var(--brand);
@@ -136,10 +136,11 @@
 .ss-nd-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-card);
-  padding: 22px 24px;
+  border-radius: var(--ss-radius-card);
+  padding: 22px var(--ss-card-pad);
   box-shadow: var(--shadow-xs);
 }
+.ss-nd-card:hover { box-shadow: var(--shadow-sm); }
 .ss-nd-card-head {
   display: flex;
   align-items: flex-start;

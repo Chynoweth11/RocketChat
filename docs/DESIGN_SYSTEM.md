@@ -3,8 +3,10 @@
 > Calm, monochrome, hairline-defined surfaces with a single institutional accent.
 > Reference language: **Apple · Stripe · Linear · Morgan Stanley.**
 
-Status: **capturing references** — more to be added before app-wide rollout.
-Rollout is **on hold** until all references are in; this doc is the source of truth.
+Status: **rollout in progress.** Tokens are implemented in
+`src/subshield/styles.css` (`.ss-app` `--ss-*` block) and mapped onto the app's
+semantic variables, so the whole app inherits the palette, radii, and elevation
+from one place. This doc is the source of truth.
 Font decision: **Roboto everywhere** (see Typography).
 
 ---
@@ -110,13 +112,15 @@ Weight ramp: Medium 500 · Semibold 590 · Bold 640 · Heavy 780.
 | `--space-5` | 20 |  |  |  |
 | `--space-6` | 24 |  |  |  |
 
-| Radius | px | Use |
+| Radius (token) | px | Use |
 |---|---|---|
-| `--radius-sm` | 8 | Chips, small fills |
-| `--radius-control` | 9 | Buttons, inputs |
-| `--radius-inner` | 12 | Nested panels |
-| `--radius-card` | 14 | Cards |
-| `--radius-pill` | 999 | Status pills, switches |
+| `--ss-radius-field` | 7 | Inputs |
+| `--ss-radius-control` | 10 | Buttons |
+| `--ss-radius-inner` | 12 | Nested panels |
+| `--ss-radius-card` | 16 | Cards |
+| `--ss-radius-pill` | 999 | Status pills, switches |
+
+Extra sizing tokens: `--ss-card-pad` 26px · `--ss-control-h` 42px.
 
 ---
 
@@ -169,10 +173,17 @@ Update rows: icon tile + title + body + right meta (label + DATE + time) + chevr
 ### Forms
 Crisp inputs, refined labels. Required fields marked with red `*`.
 - **Fieldset:** eyebrow section label (`APPLICANT DETAILS`) bordering grouped fields.
-- **TextField:** label above, hairline border, 9px radius, soft placeholder.
+- **TextField:** label above, hairline border, `--ss-radius-field` (7px), soft placeholder.
 - **Select:** same frame + chevron.
 - **FilterChip:** pill with label + count (`Declarations 4`); active = filled/bordered.
 - **Switch:** pill track, dark when on (`--ss-ink-btn`).
+
+### Navigation
+- **NavItem:** sidebar row = icon + label for primary destinations; section
+  eyebrows group them (`COVERAGE`, `CONNECT`). Active row = `--ss-surface-nav`
+  fill, rounded; optional count badge as a brand-blue pill.
+- **SegmentedControl:** pill group for in-view switches (View: List/Timeline,
+  Range: 30/90/1yr). Selected segment = white surface with `--shadow-xs` lift.
 
 ---
 
